@@ -18,8 +18,6 @@ Enjoy. :)
 Or don't. See if I care.
 
 ## Usage
-A basic script would look like this: 
-
 1. Download all of these files, or use Git to mirror them, etc.
 2. Load _Core.lua_ and any class libraries you want to use. Feel free to use
 _requires()_, _loadfile()_, or whatever else you want.
@@ -55,7 +53,7 @@ _requires()_, _loadfile()_, or whatever else you want.
         -- Do something with that information. Presumably renaming a track.
     
     end
-```
+``` 
 6. Initialize the window.
 ```lua
     GUI.Init()
