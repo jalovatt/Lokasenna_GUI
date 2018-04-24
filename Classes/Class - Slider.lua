@@ -33,8 +33,8 @@ handles			Table of default values (in steps, as per above) of each slider handle
 						handles = {5, 10, 15, 20, 25}
 
 Optional:
-dir				"h"	Horizontal slider (default)
-				"v"	Vertical slider
+dir				"h"	    Horizontal slider (default)
+				"v"	    Vertical slider
 
 
 Additional:

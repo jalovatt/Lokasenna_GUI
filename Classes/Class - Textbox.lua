@@ -29,8 +29,8 @@ focus			Whether the textbox is "in focus" or not, allowing users to type.
 Extra methods:
 
 
-GUI.Val()		Returns self.optsel as a table of boolean values for each option. Indexed from 1.
-GUI.Val(new)	Accepts a table of boolean values for each option. Indexed from 1.
+GUI.Val()		Returns the contents of the textbox.
+GUI.Val(new)	Sets the contents of the textbox.
 
 
 ]]--

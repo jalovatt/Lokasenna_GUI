@@ -22,6 +22,11 @@ vals			Boolean. Display value labels?
 
 Additional:
 bg				Color to be drawn underneath the label. Defaults to "wnd_bg"
+font_a          Caption font
+font_b          Value font
+col_txt         Text color
+col_head        Knob head color
+col_body        Knob body color
 output			Allows the value labels to be modified; accepts several different var types:
 				
 				string		Replaces all of the value labels

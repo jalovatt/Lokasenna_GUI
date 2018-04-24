@@ -2,7 +2,7 @@
 	
 	---- User parameters ----
 	
-	(name, z, x, y, w, h, caption, opts)
+	(name, z, x, y, w, h, caption, opts[, pad, noarrow])
 	
 Required:
 z				Element depth, used for hiding and disabling layers. 1 is the highest.

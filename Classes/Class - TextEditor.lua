@@ -180,7 +180,8 @@ end
 function GUI.TextEditor:val(newval)
 	
 	if newval then
-		self.retval = self:stringtotable(newval)
+		self.retval = (type(newval) == "table" and newval
+                                                or self:stringtotable(newval))
 		self:clearselection()
 		GUI.redraw_z[self.z] = true		
 	else
