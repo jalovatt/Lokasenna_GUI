@@ -28,7 +28,7 @@ directed to the project's [official thread][3] on the REAPER forum.
 I'll try to keep [the project Wiki][2] up to date, but ultimately the most detailed and accurate
 source of documentation will always be comments in the _Example_ scripts and libraries/classes.
 
-[1]: www.reaper.fm
-[2]: www.github.com/jalovatt/Lokasenna_GUI/wiki
-[3]: forum.cockos.com/showthread.php?t=177772
-[4]: www.github.com/jalovatt/Lokasenna_GUI/wiki/1.01-Getting-started
+[1]: https://www.reaper.fm/
+[2]: https://github.com/jalovatt/Lokasenna_GUI/wiki
+[3]: https://forum.cockos.com/showthread.php?t=177772
+[4]: https://github.com/jalovatt/Lokasenna_GUI/wiki/1.01-Getting-started
