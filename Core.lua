@@ -16,6 +16,858 @@ GUI.version = "2.0"
 
 
 ------------------------------------
+-------- Main functions ------------
+------------------------------------
+
+
+-- All elements are stored here. Don't put them anywhere else, or
+-- Main will never find them.
+GUI.elms = {}
+
+-- On each draw loop, only layers that are set to true in this table
+-- will be redrawn; if false, it will just copy them from the buffer
+-- Set [0] = true to redraw everything.
+GUI.redraw_z = {}
+
+-- Maintain a list of all GUI elements, sorted by their z order	
+-- Also removes any elements with z = -1, for automatically
+-- cleaning things up.
+GUI.elms_list = {}
+GUI.z_max = 0
+GUI.update_elms_list = function (init)
+	
+	local z_table = {}
+	GUI.z_max = 0
+
+	for key, __ in pairs(GUI.elms) do
+
+		local z = GUI.elms[key].z or 5
+
+		-- Delete elements if the script asked to
+		if z == -1 then
+			
+			GUI.elms[key]:ondelete()
+			GUI.elms[key] = nil
+			
+		else
+
+			if z_table[z] then
+				table.insert(z_table[z], key)
+
+			else
+				z_table[z] = {key}
+
+			end
+		
+		end
+		
+		if init then 
+			
+			GUI.elms[key]:init()
+
+		end
+
+		GUI.z_max = math.max(z, GUI.z_max)
+
+	end
+
+	GUI.elms_list = z_table
+	
+end
+
+GUI.elms_hide = {}
+GUI.elms_freeze = {}
+
+
+
+
+GUI.Init = function ()
+	
+	
+	-- Create the window
+	gfx.clear = reaper.ColorToNative(table.unpack(GUI.colors.wnd_bg))
+	
+	if not GUI.x then GUI.x = 0 end
+	if not GUI.y then GUI.y = 0 end
+	if not GUI.w then GUI.w = 640 end
+	if not GUI.h then GUI.h = 480 end
+
+	if GUI.anchor and GUI.corner then
+		GUI.x, GUI.y = GUI.get_window_pos(  GUI.x, GUI.y, GUI.w, GUI.h, 
+                                            GUI.anchor, GUI.corner)
+	end
+		
+	gfx.init(GUI.name, GUI.w, GUI.h, GUI.dock or 0, GUI.x, GUI.y)
+	
+	
+	GUI.cur_w, GUI.cur_h = gfx.w, gfx.h
+
+	-- Measure the window's title bar, in case we need it
+	local __, __, wnd_y, __, __ = gfx.dock(-1, 0, 0, 0, 0)
+	local __, gui_y = gfx.clienttoscreen(0, 0)
+	GUI.title_height = gui_y - wnd_y
+
+
+	-- Initialize a few values
+	GUI.last_time = 0
+	GUI.mouse = {
+	
+		x = 0,
+		y = 0,
+		cap = 0,
+		down = false,
+		wheel = 0,
+		lwheel = 0
+		
+	}
+  
+	-- Store which element the mouse was clicked on.
+	-- This is essential for allowing drag behaviour where dragging affects 
+    -- the element position.
+	GUI.mouse_down_element = nil
+	GUI.rmouse_down_element = nil
+	GUI.mmouse_down_element = nil
+		
+	-- Convert color presets from 0..255 to 0..1
+	for i, col in pairs(GUI.colors) do
+		col[1], col[2], col[3], col[4] =    col[1] / 255, col[2] / 255, 
+                                            col[3] / 255, col[4] / 255
+	end
+	
+	-- Initialize the tables for our z-order functions
+	GUI.update_elms_list(true)	
+	
+	if GUI.Exit then reaper.atexit(GUI.Exit) end
+	
+	GUI.gfx_open = true
+
+end
+
+
+GUI.Main = function ()
+	
+	-- Update mouse and keyboard state, window dimensions
+	GUI.mouse.lx, GUI.mouse.ly = GUI.mouse.x, GUI.mouse.y
+	GUI.mouse.x, GUI.mouse.y = gfx.mouse_x, gfx.mouse_y
+	GUI.mouse.wheel = gfx.mouse_wheel
+	GUI.mouse.cap = gfx.mouse_cap
+	GUI.char = gfx.getchar() 
+	
+	if GUI.cur_w ~= gfx.w or GUI.cur_h ~= gfx.h then
+		GUI.cur_w, GUI.cur_h = gfx.w, gfx.h
+		GUI.resized = true
+	else
+		GUI.resized = false
+	end
+	
+	--	(Escape key)	(Window closed)		(User function says to close)
+	--if GUI.char == 27 or GUI.char == -1 or GUI.quit == true then
+	if (GUI.char == 27 and not (	GUI.mouse.cap & 4 == 4 
+								or 	GUI.mouse.cap & 8 == 8 
+								or 	GUI.mouse.cap & 16 == 16))
+			or GUI.char == -1 
+			or GUI.quit == true then
+		
+		return 0
+	else
+		reaper.defer(GUI.Main)
+	end
+
+
+	--GUI.mouse.down = false
+	--GUI.mouse.r_down = false
+
+--[[
+	Update each element's state, starting from the top down.
+	
+	This is very important, so that lower elements don't
+	"steal" the mouse.
+	
+	
+	This function will also delete any elements that have their z set to -1
+
+	Handy for something like Label:fade if you just want to remove
+	the faded element entirely
+	
+	***Don't try to remove elements in the middle of the Update
+	loop; use this instead to have them automatically cleaned up***	
+	
+]]--
+	GUI.update_elms_list()
+	
+	-- We'll use this to shorten each elm's update loop if the user did something
+	-- Slightly more efficient, and averts any bugs from false positives
+	GUI.elm_updated = false
+
+	-- Check for the dev mode toggle before we get too excited about updating elms
+	if  GUI.char == 282         and GUI.mouse.cap & 4 ~= 0 
+    and GUI.mouse.cap & 8 ~= 0  and GUI.mouse.cap & 16 ~= 0 then
+		
+		GUI.dev_mode = not GUI.dev_mode
+		GUI.elm_update = true
+		GUI.redraw_z[0] = true
+		
+	end	
+
+
+	for i = 0, GUI.z_max do
+		if  GUI.elms_list[i] and #GUI.elms_list[i] > 0 
+        and not (GUI.elms_hide[i] or GUI.elms_freeze[i]) then
+			for __, elm in pairs(GUI.elms_list[i]) do
+
+				if elm and GUI.elms[elm] then GUI.Update(GUI.elms[elm]) end
+				--if GUI.elm_updated then break end
+				
+			end
+		end
+		
+		--if GUI.elm_updated then break end
+		
+	end
+
+	-- Just in case any user functions want to know...
+	GUI.mouse.last_down = GUI.mouse.down
+	GUI.mouse.last_r_down = GUI.mouse.r_down
+
+
+	-- If the user gave us a function to run, check to see if it needs to be 
+    -- run again, and do so. 
+	if GUI.func then
+		
+		local new_time = os.time()
+		if new_time - GUI.last_time >= (GUI.freq or 1) then
+			GUI.func()
+			GUI.last_time = new_time
+		
+		end
+	end
+	
+	-- Redraw all of the elements, starting from the bottom up.
+	GUI.update_elms_list()
+
+	local w, h = GUI.w, GUI.h
+
+	--[[
+		Having everything draw to a single buffer is less efficient than having
+		separate buffers per Z, but it gets around the problem of text looking 
+        shitty because it's been anti-aliased with a transparent background.
+	]]--
+
+	local need_redraw = false
+	if GUI.redraw_z[0] then
+		need_redraw = true
+	else
+		for z, b in pairs(GUI.redraw_z) do
+			if b == true then 
+				need_redraw = true 
+				break
+			end
+		end
+	end
+
+	if need_redraw then
+		
+		-- All of the layers will be drawn to their own buffer (dest = z), then
+		-- composited in buffer 0. This allows buffer 0 to be blitted as a whole
+		-- when none of the layers need to be redrawn.
+		
+		gfx.dest = 0
+		gfx.setimgdim(0, -1, -1)
+		gfx.setimgdim(0, w, h)
+
+		GUI.color("wnd_bg")
+		gfx.rect(0, 0, w, h, 1)
+
+		for i = GUI.z_max, 0, -1 do
+			if  GUI.elms_list[i] and #GUI.elms_list[i] > 0 
+            and not GUI.elms_hide[i] then
+
+				if GUI.redraw_z[i] then
+					
+					-- Set this before we redraw, so that elms can call a redraw 
+                    -- from their own :draw method. e.g. Labels fading out
+					GUI.redraw_z[i] = false
+
+					gfx.setimgdim(i, -1, -1)
+					gfx.setimgdim(i, w, h)
+					gfx.dest = i
+					
+					for __, elm in pairs(GUI.elms_list[i]) do
+						if not GUI.elms[elm] then GUI.Msg(elm.." doesn't exist?") end
+                        
+                        -- Reset these just in case an element or some user code forgot to,
+                        -- otherwise we get things like the whole buffer being blitted with a=0.2
+                        gfx.mode = 0
+                        gfx.set(0, 0, 0, 1)
+                        
+						GUI.elms[elm]:draw()
+					end
+
+					gfx.dest = 0
+				end
+							
+				gfx.blit(i, 1, 0, 0, 0, w, h, 0, 0, w, h, 0, 0)
+			end
+		end
+		
+		-- Draw developer hints if necessary
+		if GUI.dev_mode then
+			GUI.draw_dev()
+		end		
+		GUI.Draw_Version()		
+		
+	end
+		
+    -- Reset them again, to be extra sure
+	gfx.mode = 0
+	gfx.set(0, 0, 0, 1)
+	
+	gfx.dest = -1
+	gfx.blit(0, 1, 0, 0, 0, w, h, 0, 0, w, h, 0, 0)
+	
+	gfx.update()
+	
+end
+
+
+
+
+------------------------------------
+-------- Buffer functions ----------
+------------------------------------
+
+
+--[[
+	We'll use this to let elements have their own graphics buffers
+	to do whatever they want in. 
+	
+	num	=	How many buffers you want, or 1 if not specified.
+	
+	Returns a table of buffers, or just a buffer number if num = 1
+	
+	i.e.
+	
+	-- Assign this element's buffer
+	function GUI.my_element:new(.......)
+	
+	   ...new stuff...
+	   
+	   my_element.buffers = GUI.GetBuffer(4)
+	   -- or
+	   my_element.buffer = GUI.GetBuffer()
+		
+	end
+	
+	-- Draw to the buffer
+	function GUI.my_element:init()
+		
+		gfx.dest = self.buffers[1]
+		-- or
+		gfx.dest = self.buffer
+		...draw stuff...
+	
+	end
+	
+	-- Copy from the buffer
+	function GUI.my_element:draw()
+		gfx.blit(self.buffers[1], 1, 0)
+		-- or
+		gfx.blit(self.buffer, 1, 0)
+	end
+	
+]]--
+
+-- Any used buffers will be marked as True here
+GUI.buffers = {}
+
+-- When deleting elements, their buffer numbers
+-- will be added here for easy access.
+GUI.freed_buffers = {}
+
+GUI.GetBuffer = function (num)
+	
+	local ret = {}
+	local prev
+	
+	for i = 1, (num or 1) do
+		
+		if #GUI.freed_buffers > 0 then
+			
+			ret[i] = table.remove(GUI.freed_buffers)
+			
+		else
+		
+			for j = (not prev and 1023 or prev - 1), 0, -1 do
+			
+				if not GUI.buffers[j] then
+					ret[i] = j
+					GUI.buffers[j] = true
+					break
+				end
+				
+			end
+			
+		end
+		
+	end
+
+	return (#ret == 1) and ret[1] or ret
+
+end
+
+-- Elements should pass their buffer (or buffer table) to this
+-- when being deleted
+GUI.FreeBuffer = function (num)
+	
+	if type(num) == "number" then
+		table.insert(GUI.freed_buffers, num)
+	else
+		for k, v in pairs(num) do
+			table.insert(GUI.freed_buffers, v)
+		end
+	end	
+	
+end
+
+
+
+
+------------------------------------
+-------- Element functions ---------
+------------------------------------
+
+
+-- Wrapper for creating new elements, allows them to know their own name
+-- If called after the script window has opened, will also run their :init
+-- method.
+GUI.New = function (name, elm, ...)
+	
+	if not GUI[elm] then
+		reaper.ShowMessageBox(  "Unable to create element '"..tostring(name)..
+                                "'.\nClass '"..tostring(elm).."' isn't available.", 
+                                "GUI Error", 0)
+		GUI.quit = true
+		return 0
+	end
+	
+	GUI.elms[name] = GUI[elm]:new(name, ...)
+	if GUI.gfx_open then GUI.elms[name]:init() end
+    
+    -- Return this so (I think) a bunch of new elements could be created
+    -- within a table that would end up holding their names for easy bulk
+    -- processing.
+    return name
+	
+end
+
+
+--	See if the any of the given element's methods need to be called
+GUI.Update = function (elm)
+	
+	local x, y = GUI.mouse.x, GUI.mouse.y
+	local x_delta, y_delta = x-GUI.mouse.lx, y-GUI.mouse.ly
+	local wheel = GUI.mouse.wheel
+	local inside = GUI.IsInside(elm, x, y)
+	
+	local skip = elm:onupdate() or false
+		
+	
+	if GUI.elm_updated then
+		if elm.focus then
+			elm.focus = false
+			elm:lostfocus()
+		end
+		skip = true
+	end
+
+
+	if not skip then
+		
+		-- Left button
+		if GUI.mouse.cap&1==1 then
+			
+			-- If it wasn't down already...
+			if not GUI.mouse.last_down then
+
+
+				-- Was a different element clicked?
+				if not inside then 
+					if GUI.mouse_down_element == elm then
+						-- Should already have been reset by the mouse-up, but safeguard...
+						GUI.mouse_down_element = nil
+					end
+					if elm.focus then
+						elm.focus = false
+						elm:lostfocus()
+					end
+					return 0
+				else
+					if GUI.mouse_down_element == nil then -- Prevent click-through
+
+						GUI.mouse_down_element = elm
+
+						-- Double clicked?
+						if GUI.mouse.downtime 
+                        and reaper.time_precise() - GUI.mouse.downtime < 0.10 
+                        then
+
+							GUI.mouse.downtime = nil
+							GUI.mouse.dbl_clicked = true
+							elm:ondoubleclick()
+
+						elseif not GUI.mouse.dbl_clicked then
+
+							elm.focus = true
+							elm:onmousedown()
+
+						end
+
+						GUI.elm_updated = true
+					end
+					
+					GUI.mouse.down = true
+					GUI.mouse.ox, GUI.mouse.oy = x, y
+					
+				end
+							
+			-- 		Dragging? Did the mouse start out in this element?
+			elseif (x_delta ~= 0 or y_delta ~= 0) 
+            and     GUI.mouse_down_element == elm then
+			
+				if elm.focus ~= false then 
+
+					GUI.elm_updated = true
+					elm:ondrag(x_delta, y_delta)
+					
+				end
+			end
+
+		-- If it was originally clicked in this element and has been released
+		elseif GUI.mouse.down and GUI.mouse_down_element == elm then
+
+				GUI.mouse_down_element = nil
+
+				if not GUI.mouse.dbl_clicked then elm:onmouseup() end
+
+				GUI.elm_updated = true
+				GUI.mouse.down = false
+				GUI.mouse.dbl_clicked = false
+				GUI.mouse.ox, GUI.mouse.oy = -1, -1
+				GUI.mouse.lx, GUI.mouse.ly = -1, -1
+				GUI.mouse.downtime = reaper.time_precise()
+
+
+		end
+		
+		
+		-- Right button
+		if GUI.mouse.cap&2==2 then
+			
+			-- If it wasn't down already...
+			if not GUI.mouse.last_r_down then
+
+				-- Was a different element clicked?
+				if not inside then 
+					if GUI.rmouse_down_element == elm then
+						-- Should have been reset by the mouse-up, but in case...
+						GUI.rmouse_down_element = nil
+					end
+					--elm.focus = false
+				else
+                
+                    -- Prevent click-through
+					if GUI.rmouse_down_element == nil then 
+
+						GUI.rmouse_down_element = elm
+
+							-- Double clicked?
+						if GUI.mouse.r_downtime 
+                        and reaper.time_precise() - GUI.mouse.r_downtime < 0.20 
+                        then
+
+							GUI.mouse.r_downtime = nil
+							GUI.mouse.r_dbl_clicked = true
+							elm:onr_doubleclick()
+
+						elseif not GUI.mouse.r_dbl_clicked then
+
+							elm:onmouser_down()
+
+						end
+
+						GUI.elm_updated = true
+
+					end
+					
+					GUI.mouse.r_down = true
+					GUI.mouse.r_ox, GUI.mouse.r_oy = x, y
+
+				end
+				
+		
+			-- 		Dragging? Did the mouse start out in this element?
+			elseif (x_delta ~= 0 or y_delta ~= 0) 
+            and     GUI.rmouse_down_element == elm then
+			
+				if elm.focus ~= false then 
+
+					elm:onr_drag(x_delta, y_delta)
+					GUI.elm_updated = true
+
+				end
+
+			end
+
+		-- If it was originally clicked in this element and has been released
+		elseif GUI.mouse.r_down and GUI.rmouse_down_element == elm then 
+		
+			GUI.rmouse_down_element = nil
+		
+			if not GUI.mouse.r_dbl_clicked then elm:onmouser_up() end
+
+			GUI.elm_updated = true
+			GUI.mouse.r_down = false
+			GUI.mouse.r_dbl_clicked = false
+			GUI.mouse.r_ox, GUI.mouse.r_oy = -1, -1
+			GUI.mouse.r_lx, GUI.mouse.r_ly = -1, -1
+			GUI.mouse.r_downtime = reaper.time_precise()
+
+		end
+
+
+
+		-- Middle button
+		if GUI.mouse.cap&64==64 then
+			
+			
+			-- If it wasn't down already...
+			if not GUI.mouse.last_m_down then
+
+
+				-- Was a different element clicked?
+				if not inside then 
+					if GUI.mmouse_down_element == elm then
+						-- Should have been reset by the mouse-up, but in case...
+						GUI.mmouse_down_element = nil
+					end
+				else
+                    -- Prevent click-through
+					if GUI.mmouse_down_element == nil then 
+
+						GUI.mmouse_down_element = elm
+
+						-- Double clicked?
+						if GUI.mouse.m_downtime 
+                        and reaper.time_precise() - GUI.mouse.m_downtime < 0.20 
+                        then
+
+							GUI.mouse.m_downtime = nil
+							GUI.mouse.m_dbl_clicked = true
+							elm:onm_doubleclick()
+
+						else
+
+							elm:onmousem_down()
+
+						end
+
+						GUI.elm_updated = true
+
+				  end
+
+					GUI.mouse.m_down = true
+					GUI.mouse.m_ox, GUI.mouse.m_oy = x, y
+
+				end
+				
+
+			
+			-- 		Dragging? Did the mouse start out in this element?
+			elseif (x_delta ~= 0 or y_delta ~= 0) 
+            and     GUI.mmouse_down_element == elm then
+			
+				if elm.focus ~= false then 
+					
+					elm:onm_drag(x_delta, y_delta)
+					GUI.elm_updated = true
+					
+				end
+
+			end
+
+		-- If it was originally clicked in this element and has been released
+		elseif GUI.mouse.m_down and GUI.mmouse_down_element == elm then
+		
+			GUI.mmouse_down_element = nil
+		
+			if not GUI.mouse.m_dbl_clicked then elm:onmousem_up() end
+			
+			GUI.elm_updated = true
+			GUI.mouse.m_down = false
+			GUI.mouse.m_dbl_clicked = false
+			GUI.mouse.m_ox, GUI.mouse.m_oy = -1, -1
+			GUI.mouse.m_lx, GUI.mouse.m_ly = -1, -1
+			GUI.mouse.m_downtime = reaper.time_precise()
+
+		end
+
+
+	end
+	
+		
+	
+	-- If the mouse is hovering over the element
+	if inside and not GUI.mouse.down and not GUI.mouse.r_down then
+		elm:onmouseover()
+		--GUI.elm_updated = true
+		elm.mouseover = true
+	else
+		elm.mouseover = false
+		--elm.hovering = false
+	end
+	
+	
+	-- If the mousewheel's state has changed
+	if inside and GUI.mouse.wheel ~= GUI.mouse.lwheel then
+		
+		GUI.mouse.inc = (GUI.mouse.wheel - GUI.mouse.lwheel) / 120
+		
+		elm:onwheel(GUI.mouse.inc)
+		GUI.elm_updated = true
+		GUI.mouse.lwheel = GUI.mouse.wheel
+	
+	end
+	
+	-- If the element is in focus and the user typed something
+	if elm.focus and GUI.char ~= 0 then
+		elm:ontype() 
+		GUI.elm_updated = true
+	end
+	
+end
+
+
+--[[	Return or change an element's value
+	
+	For use with external user functions. Returns the given element's current 
+	value or, if specified, sets a new one.	Changing values with this is often 
+	preferable to setting them directly, as most :val methods will also update 
+	some internal parameters and redraw the element when called.
+]]--
+GUI.Val = function (elm, newval)
+
+	if not GUI.elms[elm] then return nil end
+	
+	if newval then
+		GUI.elms[elm]:val(newval)
+	else
+		return GUI.elms[elm]:val()
+	end
+
+end
+
+
+-- Are these coordinates inside the given element?
+-- If no coords are given, will use the mouse cursor
+GUI.IsInside = function (elm, x, y)
+
+	if not elm then return false end
+
+	local x, y = x or GUI.mouse.x, y or GUI.mouse.y
+
+	return	(	x >= (elm.x or 0) and x < ((elm.x or 0) + (elm.w or 0)) and 
+				y >= (elm.y or 0) and y < ((elm.y or 0) + (elm.h or 0))	)
+	
+end
+
+
+
+
+------------------------------------
+-------- Prototype element ---------
+----- + all input methods ----------
+------------------------------------
+
+
+--[[
+	All classes will use this as their template, so that
+	elements are initialized with every method available.
+]]--
+GUI.Element = {}
+function GUI.Element:new(name)
+	
+	local elm = {}
+	if name then elm.name = name end
+	
+	setmetatable(elm, self)
+	self.__index = self
+	return elm
+	
+end
+
+-- Called a) when the script window is first opened
+-- 		  b) when any element is created via GUI.New after that
+-- i.e. Elements can draw themselves to a buffer once on :init()
+-- and then just blit/rotate/etc as needed afterward
+function GUI.Element:init() end
+
+-- Called on every update loop, unless the element is hidden or frozen
+function GUI.Element:onupdate() end
+
+-- Called when the element is deleted by GUI.update_elms_list()
+-- Use it for freeing up buffers, or anything else memorywise that this
+-- element was doing
+function GUI.Element:ondelete() end
+
+-- Set or return the element's value
+-- Can be useful for something like a Slider that doesn't have the same
+-- value internally as what it's displaying
+function GUI.Element:val() end
+
+
+-- Updates the current tooltip, if necessary
+function GUI.Element:onmouseover()
+	
+	if self.tooltip and not GUI.tooltip_elm then 
+		GUI.tooltip_elm = self 
+	end
+
+end
+
+-- Only called once; won't repeat if the button is held
+function GUI.Element:onmousedown() end
+
+function GUI.Element:onmouseup() end
+function GUI.Element:ondoubleclick() end
+
+-- Will continue being called even if you drag outside the element
+function GUI.Element:ondrag() end
+
+-- Right-click
+function GUI.Element:onmouser_down() end
+function GUI.Element:onmouser_up() end
+function GUI.Element:onr_doubleclick() end
+function GUI.Element:onr_drag() end
+
+-- Middle-click
+function GUI.Element:onmousem_down() end
+function GUI.Element:onmousem_up() end
+function GUI.Element:onm_doubleclick() end
+function GUI.Element:onm_drag() end
+
+function GUI.Element:onwheel() end
+function GUI.Element:ontype() end
+
+
+-- Elements like a Textbox that need to keep track of their focus
+-- state will use this to e.g. update the text somewhere else 
+-- when the user clicks out of the box.
+function GUI.Element:lostfocus() end
+
+
+
+
+------------------------------------
 -------- Developer stuff -----------
 ------------------------------------
 
@@ -188,6 +1040,7 @@ GUI.txt_blink_rate = 16
 -- Odds are you don't need too much precision here
 -- If you do, just specify GUI.pi = math.pi() in your code
 GUI.pi = 3.14159
+
 
 
 
@@ -942,7 +1795,10 @@ end
 
 
 --[[	Use when working with file paths if you need to add your own /s
-		(Borrowed from X-Raym)	
+		(Borrowed from X-Raym)
+        
+        Apr. 22/18 - Further reading leads me to believe that simply using
+        '/' as a separator should work just fine on Windows, Mac, and Linux.
 ]]--
 GUI.file_sep = string.match(reaper.GetOS(), "Win") and "\\" or "/"
 
@@ -1053,859 +1909,6 @@ GUI.Draw_Version = function ()
 	gfx.y = gfx.h - str_h - 4
 	
 	gfx.drawstr(str)	
-	
-end
-
-
-
-
-------------------------------------
--------- Buffer functions ----------
-------------------------------------
-
-
---[[
-	We'll use this to let elements have their own graphics buffers
-	to do whatever they want in. 
-	
-	num	=	How many buffers you want, or 1 if not specified.
-	
-	Returns a table of buffers, or just a buffer number if num = 1
-	
-	i.e.
-	
-	-- Assign this element's buffer
-	function GUI.my_element:new(.......)
-	
-	   ...new stuff...
-	   
-	   my_element.buffers = GUI.GetBuffer(4)
-	   -- or
-	   my_element.buffer = GUI.GetBuffer()
-		
-	end
-	
-	-- Draw to the buffer
-	function GUI.my_element:init()
-		
-		gfx.dest = self.buffers[1]
-		-- or
-		gfx.dest = self.buffer
-		...draw stuff...
-	
-	end
-	
-	-- Copy from the buffer
-	function GUI.my_element:draw()
-		gfx.blit(self.buffers[1], 1, 0)
-		-- or
-		gfx.blit(self.buffer, 1, 0)
-	end
-	
-]]--
-
--- Any used buffers will be marked as True here
-GUI.buffers = {}
-
--- When deleting elements, their buffer numbers
--- will be added here for easy access.
-GUI.freed_buffers = {}
-
-GUI.GetBuffer = function (num)
-	
-	local ret = {}
-	local prev
-	
-	for i = 1, (num or 1) do
-		
-		if #GUI.freed_buffers > 0 then
-			
-			ret[i] = table.remove(GUI.freed_buffers)
-			
-		else
-		
-			for j = (not prev and 1023 or prev - 1), 0, -1 do
-			
-				if not GUI.buffers[j] then
-					ret[i] = j
-					GUI.buffers[j] = true
-					break
-				end
-				
-			end
-			
-		end
-		
-	end
-
-	return (#ret == 1) and ret[1] or ret
-
-end
-
--- Elements should pass their buffer (or buffer table) to this
--- when being deleted
-GUI.FreeBuffer = function (num)
-	
-	if type(num) == "number" then
-		table.insert(GUI.freed_buffers, num)
-	else
-		for k, v in pairs(num) do
-			table.insert(GUI.freed_buffers, v)
-		end
-	end	
-	
-end
-
-
-
-
-------------------------------------
--------- Element functions ---------
-------------------------------------
-
-
--- Wrapper for creating new elements, allows them to know their own name
--- If called after the script window has opened, will also run their :init
--- method.
-GUI.New = function (name, elm, ...)
-	
-	if not GUI[elm] then
-		reaper.ShowMessageBox(  "Unable to create element '"..tostring(name)..
-                                "'.\nClass '"..tostring(elm).."' isn't available.", 
-                                "GUI Error", 0)
-		GUI.quit = true
-		return 0
-	end
-	
-	GUI.elms[name] = GUI[elm]:new(name, ...)
-	if GUI.gfx_open then GUI.elms[name]:init() end
-    
-    -- Return this so (I think) a bunch of new elements could be created
-    -- within a table that would end up holding their names for easy bulk
-    -- processing.
-    return name
-	
-end
-
-
---	See if the any of the given element's methods need to be called
-GUI.Update = function (elm)
-	
-	local x, y = GUI.mouse.x, GUI.mouse.y
-	local x_delta, y_delta = x-GUI.mouse.lx, y-GUI.mouse.ly
-	local wheel = GUI.mouse.wheel
-	local inside = GUI.IsInside(elm, x, y)
-	
-	local skip = elm:onupdate() or false
-		
-	
-	if GUI.elm_updated then
-		if elm.focus then
-			elm.focus = false
-			elm:lostfocus()
-		end
-		skip = true
-	end
-
-
-	if not skip then
-		
-		-- Left button
-		if GUI.mouse.cap&1==1 then
-			
-			-- If it wasn't down already...
-			if not GUI.mouse.last_down then
-
-
-				-- Was a different element clicked?
-				if not inside then 
-					if GUI.mouse_down_element == elm then
-						-- Should already have been reset by the mouse-up, but safeguard...
-						GUI.mouse_down_element = nil
-					end
-					if elm.focus then
-						elm.focus = false
-						elm:lostfocus()
-					end
-					return 0
-				else
-					if GUI.mouse_down_element == nil then -- Prevent click-through
-
-						GUI.mouse_down_element = elm
-
-						-- Double clicked?
-						if GUI.mouse.downtime 
-                        and reaper.time_precise() - GUI.mouse.downtime < 0.10 
-                        then
-
-							GUI.mouse.downtime = nil
-							GUI.mouse.dbl_clicked = true
-							elm:ondoubleclick()
-
-						elseif not GUI.mouse.dbl_clicked then
-
-							elm.focus = true
-							elm:onmousedown()
-
-						end
-
-						GUI.elm_updated = true
-					end
-					
-					GUI.mouse.down = true
-					GUI.mouse.ox, GUI.mouse.oy = x, y
-					
-				end
-							
-			-- 		Dragging? Did the mouse start out in this element?
-			elseif (x_delta ~= 0 or y_delta ~= 0) 
-            and     GUI.mouse_down_element == elm then
-			
-				if elm.focus ~= false then 
-
-					GUI.elm_updated = true
-					elm:ondrag(x_delta, y_delta)
-					
-				end
-			end
-
-		-- If it was originally clicked in this element and has been released
-		elseif GUI.mouse.down and GUI.mouse_down_element == elm then
-
-				GUI.mouse_down_element = nil
-
-				if not GUI.mouse.dbl_clicked then elm:onmouseup() end
-
-				GUI.elm_updated = true
-				GUI.mouse.down = false
-				GUI.mouse.dbl_clicked = false
-				GUI.mouse.ox, GUI.mouse.oy = -1, -1
-				GUI.mouse.lx, GUI.mouse.ly = -1, -1
-				GUI.mouse.downtime = reaper.time_precise()
-
-
-		end
-		
-		
-		-- Right button
-		if GUI.mouse.cap&2==2 then
-			
-			-- If it wasn't down already...
-			if not GUI.mouse.last_r_down then
-
-				-- Was a different element clicked?
-				if not inside then 
-					if GUI.rmouse_down_element == elm then
-						-- Should have been reset by the mouse-up, but in case...
-						GUI.rmouse_down_element = nil
-					end
-					--elm.focus = false
-				else
-                
-                    -- Prevent click-through
-					if GUI.rmouse_down_element == nil then 
-
-						GUI.rmouse_down_element = elm
-
-							-- Double clicked?
-						if GUI.mouse.r_downtime 
-                        and reaper.time_precise() - GUI.mouse.r_downtime < 0.20 
-                        then
-
-							GUI.mouse.r_downtime = nil
-							GUI.mouse.r_dbl_clicked = true
-							elm:onr_doubleclick()
-
-						elseif not GUI.mouse.r_dbl_clicked then
-
-							elm:onmouser_down()
-
-						end
-
-						GUI.elm_updated = true
-
-					end
-					
-					GUI.mouse.r_down = true
-					GUI.mouse.r_ox, GUI.mouse.r_oy = x, y
-
-				end
-				
-		
-			-- 		Dragging? Did the mouse start out in this element?
-			elseif (x_delta ~= 0 or y_delta ~= 0) 
-            and     GUI.rmouse_down_element == elm then
-			
-				if elm.focus ~= false then 
-
-					elm:onr_drag(x_delta, y_delta)
-					GUI.elm_updated = true
-
-				end
-
-			end
-
-		-- If it was originally clicked in this element and has been released
-		elseif GUI.mouse.r_down and GUI.rmouse_down_element == elm then 
-		
-			GUI.rmouse_down_element = nil
-		
-			if not GUI.mouse.r_dbl_clicked then elm:onmouser_up() end
-
-			GUI.elm_updated = true
-			GUI.mouse.r_down = false
-			GUI.mouse.r_dbl_clicked = false
-			GUI.mouse.r_ox, GUI.mouse.r_oy = -1, -1
-			GUI.mouse.r_lx, GUI.mouse.r_ly = -1, -1
-			GUI.mouse.r_downtime = reaper.time_precise()
-
-		end
-
-
-
-		-- Middle button
-		if GUI.mouse.cap&64==64 then
-			
-			
-			-- If it wasn't down already...
-			if not GUI.mouse.last_m_down then
-
-
-				-- Was a different element clicked?
-				if not inside then 
-					if GUI.mmouse_down_element == elm then
-						-- Should have been reset by the mouse-up, but in case...
-						GUI.mmouse_down_element = nil
-					end
-				else
-                    -- Prevent click-through
-					if GUI.mmouse_down_element == nil then 
-
-						GUI.mmouse_down_element = elm
-
-						-- Double clicked?
-						if GUI.mouse.m_downtime 
-                        and reaper.time_precise() - GUI.mouse.m_downtime < 0.20 
-                        then
-
-							GUI.mouse.m_downtime = nil
-							GUI.mouse.m_dbl_clicked = true
-							elm:onm_doubleclick()
-
-						else
-
-							elm:onmousem_down()
-
-						end
-
-						GUI.elm_updated = true
-
-				  end
-
-					GUI.mouse.m_down = true
-					GUI.mouse.m_ox, GUI.mouse.m_oy = x, y
-
-				end
-				
-
-			
-			-- 		Dragging? Did the mouse start out in this element?
-			elseif (x_delta ~= 0 or y_delta ~= 0) 
-            and     GUI.mmouse_down_element == elm then
-			
-				if elm.focus ~= false then 
-					
-					elm:onm_drag(x_delta, y_delta)
-					GUI.elm_updated = true
-					
-				end
-
-			end
-
-		-- If it was originally clicked in this element and has been released
-		elseif GUI.mouse.m_down and GUI.mmouse_down_element == elm then
-		
-			GUI.mmouse_down_element = nil
-		
-			if not GUI.mouse.m_dbl_clicked then elm:onmousem_up() end
-			
-			GUI.elm_updated = true
-			GUI.mouse.m_down = false
-			GUI.mouse.m_dbl_clicked = false
-			GUI.mouse.m_ox, GUI.mouse.m_oy = -1, -1
-			GUI.mouse.m_lx, GUI.mouse.m_ly = -1, -1
-			GUI.mouse.m_downtime = reaper.time_precise()
-
-		end
-
-
-	end
-	
-		
-	
-	-- If the mouse is hovering over the element
-	if inside and not GUI.mouse.down and not GUI.mouse.r_down then
-		elm:onmouseover()
-		--GUI.elm_updated = true
-		elm.mouseover = true
-	else
-		elm.mouseover = false
-		--elm.hovering = false
-	end
-	
-	
-	-- If the mousewheel's state has changed
-	if inside and GUI.mouse.wheel ~= GUI.mouse.lwheel then
-		
-		GUI.mouse.inc = (GUI.mouse.wheel - GUI.mouse.lwheel) / 120
-		
-		elm:onwheel(GUI.mouse.inc)
-		GUI.elm_updated = true
-		GUI.mouse.lwheel = GUI.mouse.wheel
-	
-	end
-	
-	-- If the element is in focus and the user typed something
-	if elm.focus and GUI.char ~= 0 then
-		elm:ontype() 
-		GUI.elm_updated = true
-	end
-	
-end
-
-
---[[	Return or change an element's value
-	
-	For use with external user functions. Returns the given element's current 
-	value or, if specified, sets a new one.	Changing values with this is often 
-	preferable to setting them directly, as most :val methods will also update 
-	some internal parameters and redraw the element when called.
-]]--
-GUI.Val = function (elm, newval)
-
-	if not GUI.elms[elm] then return nil end
-	
-	if newval then
-		GUI.elms[elm]:val(newval)
-	else
-		return GUI.elms[elm]:val()
-	end
-
-end
-
-
--- Are these coordinates inside the given element?
--- If no coords are given, will use the mouse cursor
-GUI.IsInside = function (elm, x, y)
-
-	if not elm then return false end
-
-	local x, y = x or GUI.mouse.x, y or GUI.mouse.y
-
-	return	(	x >= (elm.x or 0) and x < ((elm.x or 0) + (elm.w or 0)) and 
-				y >= (elm.y or 0) and y < ((elm.y or 0) + (elm.h or 0))	)
-	
-end
-
-
-
-
-------------------------------------
--------- Base element --------------
------ + all input methods ----------
-------------------------------------
-
-
---[[
-	All classes will use this as their template, so that
-	elements are initialized with every method available.
-]]--
-GUI.Element = {}
-function GUI.Element:new(name)
-	
-	local elm = {}
-	if name then elm.name = name end
-	
-	setmetatable(elm, self)
-	self.__index = self
-	return elm
-	
-end
-
--- Called a) when the script window is first opened
--- 		  b) when any element is created via GUI.New after that
--- i.e. Elements can draw themselves to a buffer once on :init()
--- and then just blit/rotate/etc as needed afterward
-function GUI.Element:init() end
-
--- Called on every update loop, unless the element is hidden or frozen
-function GUI.Element:onupdate() end
-
--- Called when the element is deleted by GUI.update_elms_list()
--- Use it for freeing up buffers, or anything else memorywise that this
--- element was doing
-function GUI.Element:ondelete() end
-
--- Set or return the element's value
--- Can be useful for something like a Slider that doesn't have the same
--- value internally as what it's displaying
-function GUI.Element:val() end
-
-
--- Updates the current tooltip, if necessary
-function GUI.Element:onmouseover()
-	
-	if self.tooltip and not GUI.tooltip_elm then 
-		GUI.tooltip_elm = self 
-	end
-
-end
-
--- Only called once; won't repeat if the button is held
-function GUI.Element:onmousedown() end
-
-function GUI.Element:onmouseup() end
-function GUI.Element:ondoubleclick() end
-
--- Will continue being called even if you drag outside the element
-function GUI.Element:ondrag() end
-
--- Right-click
-function GUI.Element:onmouser_down() end
-function GUI.Element:onmouser_up() end
-function GUI.Element:onr_doubleclick() end
-function GUI.Element:onr_drag() end
-
--- Middle-click
-function GUI.Element:onmousem_down() end
-function GUI.Element:onmousem_up() end
-function GUI.Element:onm_doubleclick() end
-function GUI.Element:onm_drag() end
-
-function GUI.Element:onwheel() end
-function GUI.Element:ontype() end
-
-
--- Elements like a Textbox that need to keep track of their focus
--- state will use this to e.g. update the text somewhere else 
--- when the user clicks out of the box.
-function GUI.Element:lostfocus() end
-
-
-
-
-------------------------------------
--------- Main functions ------------
-------------------------------------
-
--- On each draw loop, only layers that are set to true in this table
--- will be redrawn; if false, it will just copy them from the buffer
--- Set [0] = true to redraw everything.
-GUI.redraw_z = {}
-
-
--- All elements are stored here. Don't put them anywhere else, or
--- Main will never find them.
-GUI.elms = {}
-
-
--- Maintain a list of all GUI elements, sorted by their z order	
--- Also removes any elements with z = -1, for automatically
--- cleaning things up.
-GUI.elms_list = {}
-GUI.z_max = 0
-GUI.update_elms_list = function (init)
-	
-	local z_table = {}
-	GUI.z_max = 0
-
-	for key, __ in pairs(GUI.elms) do
-
-		local z = GUI.elms[key].z or 5
-
-		-- Delete elements if the script asked to
-		if z == -1 then
-			
-			GUI.elms[key]:ondelete()
-			GUI.elms[key] = nil
-			
-		else
-
-			if z_table[z] then
-				table.insert(z_table[z], key)
-
-			else
-				z_table[z] = {key}
-
-			end
-		
-		end
-		
-		if init then 
-			
-			GUI.elms[key]:init()
-
-		end
-
-		GUI.z_max = math.max(z, GUI.z_max)
-
-	end
-
-	GUI.elms_list = z_table
-	
-end
-
-GUI.elms_hide = {}
-GUI.elms_freeze = {}
-
-
-
-
-GUI.Init = function ()
-	
-	
-	-- Create the window
-	gfx.clear = reaper.ColorToNative(table.unpack(GUI.colors.wnd_bg))
-	
-	if not GUI.x then GUI.x = 0 end
-	if not GUI.y then GUI.y = 0 end
-	if not GUI.w then GUI.w = 640 end
-	if not GUI.h then GUI.h = 480 end
-
-	if GUI.anchor and GUI.corner then
-		GUI.x, GUI.y = GUI.get_window_pos(  GUI.x, GUI.y, GUI.w, GUI.h, 
-                                            GUI.anchor, GUI.corner)
-	end
-		
-	gfx.init(GUI.name, GUI.w, GUI.h, GUI.dock or 0, GUI.x, GUI.y)
-	
-	
-	GUI.cur_w, GUI.cur_h = gfx.w, gfx.h
-
-	-- Measure the window's title bar, in case we need it
-	local __, __, wnd_y, __, __ = gfx.dock(-1, 0, 0, 0, 0)
-	local __, gui_y = gfx.clienttoscreen(0, 0)
-	GUI.title_height = gui_y - wnd_y
-
-
-	-- Initialize a few values
-	GUI.last_time = 0
-	GUI.mouse = {
-	
-		x = 0,
-		y = 0,
-		cap = 0,
-		down = false,
-		wheel = 0,
-		lwheel = 0
-		
-	}
-  
-	-- Store which element the mouse was clicked on.
-	-- This is essential for allowing drag behaviour where dragging affects 
-    -- the element position.
-	GUI.mouse_down_element = nil
-	GUI.rmouse_down_element = nil
-	GUI.mmouse_down_element = nil
-		
-	-- Convert color presets from 0..255 to 0..1
-	for i, col in pairs(GUI.colors) do
-		col[1], col[2], col[3], col[4] =    col[1] / 255, col[2] / 255, 
-                                            col[3] / 255, col[4] / 255
-	end
-	
-	-- Initialize the tables for our z-order functions
-	GUI.update_elms_list(true)	
-	
-	if GUI.Exit then reaper.atexit(GUI.Exit) end
-	
-	GUI.gfx_open = true
-
-end
-
-
-GUI.Main = function ()
-	
-	-- Update mouse and keyboard state, window dimensions
-	GUI.mouse.lx, GUI.mouse.ly = GUI.mouse.x, GUI.mouse.y
-	GUI.mouse.x, GUI.mouse.y = gfx.mouse_x, gfx.mouse_y
-	GUI.mouse.wheel = gfx.mouse_wheel
-	GUI.mouse.cap = gfx.mouse_cap
-	GUI.char = gfx.getchar() 
-	
-	if GUI.cur_w ~= gfx.w or GUI.cur_h ~= gfx.h then
-		GUI.cur_w, GUI.cur_h = gfx.w, gfx.h
-		GUI.resized = true
-	else
-		GUI.resized = false
-	end
-	
-	--	(Escape key)	(Window closed)		(User function says to close)
-	--if GUI.char == 27 or GUI.char == -1 or GUI.quit == true then
-	if (GUI.char == 27 and not (	GUI.mouse.cap & 4 == 4 
-								or 	GUI.mouse.cap & 8 == 8 
-								or 	GUI.mouse.cap & 16 == 16))
-			or GUI.char == -1 
-			or GUI.quit == true then
-		
-		return 0
-	else
-		reaper.defer(GUI.Main)
-	end
-
-
-	--GUI.mouse.down = false
-	--GUI.mouse.r_down = false
-
---[[
-	Update each element's state, starting from the top down.
-	
-	This is very important, so that lower elements don't
-	"steal" the mouse.
-	
-	
-	This function will also delete any elements that have their z set to -1
-
-	Handy for something like Label:fade if you just want to remove
-	the faded element entirely
-	
-	***Don't try to remove elements in the middle of the Update
-	loop; use this instead to have them automatically cleaned up***	
-	
-]]--
-	GUI.update_elms_list()
-	
-	-- We'll use this to shorten each elm's update loop if the user did something
-	-- Slightly more efficient, and averts any bugs from false positives
-	GUI.elm_updated = false
-
-	-- Check for the dev mode toggle before we get too excited about updating elms
-	if  GUI.char == 282         and GUI.mouse.cap & 4 ~= 0 
-    and GUI.mouse.cap & 8 ~= 0  and GUI.mouse.cap & 16 ~= 0 then
-		
-		GUI.dev_mode = not GUI.dev_mode
-		GUI.elm_update = true
-		GUI.redraw_z[0] = true
-		
-	end	
-
-
-	for i = 0, GUI.z_max do
-		if  GUI.elms_list[i] and #GUI.elms_list[i] > 0 
-        and not (GUI.elms_hide[i] or GUI.elms_freeze[i]) then
-			for __, elm in pairs(GUI.elms_list[i]) do
-
-				if elm and GUI.elms[elm] then GUI.Update(GUI.elms[elm]) end
-				--if GUI.elm_updated then break end
-				
-			end
-		end
-		
-		--if GUI.elm_updated then break end
-		
-	end
-
-	-- Just in case any user functions want to know...
-	GUI.mouse.last_down = GUI.mouse.down
-	GUI.mouse.last_r_down = GUI.mouse.r_down
-
-
-	-- If the user gave us a function to run, check to see if it needs to be 
-    -- run again, and do so. 
-	if GUI.func then
-		
-		local new_time = os.time()
-		if new_time - GUI.last_time >= (GUI.freq or 1) then
-			GUI.func()
-			GUI.last_time = new_time
-		
-		end
-	end
-	
-	-- Redraw all of the elements, starting from the bottom up.
-	GUI.update_elms_list()
-
-	local w, h = GUI.w, GUI.h
-
-	--[[
-		Having everything draw to a single buffer is less efficient than having
-		separate buffers per Z, but it gets around the problem of text looking 
-        shitty because it's been anti-aliased with a transparent background.
-	]]--
-
-	local need_redraw = false
-	if GUI.redraw_z[0] then
-		need_redraw = true
-	else
-		for z, b in pairs(GUI.redraw_z) do
-			if b == true then 
-				need_redraw = true 
-				break
-			end
-		end
-	end
-
-	if need_redraw then
-		
-		-- All of the layers will be drawn to their own buffer (dest = z), then
-		-- composited in buffer 0. This allows buffer 0 to be blitted as a whole
-		-- when none of the layers need to be redrawn.
-		
-		gfx.dest = 0
-		gfx.setimgdim(0, -1, -1)
-		gfx.setimgdim(0, w, h)
-
-		GUI.color("wnd_bg")
-		gfx.rect(0, 0, w, h, 1)
-
-		for i = GUI.z_max, 0, -1 do
-			if  GUI.elms_list[i] and #GUI.elms_list[i] > 0 
-            and not GUI.elms_hide[i] then
-
-				if GUI.redraw_z[i] then
-					
-					-- Set this before we redraw, so that elms can call a redraw 
-                    -- from their own :draw method. e.g. Labels fading out
-					GUI.redraw_z[i] = false
-
-					gfx.setimgdim(i, -1, -1)
-					gfx.setimgdim(i, w, h)
-					gfx.dest = i
-					
-					for __, elm in pairs(GUI.elms_list[i]) do
-						if not GUI.elms[elm] then GUI.Msg(elm.." doesn't exist?") end
-                        
-                        -- Reset these just in case an element or some user code forgot to,
-                        -- otherwise we get things like the whole buffer being blitted with a=0.2
-                        gfx.mode = 0
-                        gfx.set(0, 0, 0, 1)
-                        
-						GUI.elms[elm]:draw()
-					end
-
-					gfx.dest = 0
-				end
-							
-				gfx.blit(i, 1, 0, 0, 0, w, h, 0, 0, w, h, 0, 0)
-			end
-		end
-		
-		-- Draw developer hints if necessary
-		if GUI.dev_mode then
-			GUI.draw_dev()
-		end		
-		GUI.Draw_Version()		
-		
-	end
-		
-    -- Reset them again, to be extra sure
-	gfx.mode = 0
-	gfx.set(0, 0, 0, 1)
-	
-	gfx.dest = -1
-	gfx.blit(0, 1, 0, 0, 0, w, h, 0, 0, w, h, 0, 0)
-	
-	gfx.update()
 	
 end
 
