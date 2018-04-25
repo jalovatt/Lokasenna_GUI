@@ -3,9 +3,6 @@
 
 -------------------------
 
-This library is intended to provide an easy-to-use base for building a GUI 
-for Reaper scripts, since ReaScript doesn't offer any GUI tools on its own.
-
 All of the main logic is handled in Core.lua. It's technically the only included 
 file necessary to use Lokasenna_GUI - for instance, if you wanted to use 
 your own GUI elements rather than the ones I've put together. Don't worry,
@@ -15,21 +12,9 @@ I won't be offended if you do.
 A basic GUI script would look like this...
 
 
-1. Load Core.lua and whatever class libraries you want to use. Feel free to use
-requires(), loadfile(), or whatever else you want.
-
-	loadfile("Core.lua")()
-	loadfile("Classes\\Label.lua")()
 
 Everything is stored in a table called 'GUI'.
 
-
-2. Give the window a name, position, and dimensions.
-
-	GUI.name = "My script's window"
-	GUI.x, GUI.y = 0, 0
-	GUI.w, GUI.h = 256, 96
-	
 If you'd like, you can also specify GUI.anchor and GUI.corner to have the
 window open in a location relative to either the screen or the mouse. The most
 obvious use for this would be to have the window centered on the mouse cursor:

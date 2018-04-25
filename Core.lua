@@ -137,7 +137,7 @@ GUI.Init = function ()
 	-- Initialize the tables for our z-order functions
 	GUI.update_elms_list(true)	
 	
-	if GUI.Exit then reaper.atexit(GUI.Exit) end
+	if GUI.exit then reaper.atexit(GUI.exit) end
 	
 	GUI.gfx_open = true
 
@@ -243,6 +243,8 @@ GUI.Main = function ()
 	end
 	
 	-- Redraw all of the elements, starting from the bottom up.
+    -- *** why is this being called again? In case of deletions? Is there a more
+    -- efficient way to handle this? ***
 	GUI.update_elms_list()
 
 	local w, h = GUI.w, GUI.h
