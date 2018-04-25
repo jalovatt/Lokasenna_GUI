@@ -145,7 +145,7 @@ function GUI.Textbox:val(newval)
 	
 	if newval then
 		self.retval = newval
-		GUI.redraw_z[self.z] = true		
+		self:redraw()		
 	else
 		return self.retval
 	end
@@ -155,7 +155,7 @@ end
 
 function GUI.Textbox:lostfocus()
 
-	GUI.redraw_z[self.z] = true
+	self:redraw()
 	
 end
 
@@ -167,10 +167,10 @@ function GUI.Textbox:onupdate()
 	
 		if self.blink == 0 then
 			self.show_caret = true
-			GUI.redraw_z[self.z] = true
+			self:redraw()
 		elseif self.blink == math.floor(GUI.txt_blink_rate / 2) then
 			self.show_caret = false
-			GUI.redraw_z[self.z] = true
+			self:redraw()
 		end
 		self.blink = (self.blink + 1) % GUI.txt_blink_rate
 
@@ -204,7 +204,7 @@ function GUI.Textbox:onmousedown()
         
     end
     
-    GUI.redraw_z[self.z] = true
+    self:redraw()
 	
 end
 
@@ -221,7 +221,7 @@ function GUI.Textbox:ondrag()
 	self.sel_s = self:getcaret(GUI.mouse.ox, GUI.mouse.oy)
     self.sel_e = self:getcaret(GUI.mouse.x, GUI.mouse.y)
     
-	GUI.redraw_z[self.z] = true	
+	self:redraw()	
     
 end
 
@@ -279,7 +279,7 @@ function GUI.Textbox:onwheel(inc)
    local dir = inc > 0 and 3 or -3
    self.wnd_pos = GUI.clamp(0, self.wnd_pos + dir, len + 2 - self.wnd_w)
    
-   GUI.redraw_z[self.z] = true    
+   self:redraw()    
     
 end
 
@@ -667,7 +667,7 @@ GUI.Textbox.keys = {
     [GUI.chars.RETURN] = function(self)
         
         self.focus = false
-        GUI.redraw_z[self.z] = true
+        self:redraw()
 
     end,
     

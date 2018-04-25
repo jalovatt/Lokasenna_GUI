@@ -197,7 +197,7 @@ function GUI.Knob:val(newval)
 		self.curstep = newval - self.min
 		self.curval = self.curstep / self.steps
 
-		GUI.redraw_z[self.z] = true
+		self:redraw()
 
 	else
 		return self.retval
@@ -227,7 +227,7 @@ function GUI.Knob:ondrag()
 	
 	self.retval = GUI.round(((self.max - self.min) / self.steps) * self.curstep + self.min)
 
-	GUI.redraw_z[self.z] = true
+	self:redraw()
 
 end
 
@@ -239,7 +239,7 @@ function GUI.Knob:ondoubleclick()
 	self.curval = self.curstep / self.steps
 	self.retval = GUI.round(((self.max - self.min) / self.steps) * self.curstep + self.min)
 	
-	GUI.redraw_z[self.z] = true
+	self:redraw()
 	
 end
 
@@ -264,7 +264,7 @@ function GUI.Knob:onwheel()
 	
 	self:val()
 
-	GUI.redraw_z[self.z] = true
+	self:redraw()
 
 end
 

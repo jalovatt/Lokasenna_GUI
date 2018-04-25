@@ -183,7 +183,7 @@ function GUI.TextEditor:val(newval)
 		self.retval = (type(newval) == "table" and newval
                                                 or self:stringtotable(newval))
 		self:clearselection()
-		GUI.redraw_z[self.z] = true		
+		self:redraw()		
 	else
 		return table.concat(self.retval, "\n")
 	end
@@ -197,10 +197,10 @@ function GUI.TextEditor:onupdate()
 	
 		if self.blink == 0 then
 			self.show_caret = true
-			GUI.redraw_z[self.z] = true
+			self:redraw()
 		elseif self.blink == math.floor(GUI.txt_blink_rate / 2) then
 			self.show_caret = false
-			GUI.redraw_z[self.z] = true
+			self:redraw()
 		end
 		self.blink = (self.blink + 1) % GUI.txt_blink_rate
 
@@ -211,7 +211,7 @@ end
 
 function GUI.TextEditor:lostfocus()
 
-	GUI.redraw_z[self.z] = true
+	self:redraw()
 	
 end
 
@@ -256,7 +256,7 @@ function GUI.TextEditor:onmousedown(scroll)
         
     end
     
-    GUI.redraw_z[self.z] = true    
+    self:redraw()    
 	
 end
 
@@ -283,7 +283,7 @@ function GUI.TextEditor:ondrag()
 
 	end
 	
-	GUI.redraw_z[self.z] = true
+	self:redraw()
 	
 end
 
@@ -379,7 +379,7 @@ function GUI.TextEditor:onwheel(inc)
 		
 	end
 	
-	GUI.redraw_z[self.z] = true
+	self:redraw()
 	
 end
 

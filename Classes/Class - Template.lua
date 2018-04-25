@@ -100,7 +100,7 @@ function GUI.Template:val(newval)
 	
 	if newval then
 		self.retval = newval
-		GUI.redraw_z[self.z] = true		
+		self:redraw()		
 	else
 		return self.retval
 	end
@@ -113,13 +113,13 @@ function GUI.Template:onmousedown()
     
     -- Odds are, any input method will want to make the element redraw itself so
     -- whatever the user did is actually shown on the screen.
-	GUI.redraw_z[self.z] = true	
+	self:redraw()	
 end
 
 
 function GUI.Template:ondoubleclick()
 
-	GUI.redraw_z[self.z] = true
+	self:redraw()
 end
 
 
@@ -128,7 +128,7 @@ function GUI.Template:ondrag()
     -- GUI.mouse.ox and .oy are available to compare where the drag started from
     -- with the current position
 
-	GUI.redraw_z[self.z] = true
+	self:redraw()
 end
 
 
@@ -136,7 +136,7 @@ function GUI.Template:onwheel(inc)
     
     -- Use 'inc' to figure out which way the wheel was turned and by how much
     
-    GUI.redraw_z[self.z] = true
+    self:redraw()
 end
 
 
@@ -144,7 +144,7 @@ function GUI.Template:ontype()
     
     -- See the TextEditor class for a good example of handling keyboard input
 
-	GUI.redraw_z[self.z] = true	
+	self:redraw()	
 end
 
 

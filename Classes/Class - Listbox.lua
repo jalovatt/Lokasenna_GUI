@@ -144,7 +144,7 @@ function GUI.Listbox:val(newval)
 	
 	if newval then
 		self.list = type(newval) == "string" and self:CSVtotable(newval) or newval
-		GUI.redraw_z[self.z] = true		
+		self:redraw()		
 	else
 	
 		if self.multi then
@@ -197,7 +197,7 @@ function GUI.Listbox:onmouseup()
 	
 	end
 	
-	GUI.redraw_z[self.z] = true
+	self:redraw()
 	
 end
 
@@ -211,7 +211,7 @@ function GUI.Listbox:onmousedown(scroll)
 		local wnd_c = GUI.round( ((GUI.mouse.y - self.y) / self.h) * #self.list  )
 		self.wnd_y = GUI.clamp(1, wnd_c - (self.wnd_h / 2), #self.list - self.wnd_h + 1)
 		
-		GUI.redraw_z[self.z] = true
+		self:redraw()
 
 	end
 		
@@ -230,7 +230,7 @@ function GUI.Listbox:ondrag()
 
 	end
 	
-	GUI.redraw_z[self.z] = true
+	self:redraw()
 	
 end
 
@@ -242,7 +242,7 @@ function GUI.Listbox:onwheel(inc)
 	-- Scroll up/down one line
 	self.wnd_y = GUI.clamp(1, self.wnd_y + dir, #self.list - self.wnd_h + 1)
 
-	GUI.redraw_z[self.z] = true
+	self:redraw()
 	
 end
 

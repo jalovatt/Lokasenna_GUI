@@ -800,6 +800,7 @@ function GUI.Element:new(name)
 	
 	local elm = {}
 	if name then elm.name = name end
+    self.z = 1
 	
 	setmetatable(elm, self)
 	self.__index = self
@@ -812,6 +813,14 @@ end
 -- i.e. Elements can draw themselves to a buffer once on :init()
 -- and then just blit/rotate/etc as needed afterward
 function GUI.Element:init() end
+
+-- Called whenever the element's z layer is told to redraw
+function GUI.Element:draw() end
+
+-- Ask for a redraw on the next update
+function GUI.Element:redraw()
+    GUI.redraw_z[self.z] = true
+end
 
 -- Called on every update loop, unless the element is hidden or frozen
 function GUI.Element:onupdate() end

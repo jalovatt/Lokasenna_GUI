@@ -231,7 +231,7 @@ function GUI.Slider:val(newvals)
 			
 		end
 		
-		GUI.redraw_z[self.z] = true
+		self:redraw()
 	
 	else
 		
@@ -274,7 +274,7 @@ function GUI.Slider:onmousedown()
 	
 	self:setcurval(self.cur_handle, GUI.clamp(mouse_val, 0, 1) )
 
-	GUI.redraw_z[self.z] = true	
+	self:redraw()	
 	
 end
 
@@ -299,7 +299,7 @@ function GUI.Slider:ondrag()
 
     self:setcurval(cur, GUI.clamp( self.handles[cur].curval + ((n - ln) / adj) , 0, 1 ) )
 
-	GUI.redraw_z[self.z] = true
+	self:redraw()
 
 end
 
@@ -325,7 +325,7 @@ function GUI.Slider:onwheel()
 
     self:setcurval(cur, GUI.clamp( self.handles[cur].curval + (inc * adj / self.steps) , 0, 1) )
 	
-	GUI.redraw_z[self.z] = true
+	self:redraw()
 
 end
 
@@ -360,7 +360,7 @@ function GUI.Slider:ondoubleclick()
 		
 	end
 
-	GUI.redraw_z[self.z] = true
+	self:redraw()
 	
 end
 

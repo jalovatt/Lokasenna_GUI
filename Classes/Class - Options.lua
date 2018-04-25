@@ -369,7 +369,7 @@ function GUI.Radio:val(newval)
 	if newval then
 		self.retval = newval
 		self.state = newval
-		GUI.redraw_z[self.z] = true		
+		self:redraw()		
 	else
 		return self.retval
 	end	
@@ -381,7 +381,7 @@ function GUI.Radio:onmousedown()
 	
 	self.state = self:getmouseopt()
 
-	GUI.redraw_z[self.z] = true
+	self:redraw()
 
 end
 
@@ -396,7 +396,7 @@ function GUI.Radio:onmouseup()
 		self.state = self.retval	
 	end
 
-	GUI.redraw_z[self.z] = true
+	self:redraw()
 
 end
 
@@ -405,7 +405,7 @@ function GUI.Radio:ondrag()
 
 	self:onmousedown()
 
-	GUI.redraw_z[self.z] = true
+	self:redraw()
 
 end
 
@@ -420,7 +420,7 @@ function GUI.Radio:onwheel()
 	
 	self.retval = self.state
 
-	GUI.redraw_z[self.z] = true
+	self:redraw()
 
 end
 
@@ -479,7 +479,7 @@ function GUI.Checklist:val(newval)
 			for i = 1, #new do
 				self.optsel[i] = new[i]
 			end
-			GUI.redraw_z[self.z] = true	
+			self:redraw()	
 		end
 	else
 		return self.optsel
@@ -494,7 +494,7 @@ function GUI.Checklist:onmouseup()
 	
 	self.optsel[mouseopt] = not self.optsel[mouseopt] 
 
-	GUI.redraw_z[self.z] = true
+	self:redraw()
 
 end
 

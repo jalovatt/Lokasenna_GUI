@@ -186,7 +186,7 @@ function GUI.Tabs:val(newval)
 		self.retval = self.state
 
 		self:update_sets()
-		GUI.redraw_z[self.z] = true
+		self:redraw()
 	else
 		return self.state
 	end
@@ -212,7 +212,7 @@ function GUI.Tabs:onmousedown()
 
 	self.state = mouseopt
 
-	GUI.redraw_z[self.z] = true
+	self:redraw()
 	
 end
 
@@ -229,7 +229,7 @@ function GUI.Tabs:onmouseup()
 		self.state = self.retval	
 	end
     
-	GUI.redraw_z[self.z] = true	
+	self:redraw()	
     
 end
 
@@ -237,7 +237,7 @@ end
 function GUI.Tabs:ondrag() 
 
 	self:onmousedown()
-	GUI.redraw_z[self.z] = true
+	self:redraw()
     
 end
 
@@ -251,7 +251,7 @@ function GUI.Tabs:onwheel()
 	
 	self.retval = self.state
 	self:update_sets()
-	GUI.redraw_z[self.z] = true
+	self:redraw()
     
 end
 

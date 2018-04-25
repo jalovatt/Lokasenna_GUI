@@ -120,7 +120,7 @@ function GUI.Frame:val(new)
 	if new then
 		self.text = new
         self:init()
-		GUI.redraw_z[self.z] = true
+		self:redraw()
 	else
 		return string.gsub(self.text, "\n", "")
 	end

@@ -161,7 +161,7 @@ function GUI.Menubox:val(newval)
 	
 	if newval then
 		self.retval = newval
-		GUI.redraw_z[self.z] = true		
+		self:redraw()		
 	else
 		return math.floor(self.retval)
 	end
@@ -188,14 +188,14 @@ function GUI.Menubox:onmouseup()
 	if curopt ~= 0 then self.retval = curopt end
 
 	self.focus = false
-	GUI.redraw_z[self.z] = true	
+	self:redraw()	
     
 end
 
 
 -- This is only so that the box will light up
 function GUI.Menubox:onmousedown()
-	GUI.redraw_z[self.z] = true
+	self:redraw()
 end
 
 
@@ -209,7 +209,7 @@ function GUI.Menubox:onwheel()
 	
 	self.retval = curopt
 	
-	GUI.redraw_z[self.z] = true	
+	self:redraw()	
     
 end
 

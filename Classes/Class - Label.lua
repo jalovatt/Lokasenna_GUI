@@ -150,7 +150,7 @@ function GUI.Label:fade(len, z_new, z_end, curve)
 	
 	self.z = z_new
 	self.fade_arr = { len, z_end, reaper.time_precise(), curve or 3 }
-	GUI.redraw_z[self.z] = true
+	self:redraw()
 	
 end
 
@@ -183,7 +183,7 @@ function GUI.Label:val(newval)
 	if newval then
 		self.retval = newval
 		self:init()
-		GUI.redraw_z[self.z] = true
+		self:redraw()
 	else
 		return self.retval
 	end
@@ -201,7 +201,7 @@ function GUI.Label:getalpha()
     
     local a = sign > 0 and (1 - (gfx.a * diff)) or (gfx.a * diff)
 
-    GUI.redraw_z[self.z] = true
+    self:redraw()
     
     -- Terminate the fade loop at some point
     if sign == 1 and a < 0.02 then

@@ -143,7 +143,7 @@ end
 function GUI.Button:onmousedown()
 	
 	self.state = 1
-	GUI.redraw_z[self.z] = true
+	self:redraw()
 
 end
 
@@ -159,7 +159,7 @@ function GUI.Button:onmouseup()
 		self.func(table.unpack(self.params))
 		
 	end
-	GUI.redraw_z[self.z] = true
+	self:redraw()
 
 end
 
