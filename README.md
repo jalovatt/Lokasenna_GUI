@@ -1,7 +1,5 @@
 # Lokasenna_GUI
 Lua GUI library for [REAPER][1] scripts
-<br><br>
-![A GUI example](images/GUI_example.png)
 
 ## Obligatory Preamble
 As powerful as REAPER's scripting capabilities are, it offers nothing in the way of
@@ -33,4 +31,4 @@ source of documentation will always be comments in the _Example_ scripts and lib
 [1]: www.reaper.fm
 [2]: www.github.com/jalovatt/Lokasenna_GUI/wiki
 [3]: forum.cockos.com/showthread.php?t=177772
-[4]: 
+[4]: www.github.com/jalovatt/Lokasenna_GUI/wiki/1.01-Getting-started
