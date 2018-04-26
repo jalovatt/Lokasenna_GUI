@@ -146,6 +146,8 @@ end
 
 GUI.Main = function ()
    
+   -- A basic crash handler, just to add some helpful detail
+   -- to the Reaper error message.
    xpcall(  GUI.Main_Loop, 
             function(errObject)
                              
