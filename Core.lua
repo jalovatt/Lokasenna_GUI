@@ -145,6 +145,42 @@ end
 
 
 GUI.Main = function ()
+   
+   xpcall(  GUI.Main_Loop, 
+            function(errObject)
+                             
+                local by_line = "([^\r\n]*)\r?\n?"
+                local trim_path = "[\\/]([^\\/]-:%d+:.+)$"
+                local err = string.match(errObject, trim_path) or "Couldn't get error message."
+            
+                local trace = debug.traceback()
+                local tmp = {}
+                for line in string.gmatch(trace, by_line) do
+                    
+                    local str = string.match(line, trim_path) or line
+                    
+                    tmp[#tmp + 1] = str
+
+                end
+                
+                local name = ({reaper.get_action_context()})[2]:match("([^/\\_]+)$")
+                
+                local ret = reaper.ShowMessageBox(name.." has crashed!\n\n"..
+                                                  "Would you like to have a crash report printed "..
+                                                  "to the Reaper console?", 
+                                                  "Oops", 4)
+                
+                if ret == 6 then 
+                    reaper.ShowConsoleMsg("Error: "..err.."\n\n"..
+                                          "Stack traceback:\n\t"..table.concat(tmp, "\n\t", 2))
+                end
+                
+                gfx.quit()
+            end)
+
+end
+
+GUI.Main_Loop = function ()
 	
 	-- Update mouse and keyboard state, window dimensions
 	GUI.mouse.lx, GUI.mouse.ly = GUI.mouse.x, GUI.mouse.y
@@ -330,7 +366,6 @@ GUI.Main = function ()
 	gfx.update()
 	
 end
-
 
 
 
