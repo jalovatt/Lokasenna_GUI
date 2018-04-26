@@ -195,9 +195,9 @@ end
 
 
 
-GUI.New("my_chk", 	"Checklist", 	5, 32, 96, 160, 160, "Checklist:", "Alice,Bob,Charlie,Denise,Edward", "v", 4)
-GUI.New("my_opt", 	"Radio", 		5, 200, 96, 160, 160, "Options:", "Apples,Bananas,Cherries,Donuts,Eggplant", "v", 4)
-GUI.New("my_chk2",	"Checklist",	5, 32, 280, 384, 64, "Whoa, another Checklist", "N,NE,E,SE,S,SW,W,NW", "h", 4)
+GUI.New("my_chk", 	"Checklist", 	5, 32, 96, 160, 160, "Checklist:", "Alice,Bob,Charlie,Denise,Edward,Francine", "v", 4)
+GUI.New("my_opt", 	"Radio", 		5, 200, 96, 160, 160, "Options:", "Apples,Bananas,_,Donuts,Eggplant", "v", 4)
+GUI.New("my_chk2",	"Checklist",	5, 32, 280, 384, 64, "Whoa, another Checklist", "A,B,C,_,D,E,F,_,G,H,I", "h", 4)
 GUI.New("my_opt2",	"Radio",		5, 32, 364, 384, 64, "Horizontal options", "A,A#,B,C,C#,D,D#,E,F,F#,G,G#", "h", 4)
 
 GUI.elms.my_opt.swap = true

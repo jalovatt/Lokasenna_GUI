@@ -1866,8 +1866,16 @@ GUI.open_file = function (path)
 end
 
 
---Also might need to know this
+-- Also might need to know this
 GUI.SWS_exists = reaper.APIExists("CF_GetClipboardBig")
+
+
+-- Why does Lua not have an operator for this?
+GUI.xor = function(a, b)
+   
+   return (a or b) and not (a and b)
+    
+end
 
 
 --[[

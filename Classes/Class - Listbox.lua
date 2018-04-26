@@ -26,10 +26,10 @@ font_b			Text font.
 
 Extra methods:
 
-GUI.Val()		Returns either a single item number, or a table with indices,
-				for each selected item
+GUI.Val()		Returns either a single item number (multi = false), or a table with indices
+				for each selected item (multi = true)
 				
-GUI.Val(new)	Accepts a multiline string
+GUI.Val(new)	Accepts a table with [#] = true for any list items to be selected.
 
 :wnd_recalc()	If your script needs to resize the listbox, move it around, etc,
 				run this afterward so it can update a few internal values
@@ -143,8 +143,15 @@ end
 function GUI.Listbox:val(newval)
 	
 	if newval then
-		self.list = type(newval) == "string" and self:CSVtotable(newval) or newval
-		self:redraw()		
+		--self.list = type(newval) == "string" and self:CSVtotable(newval) or newval
+        if type(newval) ~= "table" then return end
+        
+        for i = 1, #self.list do
+            self.retval[i] = newval[i] or nil
+        end
+        
+		self:redraw()
+        
 	else
 	
 		if self.multi then

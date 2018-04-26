@@ -24,17 +24,16 @@ x, y			Coordinates of top-left corner
 caption			Element title. Feel free to just use a blank string: ""
 opts			Accepts either a table* or a comma-separated string of options.
 
-				Options can be skipped to create a gap in the list by using "__":
+				Options can be separated by a gap in the list by using "_":
 				
-				opts = "Alice,Bob,Charlie,__,Edward,Francine"
+				opts = "Alice,Bob,Charlie,_,Edward,Francine"
 				->
-				Alice
-				Bob
-				Charlie
+				Alice       1
+				Bob         2
+				Charlie     3
 				
-				Edward
-				Francine
-
+				Edward      5
+				Francine    6
 
                 * Must be indexed contiguously, starting from 1.
 
@@ -210,10 +209,11 @@ function Option:getmouseopt()
 	local mouseopt = self.dir == "h" 	
                     and (GUI.mouse.x - (self.x + self.pad))
 					or	(GUI.mouse.y - (self.y + self.cap_h + 1.5*self.pad) )
+                    
 	mouseopt = mouseopt / ((self.opt_size + self.pad) * len)
 	mouseopt = GUI.clamp( math.floor(mouseopt * len) + 1 , 1, len )
-    
-    return mouseopt
+
+    return self.optarray[mouseopt] ~= "_" and mouseopt or false
     
 end
 
@@ -262,7 +262,7 @@ function Option:drawoptions()
 	for i = 1, #self.optarray do
 	
 		str = self.optarray[i]
-		if str ~= "__" then
+		if str ~= "_" then
 		        
             opt_x = x + (horz   and (i - 1) * adj + pad
                                 or  (self.swap  and (w - adj - 1) 
@@ -379,7 +379,7 @@ end
 
 function GUI.Radio:onmousedown()
 	
-	self.state = self:getmouseopt()
+	self.state = self:getmouseopt() or self.state
 
 	self:redraw()
 
@@ -411,13 +411,18 @@ end
 
 
 function GUI.Radio:onwheel()
-	
-	self.state = GUI.round(self.state +     (self.dir == "h" and 1 or -1) 
-                                        *    GUI.mouse.inc)
-                                        
-	if self.state < 1 then self.state = 1 end
-	if self.state > #self.optarray then self.state = #self.optarray end
-	
+--[[
+	state = GUI.round(self.state +     (self.dir == "h" and 1 or -1) 
+                                    *   GUI.mouse.inc)
+]]--                             
+
+    self.state = self:getnextoption(    GUI.xor( GUI.mouse.inc > 0, self.dir == "h" ) 
+                                        and -1 
+                                        or 1 )
+
+	--if self.state < 1 then self.state = 1 end
+	--if self.state > #self.optarray then self.state = #self.optarray end
+
 	self.retval = self.state
 
 	self:redraw()
@@ -428,6 +433,23 @@ end
 function GUI.Radio:isoptselected(opt)
     
    return opt == self.state 
+    
+end
+
+
+function GUI.Radio:getnextoption(dir)
+   
+    local j = dir > 0 and #self.optarray or 1
+   
+    for i = self.state + dir, j, dir do
+       
+        if self.optarray[i] ~= "_" then
+            return i
+        end
+       
+    end
+    
+    return self.state
     
 end
 
@@ -492,6 +514,8 @@ function GUI.Checklist:onmouseup()
 		
     local mouseopt = self:getmouseopt()
 	
+    if not mouseopt then return end
+    
 	self.optsel[mouseopt] = not self.optsel[mouseopt] 
 
 	self:redraw()
