@@ -62,7 +62,9 @@ menus           Accepts a specifically formatted table.
  
 
 Optional:
-pad             Extra width added to menus
+w, h            Specify an overall width and height. If omitted, these will be calculated
+                automatically from the menu titles
+pad             Extra width added between menus. Defaults to 0.
 
 Additional:
 font            Font for the menu titles
