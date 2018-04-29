@@ -40,7 +40,7 @@ req("Core.lua")()
 req("Classes/Class - Slider.lua")()
 req("Classes/Class - Button.lua")()
 req("Classes/Class - Menubox.lua")()
-req("Classes/Class - Checklist.lua")()
+req("Classes/Class - Options.lua")()
 
 -- If any of the requested libraries weren't found, abort the script.
 if missing_lib then return 0 end

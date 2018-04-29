@@ -58,19 +58,7 @@ GUI.name = "Example - Script template"
 GUI.x, GUI.y, GUI.w, GUI.h = 0, 0, 400, 200
 GUI.anchor, GUI.corner = "mouse", "C"
 
---[[	
 
-	Button		z, 	x, 	y, 	w, 	h, caption, func[, ...]
-	Checklist	z, 	x, 	y, 	w, 	h, caption, opts[, dir, pad]
-	Menubox		z, 	x, 	y, 	w, 	h, caption, opts[, pad, noarrow]
-	Slider		z, 	x, 	y, 	w, 	caption, min, max, steps, handles[, dir]
-	
-]]--
-
-GUI.New("mnu_mode",	"Menubox",		1, 64,	32,  72, 20, "Mode:", "Auto,Punch,Step")
-GUI.New("chk_opts",	"Checklist",	1, 192,	32,  192, 96, "Options", "Only in time selection,Only on selected track,Glue items when finished", "v", 4)
-GUI.New("sldr_thresh", "Slider",	1, 32,  96, 128, "Threshold", -500, 0, 500, 482, "h")
-GUI.New("btn_go",	"Button",		1, 168, 152, 64, 24, "Go!", btn_click)
 
 GUI.Init()
 GUI.Main()

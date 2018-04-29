@@ -12,6 +12,7 @@ caption			Label displayed to the left of the menu box
 opts			Comma-separated string of options. As with gfx.showmenu, there are
 				a few special symbols that can be added at the beginning of an option:
 				
+                    ! : Checked
 					# : grayed out
 					> : this menu item shows a submenu
 					< : last item in the current submenu
@@ -178,13 +179,12 @@ function GUI.Menubox:onmouseup()
 
 	-- The menu doesn't count separators in the returned number,
 	-- so we'll do it here
-	local sep_arr = {}    
-	local menu_str = self:prepmenu()
+	local menu_str, sep_arr = self:prepmenu()
 	
 	gfx.x, gfx.y = GUI.mouse.x, GUI.mouse.y	
 	local curopt = gfx.showmenu(menu_str)
 	
-	if #sep_arr > 0 then self:stripseps() end	
+	if #sep_arr > 0 then curopt = self:stripseps(curopt, sep_arr) end	
 	if curopt ~= 0 then self.retval = curopt end
 
 	self.focus = false
@@ -333,6 +333,7 @@ end
 function GUI.Menubox:prepmenu()
 
 	local str_arr = {}
+    local sep_arr = {}    
     local menu_str = ""
     
 	for i = 1, self.numopts do
@@ -363,13 +364,13 @@ function GUI.Menubox:prepmenu()
 	
 	menu_str = table.concat( str_arr )
 	
-	return string.sub(menu_str, 1, string.len(menu_str) - 1)
+	return string.sub(menu_str, 1, string.len(menu_str) - 1), sep_arr
 
 end
 
 
 -- Adjust the menu's returned value to ignore any separators ( --------- )
-function GUI.Menubox:stripseps()
+function GUI.Menubox:stripseps(curopt, sep_arr)
 
     for i = 1, #sep_arr do
         if curopt >= sep_arr[i] then
@@ -378,6 +379,8 @@ function GUI.Menubox:stripseps()
             break
         end
     end
+    
+    return curopt
     
 end    
     

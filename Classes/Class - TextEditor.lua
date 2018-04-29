@@ -288,14 +288,15 @@ function GUI.TextEditor:ondrag()
 end
 
 
-function GUI.TextEditor:ontype()
+function GUI.TextEditor:ontype(char, mod)
 
-    local char = GUI.char
+    local char = char or GUI.char
+    local mod = mod or GUI.mouse.cap
 
 	-- Non-typeable / navigation chars
 	if self.keys[char] then
 		
-		local shift = GUI.mouse.cap & 8 == 8
+		local shift = mod & 8 == 8
 		
 		if shift and not self.sel_s then 
 			self.sel_s = {x = self.caret.x, y = self.caret.y}

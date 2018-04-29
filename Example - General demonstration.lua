@@ -46,6 +46,7 @@ req("Classes/Class - Button.lua")()
 req("Classes/Class - Menubox.lua")()
 req("Classes/Class - Textbox.lua")()
 req("Classes/Class - Frame.lua")()
+req("Classes/Class - Options.lua")()
 
 -- If any of the requested libraries weren't found, abort the script.
 if missing_lib then return 0 end
