@@ -41,6 +41,9 @@ GUI.Val(new)	Accepts a multiline string
 				run this afterward so it can update a few internal values
 
 
+*** Note: Reaper doesn't support the Tab character ("\t") properly, so any tabs are
+    automatically replaced with four spaces. ***
+
 ]]--
 
 if not GUI then
@@ -306,7 +309,7 @@ function GUI.TextEditor:ontype(char, mod)
 		-- the next section
         local bypass = self.keys[char](self)
 		
-		if shift and char ~= (GUI.chars.BACKSPACE) then
+		if shift and char ~= GUI.chars.BACKSPACE and char ~= GUI.chars.TAB then
 			
 			self.sel_e = {x = self.caret.x, y = self.caret.y}
 			
@@ -943,6 +946,8 @@ function GUI.TextEditor:setscrollbar(scroll)
 end
 
 
+
+
 ------------------------------------
 -------- Char/String Helpers -------
 ------------------------------------
@@ -951,10 +956,11 @@ end
 -- Split a string by line into a table
 function GUI.TextEditor:stringtotable(str)
 
+    str = self:sanitizetext(str)
 	local pattern = "([^\r\n]*)\r?\n?"
 	local tmp = {}
 	for line in string.gmatch(str, pattern) do
-		table.insert(tmp, line)
+		table.insert(tmp, line )
 	end
 	
 	return tmp
@@ -967,6 +973,8 @@ end
 function GUI.TextEditor:insertstring(str, move_caret)
 
 	self:storeundostate()
+
+    str = self:sanitizetext(str)
 
 	if self.sel_s then self:deleteselection() end
 
@@ -1026,6 +1034,46 @@ function GUI.TextEditor:carettoend()
 	]]--
     
     return string.len(self.retval[self.caret.y] or "")
+    
+end
+
+
+-- Replace any characters that we're unable to reproduce properly
+function GUI.TextEditor:sanitizetext(str)
+    
+    if type(str) == "string" then
+    
+        return str:gsub("\t", "    ")
+            
+    elseif type(str) == "table" then
+    
+        local tmp = {}
+        for i = 1, #str do
+            
+            tmp[i] = str[i]:gsub("\t", "    ")
+            
+            return tmp
+            
+        end
+    
+    end
+
+end
+
+
+-- Backspace by up to four " " characters, if present.
+function GUI.TextEditor:backtab()
+    
+    local str = self.retval[self.caret.y]
+    local pre, post = string.sub(str, 1, self.caret.x), string.sub(str, self.caret.x + 1)
+    
+    local space
+    pre, space = string.match(pre, "(.-)(%s*)$")
+    
+    pre = pre .. (space and string.sub(space, 1, -5) or "")
+
+    self.caret.x = string.len(pre)
+    self.retval[self.caret.y] = pre..post
     
 end
 
@@ -1150,9 +1198,14 @@ GUI.TextEditor.keys = {
 		
         -- Disabled until Reaper supports this properly
 		--self:insertchar(9)
-		
-	end,
-	
+        
+        if GUI.mouse.cap & 8 == 8 then
+            self:backtab()
+        else
+            self:insertstring("    ", true)
+		end
+        
+	end,	
 	
 	[GUI.chars.INSERT] = function(self)
 		
@@ -1313,6 +1366,8 @@ GUI.TextEditor.keys = {
 		
 	end
 }
+
+
 
 
 ------------------------------------
