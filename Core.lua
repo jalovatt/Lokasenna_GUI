@@ -16,6 +16,46 @@ GUI.version = "2.0"
 
 
 ------------------------------------
+-------- Error handling ------------
+------------------------------------
+
+
+-- A basic crash handler, just to add some helpful detail
+-- to the Reaper error message.
+GUI.crash = function (errObject)
+                             
+    local by_line = "([^\r\n]*)\r?\n?"
+    local trim_path = "[\\/]([^\\/]-:%d+:.+)$"
+    local err = string.match(errObject, trim_path) or "Couldn't get error message."
+
+    local trace = debug.traceback()
+    local tmp = {}
+    for line in string.gmatch(trace, by_line) do
+        
+        local str = string.match(line, trim_path) or line
+        
+        tmp[#tmp + 1] = str
+
+    end
+    
+    local name = ({reaper.get_action_context()})[2]:match("([^/\\_]+)$")
+    
+    local ret = reaper.ShowMessageBox(name.." has crashed!\n\n"..
+                                      "Would you like to have a crash report printed "..
+                                      "to the Reaper console?", 
+                                      "Oops", 4)
+    
+    if ret == 6 then 
+        reaper.ShowConsoleMsg("Error: "..err.."\n\n"..
+                              "Stack traceback:\n\t"..table.concat(tmp, "\n\t", 2))
+    end
+    
+    gfx.quit()
+end
+
+
+
+------------------------------------
 -------- Main functions ------------
 ------------------------------------
 
@@ -146,39 +186,7 @@ end
 
 GUI.Main = function ()
    
-   -- A basic crash handler, just to add some helpful detail
-   -- to the Reaper error message.
-   xpcall(  GUI.Main_Loop, 
-            function(errObject)
-                             
-                local by_line = "([^\r\n]*)\r?\n?"
-                local trim_path = "[\\/]([^\\/]-:%d+:.+)$"
-                local err = string.match(errObject, trim_path) or "Couldn't get error message."
-            
-                local trace = debug.traceback()
-                local tmp = {}
-                for line in string.gmatch(trace, by_line) do
-                    
-                    local str = string.match(line, trim_path) or line
-                    
-                    tmp[#tmp + 1] = str
-
-                end
-                
-                local name = ({reaper.get_action_context()})[2]:match("([^/\\_]+)$")
-                
-                local ret = reaper.ShowMessageBox(name.." has crashed!\n\n"..
-                                                  "Would you like to have a crash report printed "..
-                                                  "to the Reaper console?", 
-                                                  "Oops", 4)
-                
-                if ret == 6 then 
-                    reaper.ShowConsoleMsg("Error: "..err.."\n\n"..
-                                          "Stack traceback:\n\t"..table.concat(tmp, "\n\t", 2))
-                end
-                
-                gfx.quit()
-            end)
+   xpcall(  GUI.Main_Loop, GUI.crash)
 
 end
 
@@ -349,14 +357,16 @@ GUI.Main_Loop = function ()
 				gfx.blit(i, 1, 0, 0, 0, w, h, 0, 0, w, h, 0, 0)
 			end
 		end
-		
-		-- Draw developer hints if necessary
-		if GUI.dev_mode then
-			GUI.draw_dev()
-		end		
-		GUI.Draw_Version()		
+
+        -- Draw developer hints if necessary
+        if GUI.dev_mode then
+            GUI.Draw_Dev()
+        else		
+            GUI.Draw_Version()		
+        end
 		
 	end
+   
 		
     -- Reset them again, to be extra sure
 	gfx.mode = 0
@@ -938,11 +948,12 @@ GUI.dev = {
 
 
 -- Draws a grid overlay and some developer hints
-GUI.draw_dev = function ()
-	
+-- Toggled via Ctrl+Shift+Alt+Z, or by setting GUI.dev_mode = true
+GUI.Draw_Dev = function ()
+	    
 	-- Draw a grid for placing elements
 	GUI.color("magenta")
-	gfx.setfont("Courier New", 12)
+	gfx.setfont("Courier New", 10)
 	
 	for i = 0, GUI.w, GUI.dev.grid_b do
 		
@@ -958,8 +969,26 @@ GUI.draw_dev = function ()
 		end	
 	
 	end
-	
+    
+    local str = "Mouse: "..math.modf(GUI.mouse.x)..", "..math.modf(GUI.mouse.y).." "
+    local str_w, str_h = gfx.measurestr(str)
+    gfx.x, gfx.y = GUI.w - str_w - 2, GUI.h - 2*str_h - 2
+    
+    GUI.color("black")
+    gfx.rect(gfx.x - 2, gfx.y - 2, str_w + 4, 2*str_h + 4, true)
+    
+    GUI.color("white")
+    gfx.drawstr(str)
+   
+    local snap_x, snap_y = GUI.nearestmultiple(GUI.mouse.x, GUI.dev.grid_b),
+                           GUI.nearestmultiple(GUI.mouse.y, GUI.dev.grid_b)
+    
+    gfx.x, gfx.y = GUI.w - str_w - 2, GUI.h - str_h - 2
+	gfx.drawstr(" Snap: "..snap_x..", "..snap_y)
+    
 	gfx.a = 1
+    
+    GUI.redraw_z[0] = true
 	
 end
 
@@ -1684,6 +1713,16 @@ GUI.round = function (num, places)
 	end
 	
 end
+
+
+-- Returns 'val', rounded to the nearest multiple of 'snap'
+GUI.nearestmultiple = function (val, snap)
+    
+    local int, frac = math.modf(val / snap)
+    return (math.floor( frac + 0.5 ) == 1 and int + 1 or int) * snap
+    
+end
+
 
 
 -- Make sure num is between min and max
