@@ -81,7 +81,7 @@ function GUI.Label:new(name, z, x, y, caption, shadow, font, color, bg)
     -- Placeholders; we'll get these at runtime
 	label.w, label.h = 0, 0
 	
-	label.retval = caption
+	label.caption = caption
 	
 	label.shadow = shadow or false
 	label.font = font or 2
@@ -104,7 +104,7 @@ function GUI.Label:init(open)
     self.buffs = self.buffs or GUI.GetBuffer(2)
 
     GUI.font(self.font)
-    self.w, self.h = gfx.measurestr(self.retval) 
+    self.w, self.h = gfx.measurestr(self.caption) 
 
     local w, h = self.w + 4, self.h + 4
 
@@ -136,9 +136,9 @@ function GUI.Label:init(open)
     GUI.color(self.color)
 
 	if self.shadow then	
-        GUI.shadow(self.retval, self.color, "shadow")
+        GUI.shadow(self.caption, self.color, "shadow")
     else
-        gfx.drawstr(self.retval)
+        gfx.drawstr(self.caption)
     end   
     
     gfx.dest = dest
@@ -181,11 +181,11 @@ end
 function GUI.Label:val(newval)
 
 	if newval then
-		self.retval = newval
+		self.caption = newval
 		self:init()
 		self:redraw()
 	else
-		return self.retval
+		return self.caption
 	end
 
 end
