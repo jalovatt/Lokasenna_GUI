@@ -142,13 +142,14 @@ function GUI.Frame:drawframe()
 	local round = self.round
     
     -- Frame background
-    GUI.color(self.bg)
-    if round > 0 then
-        GUI.roundrect(1, 1, w, h, round, 1, true)
-    else
-        gfx.rect(1, 1, w, h, true)
+    if self.bg then
+        GUI.color(self.bg)
+        if round > 0 then
+            GUI.roundrect(1, 1, w, h, round, 1, true)
+        else
+            gfx.rect(1, 1, w, h, true)
+        end
     end
-    
     
     -- Shadow
     local r, g, b, a = table.unpack(GUI.colors["shadow"])
