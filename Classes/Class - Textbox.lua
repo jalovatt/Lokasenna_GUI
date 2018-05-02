@@ -136,7 +136,7 @@ function GUI.Textbox:draw()
 		
 	end
     
-    if #self.retval > self.wnd_w - 2 then self:drawgradient() end    
+    if string.len(self.retval) > self.wnd_w - 2 then self:drawgradient() end    
 	
 end
 
@@ -631,10 +631,12 @@ GUI.Textbox.keys = {
             
         else
         
+        if self.caret <= 0 then return end
+            
             local str = self.retval
             self.retval =   string.sub(str, 1, self.caret - 1)..
                             string.sub(str, self.caret + 1, -1)
-            self.caret = self.caret - 1
+            self.caret = math.max(0, self.caret - 1)
             
         end
         
