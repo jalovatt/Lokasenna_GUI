@@ -153,13 +153,6 @@ function GUI.Textbox:val(newval)
 end
 
 
-function GUI.Textbox:lostfocus()
-
-	self:redraw()
-	
-end
-
-
 -- Just for making the caret blink
 function GUI.Textbox:onupdate()
 	
@@ -669,6 +662,7 @@ GUI.Textbox.keys = {
     [GUI.chars.RETURN] = function(self)
         
         self.focus = false
+        self:lostfocus()
         self:redraw()
 
     end,
