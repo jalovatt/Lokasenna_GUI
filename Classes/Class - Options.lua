@@ -165,7 +165,7 @@ function Option:init()
     self:initoptions()
 	
     
-	if self.caption ~= "" then
+	if self.caption and self.caption ~= "" then
 		GUI.font(self.font_a)		
 		local str_w, str_h = gfx.measurestr(self.caption)
 		self.cap_h = 0.5*str_h
@@ -245,7 +245,9 @@ function Option:drawoptions()
 	local pad = self.pad
     
     -- Bump everything down for the caption
-    y = y + self.cap_h + 1.5 * pad 
+    if self.caption and self.caption ~= "" then 
+        y = y + self.cap_h + 1.5 * pad 
+    end
 
     -- Bump the options down more for horizontal options
     -- with the text on top
