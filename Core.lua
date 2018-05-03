@@ -201,7 +201,13 @@ GUI.Main_Loop = function ()
 	
 	if GUI.cur_w ~= gfx.w or GUI.cur_h ~= gfx.h then
 		GUI.cur_w, GUI.cur_h = gfx.w, gfx.h
+        
+        -- Deprecated
 		GUI.resized = true
+        
+        -- Hook for user code
+        if GUI.onresize then GUI.onresize() end
+        
 	else
 		GUI.resized = false
 	end
@@ -239,7 +245,9 @@ GUI.Main_Loop = function ()
 	loop; use this instead to have them automatically cleaned up***	
 	
 ]]--
-	GUI.update_elms_list()
+
+    -- Disabled May 2/2018 to see if it was actually necessary
+	-- GUI.update_elms_list()
 	
 	-- We'll use this to shorten each elm's update loop if the user did something
 	-- Slightly more efficient, and averts any bugs from false positives
@@ -288,22 +296,18 @@ GUI.Main_Loop = function ()
 		end
 	end
 	
+    
+    -- Maintain a list of elms and zs in case any have been moved or deleted
+	GUI.update_elms_list()    
+    
+    
 	-- Redraw all of the elements, starting from the bottom up.
-    -- *** why is this being called again? In case of deletions? Is there a more
-    -- efficient way to handle this? ***
-	GUI.update_elms_list()
+	local w, h = GUI.cur_w, GUI.cur_h
 
-	local w, h = GUI.w, GUI.h
 
-	--[[
-		Having everything draw to a single buffer is less efficient than having
-		separate buffers per Z, but it gets around the problem of text looking 
-        shitty because it's been anti-aliased with a transparent background.
-	]]--
-
-	local need_redraw = false
+	local need_redraw, global_redraw
 	if GUI.redraw_z[0] then
-		need_redraw = true
+		global_redraw = true
 	else
 		for z, b in pairs(GUI.redraw_z) do
 			if b == true then 
@@ -313,7 +317,7 @@ GUI.Main_Loop = function ()
 		end
 	end
 
-	if need_redraw then
+	if need_redraw or global_redraw then
 		
 		-- All of the layers will be drawn to their own buffer (dest = z), then
 		-- composited in buffer 0. This allows buffer 0 to be blitted as a whole
@@ -330,7 +334,7 @@ GUI.Main_Loop = function ()
 			if  GUI.elms_list[i] and #GUI.elms_list[i] > 0 
             and not GUI.elms_hide[i] then
 
-				if GUI.redraw_z[i] then
+				if global_redraw or GUI.redraw_z[i] then
 					
 					-- Set this before we redraw, so that elms can call a redraw 
                     -- from their own :draw method. e.g. Labels fading out
