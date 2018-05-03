@@ -190,8 +190,37 @@ GUI.Main = function ()
 
 end
 
+
 GUI.Main_Loop = function ()
+
+    GUI.Main_Update_State()
+
+    GUI.Main_Update_Elms()
+
+	-- If the user gave us a function to run, check to see if it needs to be 
+    -- run again, and do so. 
+	if GUI.func then
+		
+		local new_time = os.time()
+		if new_time - GUI.last_time >= (GUI.freq or 1) then
+			GUI.func()
+			GUI.last_time = new_time
+		
+		end
+	end
 	
+    
+    -- Maintain a list of elms and zs in case any have been moved or deleted
+	GUI.update_elms_list()    
+    
+    
+    GUI.Main_Draw()
+
+end
+
+
+GUI.Main_Update_State = function()
+    
 	-- Update mouse and keyboard state, window dimensions
     if GUI.mouse.x ~= gfx.mouse_x or GUI.mouse.y ~= gfx.mouse_y then
         
@@ -231,10 +260,9 @@ GUI.Main_Loop = function ()
 	else
 		reaper.defer(GUI.Main)
 	end
+    
+end
 
-
-	--GUI.mouse.down = false
-	--GUI.mouse.r_down = false
 
 --[[
 	Update each element's state, starting from the top down.
@@ -252,7 +280,8 @@ GUI.Main_Loop = function ()
 	loop; use this instead to have them automatically cleaned up***	
 	
 ]]--
-
+GUI.Main_Update_Elms = function ()
+    
     -- Disabled May 2/2018 to see if it was actually necessary
 	-- GUI.update_elms_list()
 	
@@ -290,23 +319,10 @@ GUI.Main_Loop = function ()
 	GUI.mouse.last_down = GUI.mouse.down
 	GUI.mouse.last_r_down = GUI.mouse.r_down
 
+end
 
-	-- If the user gave us a function to run, check to see if it needs to be 
-    -- run again, and do so. 
-	if GUI.func then
-		
-		local new_time = os.time()
-		if new_time - GUI.last_time >= (GUI.freq or 1) then
-			GUI.func()
-			GUI.last_time = new_time
-		
-		end
-	end
-	
     
-    -- Maintain a list of elms and zs in case any have been moved or deleted
-	GUI.update_elms_list()    
-    
+GUI.Main_Draw = function ()    
     
 	-- Redraw all of the elements, starting from the bottom up.
 	local w, h = GUI.cur_w, GUI.cur_h
@@ -387,8 +403,11 @@ GUI.Main_Loop = function ()
 	gfx.blit(0, 1, 0, 0, 0, w, h, 0, 0, w, h, 0, 0)
 	
 	gfx.update()
-	
+
 end
+
+
+
 
 
 
