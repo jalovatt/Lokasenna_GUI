@@ -193,8 +193,15 @@ end
 GUI.Main_Loop = function ()
 	
 	-- Update mouse and keyboard state, window dimensions
-	GUI.mouse.lx, GUI.mouse.ly = GUI.mouse.x, GUI.mouse.y
-	GUI.mouse.x, GUI.mouse.y = gfx.mouse_x, gfx.mouse_y
+    if GUI.mouse.x ~= gfx.mouse_x or GUI.mouse.y ~= gfx.mouse_y then
+        
+        GUI.mouse.lx, GUI.mouse.ly = GUI.mouse.x, GUI.mouse.y
+        GUI.mouse.x, GUI.mouse.y = gfx.mouse_x, gfx.mouse_y
+        
+        -- Hook for user code
+        if GUI.onmousemove then GUI.onmousemove() end
+        
+    end
 	GUI.mouse.wheel = gfx.mouse_wheel
 	GUI.mouse.cap = gfx.mouse_cap
 	GUI.char = gfx.getchar() 
