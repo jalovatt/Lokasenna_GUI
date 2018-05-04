@@ -329,6 +329,17 @@ function GUI.Menubar:onmouseover()
     
     local x = GUI.mouse.x - self.x
 
+    if  self.mousemnu_x and x > self:measuretitles(nil, true) then
+        
+        self.mousemnu = nil
+        self.mousemnu_x = nil
+        self:redraw()
+        
+        return
+        
+    end
+        
+
     -- Iterate through the titles by overall width until we
     -- find which one the mouse is in.
     for i = 1, #self.menus do
