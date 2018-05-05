@@ -165,8 +165,8 @@ GUI.Init = function ()
 	-- This is essential for allowing drag behaviour where dragging affects 
     -- the element position.
 	GUI.mouse_down_elm = nil
-	GUI.rmouse_down_element = nil
-	GUI.mmouse_down_element = nil
+	GUI.rmouse_down_elm = nil
+	GUI.mmouse_down_elm = nil
 		
 	-- Convert color presets from 0..255 to 0..1
 	for i, col in pairs(GUI.colors) do
@@ -645,17 +645,17 @@ GUI.Update = function (elm)
 
 				-- Was a different element clicked?
 				if not inside then 
-					if GUI.rmouse_down_element == elm then
+					if GUI.rmouse_down_elm == elm then
 						-- Should have been reset by the mouse-up, but in case...
-						GUI.rmouse_down_element = nil
+						GUI.rmouse_down_elm = nil
 					end
 					--elm.focus = false
 				else
                 
                     -- Prevent click-through
-					if GUI.rmouse_down_element == nil then 
+					if GUI.rmouse_down_elm == nil then 
 
-						GUI.rmouse_down_element = elm
+						GUI.rmouse_down_elm = elm
 
 							-- Double clicked?
 						if GUI.mouse.r_downtime 
@@ -684,7 +684,7 @@ GUI.Update = function (elm)
 		
 			-- 		Dragging? Did the mouse start out in this element?
 			elseif (x_delta ~= 0 or y_delta ~= 0) 
-            and     GUI.rmouse_down_element == elm then
+            and     GUI.rmouse_down_elm == elm then
 			
 				if elm.focus ~= false then 
 
@@ -696,9 +696,9 @@ GUI.Update = function (elm)
 			end
 
 		-- If it was originally clicked in this element and has been released
-		elseif GUI.mouse.r_down and GUI.rmouse_down_element == elm then 
+		elseif GUI.mouse.r_down and GUI.rmouse_down_elm == elm then 
 		
-			GUI.rmouse_down_element = nil
+			GUI.rmouse_down_elm = nil
 		
 			if not GUI.mouse.r_dbl_clicked then elm:onmouser_up() end
 
@@ -723,15 +723,15 @@ GUI.Update = function (elm)
 
 				-- Was a different element clicked?
 				if not inside then 
-					if GUI.mmouse_down_element == elm then
+					if GUI.mmouse_down_elm == elm then
 						-- Should have been reset by the mouse-up, but in case...
-						GUI.mmouse_down_element = nil
+						GUI.mmouse_down_elm = nil
 					end
 				else
                     -- Prevent click-through
-					if GUI.mmouse_down_element == nil then 
+					if GUI.mmouse_down_elm == nil then 
 
-						GUI.mmouse_down_element = elm
+						GUI.mmouse_down_elm = elm
 
 						-- Double clicked?
 						if GUI.mouse.m_downtime 
@@ -761,7 +761,7 @@ GUI.Update = function (elm)
 			
 			-- 		Dragging? Did the mouse start out in this element?
 			elseif (x_delta ~= 0 or y_delta ~= 0) 
-            and     GUI.mmouse_down_element == elm then
+            and     GUI.mmouse_down_elm == elm then
 			
 				if elm.focus ~= false then 
 					
@@ -773,9 +773,9 @@ GUI.Update = function (elm)
 			end
 
 		-- If it was originally clicked in this element and has been released
-		elseif GUI.mouse.m_down and GUI.mmouse_down_element == elm then
+		elseif GUI.mouse.m_down and GUI.mmouse_down_elm == elm then
 		
-			GUI.mmouse_down_element = nil
+			GUI.mmouse_down_elm = nil
 		
 			if not GUI.mouse.m_dbl_clicked then elm:onmousem_up() end
 			
