@@ -47,7 +47,7 @@ GUI.crash = function (errObject)
     
     if ret == 6 then 
         reaper.ShowConsoleMsg("Error: "..err.."\n\n"..
-                              "Stack traceback:\n\t"..table.concat(tmp, "\n\t", 2))
+                              "Stack traceback:\n\t"..table.concat(tmp, "\n\t", 2).."\n\n")
     end
     
     gfx.quit()
@@ -164,7 +164,7 @@ GUI.Init = function ()
 	-- Store which element the mouse was clicked on.
 	-- This is essential for allowing drag behaviour where dragging affects 
     -- the element position.
-	GUI.mouse_down_element = nil
+	GUI.mouse_down_elm = nil
 	GUI.rmouse_down_element = nil
 	GUI.mmouse_down_element = nil
 		
@@ -569,9 +569,9 @@ GUI.Update = function (elm)
 
 				-- Was a different element clicked?
 				if not inside then 
-					if GUI.mouse_down_element == elm then
+					if GUI.mouse_down_elm == elm then
 						-- Should already have been reset by the mouse-up, but safeguard...
-						GUI.mouse_down_element = nil
+						GUI.mouse_down_elm = nil
 					end
 					if elm.focus then
 						elm.focus = false
@@ -579,9 +579,9 @@ GUI.Update = function (elm)
 					end
 					return 0
 				else
-					if GUI.mouse_down_element == nil then -- Prevent click-through
+					if GUI.mouse_down_elm == nil then -- Prevent click-through
 
-						GUI.mouse_down_element = elm
+						GUI.mouse_down_elm = elm
 
 						-- Double clicked?
 						if GUI.mouse.downtime 
@@ -609,7 +609,7 @@ GUI.Update = function (elm)
 							
 			-- 		Dragging? Did the mouse start out in this element?
 			elseif (x_delta ~= 0 or y_delta ~= 0) 
-            and     GUI.mouse_down_element == elm then
+            and     GUI.mouse_down_elm == elm then
 			
 				if elm.focus ~= false then 
 
@@ -620,9 +620,9 @@ GUI.Update = function (elm)
 			end
 
 		-- If it was originally clicked in this element and has been released
-		elseif GUI.mouse.down and GUI.mouse_down_element == elm then
+		elseif GUI.mouse.down and GUI.mouse_down_elm == elm then
 
-				GUI.mouse_down_element = nil
+				GUI.mouse_down_elm = nil
 
 				if not GUI.mouse.dbl_clicked then elm:onmouseup() end
 
