@@ -206,7 +206,7 @@ function GUI.Tabs:onmousedown()
     -- Offset for the first tab
 	local adj = 0.75*self.h
 
-	local mouseopt = (GUI.mouse.x - (self.x + adj)) / self.w
+	local mouseopt = (GUI.mouse.x - (self.x + adj)) / (self.numopts * (self.tab_w + self.pad))
 		
 	mouseopt = GUI.clamp((math.floor(mouseopt * self.numopts) + 1), 1, self.numopts)
 
@@ -312,7 +312,7 @@ function GUI.Tabs:draw_tab(x, y, w, h, dir, font, col_txt, col_bg, lbl)
 	
 	local str_w, str_h = gfx.measurestr(lbl)
 	gfx.x = x + ((w - str_w) / 2)
-	gfx.y = y + ((h - str_h) / 2) - 2 -- Don't include the bit we drew under the frame
+	gfx.y = y + ((h - str_h) / 2)
 	gfx.drawstr(lbl)	
 
 end
