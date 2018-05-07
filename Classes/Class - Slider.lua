@@ -119,6 +119,24 @@ function GUI.Slider:new(name, z, x, y, w, caption, min, max, steps, handles, dir
 	-- If the user only asked for one handle
 	if type(handles) == "number" then handles = {handles} end
 
+    function Slider:init_handles(handles)
+    
+        self.handles = {}
+        for i = 1, #handles do
+            
+            self.handles[i] = {}
+            self.handles[i].default = (self.dir ~= "v" and handles[i] or (self.steps - handles[i]))
+            self.handles[i].curstep = handles[i]
+            self.handles[i].curval = handles[i] / self.steps
+            self.handles[i].retval = GUI.round(((self.max - self.min) / self.steps) * handles[i] + self.min)
+            --self.handles[i].retval = ((max - min) / (steps - 1)) * handles[i] + min
+            
+        end  
+        
+    end
+
+    Slider:init_handles(handles)
+--[[
 	Slider.handles = {}
 	for i = 1, #handles do
 		
@@ -130,7 +148,7 @@ function GUI.Slider:new(name, z, x, y, w, caption, min, max, steps, handles, dir
 		--Slider.handles[i].retval = ((max - min) / (steps - 1)) * handles[i] + min
 		
 	end
-	
+]]--	
 	setmetatable(Slider, self)
 	self.__index = self
 	return Slider	
@@ -141,6 +159,9 @@ end
 function GUI.Slider:init()
 	
 	self.buffs = self.buffs or GUI.GetBuffer(2)
+    
+    -- In case we were given a new set of handles without involving GUI.Val
+    if not self.handles[1].default then self:init_handles(self.handles) end
 
     local w, h = self.w, self.h
 
@@ -223,7 +244,6 @@ function GUI.Slider:val(newvals)
 		if type(newvals) == "number" then newvals = {newvals} end
 		
 		local steps, min, max = self.steps, self.min, self.max
-		local inc = (max - min) / steps
 		
 		for i = 1, #self.handles do
 			
@@ -263,7 +283,7 @@ end
 
 
 function GUI.Slider:onmousedown()
-	
+
 	-- Snap the nearest slider to the nearest value
 	
 	local mouse_val = self.dir == "h" 
