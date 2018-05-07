@@ -229,7 +229,11 @@ GUI.Main_Update_State = function()
         
         -- Hook for user code
         if GUI.onmousemove then GUI.onmousemove() end
-        
+       
+    else
+    
+        GUI.mouse.lx, GUI.mouse.ly = GUI.mouse.x, GUI.mouse.y
+       
     end
 	GUI.mouse.wheel = gfx.mouse_wheel
 	GUI.mouse.cap = gfx.mouse_cap
@@ -518,13 +522,13 @@ end
 -- If called after the script window has opened, will also run their :init
 -- method.
 GUI.New = function (name, elm, ...)
-	
-	if not GUI[elm] then
+
+    if not GUI[elm] then
 		reaper.ShowMessageBox(  "Unable to create element '"..tostring(name)..
                                 "'.\nClass '"..tostring(elm).."' isn't available.", 
                                 "GUI Error", 0)
 		GUI.quit = true
-		return 0
+		return nil
 	end
 	
 	GUI.elms[name] = GUI[elm]:new(name, ...)
