@@ -136,19 +136,7 @@ function GUI.Slider:new(name, z, x, y, w, caption, min, max, steps, handles, dir
     end
 
     Slider:init_handles(handles)
---[[
-	Slider.handles = {}
-	for i = 1, #handles do
-		
-		Slider.handles[i] = {}
-		Slider.handles[i].default = (dir ~= "v" and handles[i] or (steps - handles[i]))
-		Slider.handles[i].curstep = handles[i]
-		Slider.handles[i].curval = handles[i] / steps
-		Slider.handles[i].retval = GUI.round(((max - min) / steps) * handles[i] + min)
-		--Slider.handles[i].retval = ((max - min) / (steps - 1)) * handles[i] + min
-		
-	end
-]]--	
+
 	setmetatable(Slider, self)
 	self.__index = self
 	return Slider	
