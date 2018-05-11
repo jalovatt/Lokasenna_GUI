@@ -120,6 +120,8 @@ function GUI.Slider:new(name, z, x, y, w, caption, min, max, defaults, inc, dir)
 	Slider.cap_x = 0
 	Slider.cap_y = 0
 	
+    if min > max then min, max = max, min end
+    
 	if Slider.dir == "v" then
 		min, max = max, min		
 	end
