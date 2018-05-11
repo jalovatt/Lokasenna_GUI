@@ -37,10 +37,9 @@ end
 -- when they look for functions that aren't there.
 req("Core.lua")()
 
-req("Classes/Class - Slider.lua")()
-req("Classes/Class - Button.lua")()
-req("Classes/Class - Menubox.lua")()
-req("Classes/Class - Checklist.lua")()
+--[[
+    Require element classes here
+]]--
 
 
 -- If any of the requested libraries weren't found, abort the script.
@@ -58,6 +57,10 @@ GUI.name = "Example - Script template"
 GUI.x, GUI.y, GUI.w, GUI.h = 0, 0, 400, 200
 GUI.anchor, GUI.corner = "mouse", "C"
 
+
+--[[
+    Create new elements here
+]]--
 
 
 GUI.Init()

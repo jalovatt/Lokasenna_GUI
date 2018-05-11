@@ -20,7 +20,7 @@ local function req(file)
 	
 	if missing_lib then return function () end end
 	
-	local ret, err = loadfile(script_path .. file)
+    local ret, err = loadfile(( file:sub(2, 2) == ":" and "" or script_path) .. file)
 	if not ret then
 		reaper.ShowMessageBox("Couldn't load "..file.."\n\nError: "..tostring(err), "Library error", 0)
 		missing_lib = true		
@@ -36,7 +36,6 @@ end
 -- The Core library must be loaded prior to any classes, or the classes will throw up errors
 -- when they look for functions that aren't there.
 req("Core.lua")()
-
 req("Classes/Class - Slider.lua")()
 req("Classes/Class - Button.lua")()
 req("Classes/Class - Menubox.lua")()
@@ -99,13 +98,13 @@ GUI.anchor, GUI.corner = "mouse", "C"
 	Button		z, 	x, 	y, 	w, 	h, caption, func[, ...]
 	Checklist	z, 	x, 	y, 	w, 	h, caption, opts[, dir, pad]
 	Menubox		z, 	x, 	y, 	w, 	h, caption, opts, pad, noarrow]
-	Slider		z, 	x, 	y, 	w, 	caption, min, max, steps, handles[, dir]
+	Slider		z, 	x, 	y, 	w, 	caption, min, max, defaults[, inc, dir]
 	
 ]]--
 
 GUI.New("mnu_mode",	"Menubox",		1, 64,	32,  72, 20, "Mode:", "Auto,Punch,Step")
 GUI.New("chk_opts",	"Checklist",	1, 192,	32,  192, 96, "Options", "Only in time selection,Only on selected track,Glue items when finished", "v", 4)
-GUI.New("sldr_thresh", "Slider",	1, 32,  96, 128, "Threshold", -60, 0, 60, 48, "h")
+GUI.New("sldr_thresh", "Slider",	1, 32,  96, 128, "Threshold", -60, 0, 48, nil, "h")
 GUI.New("btn_go",	"Button",		1, 168, 152, 64, 24, "Go!", btn_click)
 
 

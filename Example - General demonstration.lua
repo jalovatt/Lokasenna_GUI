@@ -21,7 +21,7 @@ local function req(file)
 	
 	if missing_lib then return function () end end
 	
-	local ret, err = loadfile(script_path .. file)
+    local ret, err = loadfile(( file:sub(2, 2) == ":" and "" or script_path) .. file)
 	if not ret then
 		reaper.ShowMessageBox("Couldn't load "..file.."\n\nError: "..tostring(err), "Library error", 0)
 		missing_lib = true		
@@ -37,7 +37,6 @@ end
 -- The Core library must be loaded prior to any classes, or the classes will throw up errors
 -- when they look for functions that aren't there.
 req("Core.lua")()
-
 req("Classes/Class - Label.lua")()
 req("Classes/Class - Knob.lua")()
 req("Classes/Class - Tabs.lua")()
@@ -92,7 +91,7 @@ end
 
 local function fade_lbl()
    
-    -- Fade out the label above
+    -- Fade out the label
     if GUI.elms.my_lbl.z == 3 then
         GUI.elms.my_lbl:fade(1, 3, 6)
         
@@ -121,11 +120,11 @@ GUI.anchor, GUI.corner = "mouse", "C"
 	Button		z, 	x, 	y, 	w, 	h, caption, func[, ...]
 	Checklist	z, 	x, 	y, 	w, 	h, caption, opts[, dir, pad]
 	Frame		z, 	x, 	y, 	w, 	h[, shadow, fill, color, round]
-	Knob		z, 	x, 	y, 	w, 	caption, min, max, steps, default[, vals]	
+	Knob		z, 	x, 	y, 	w, 	caption, min, max, default[, inc, vals]	
 	Label		z, 	x, 	y,		caption[, shadow, font, color, bg]
 	Menubox		z, 	x, 	y, 	w, 	h, caption, opts
 	Radio		z, 	x, 	y, 	w, 	h, caption, opts[, dir, pad]
-	Slider		z, 	x, 	y, 	w, 	caption, min, max, steps, handles[, dir]
+	Slider		z, 	x, 	y, 	w, 	caption, min, max, defaults[, inc, dir]
 	Tabs		z, 	x, 	y, 		tab_w, tab_h, opts[, pad]
 	Textbox		z, 	x, 	y, 	w, 	h[, caption, pad]
 	
@@ -155,31 +154,39 @@ GUI.elms.tabs:update_sets(
 
 
 GUI.New("my_lbl", 	"Label", 		3, 256, 96, "Label!", true, 1)
-GUI.New("my_knob", 	"Knob", 		3, 64, 112, 64, "Volume", 0, 11, 12, 12, 1)
+GUI.New("my_knob", 	"Knob", 		3, 64, 112, 64, "Volume", 0, 11, 44, 0.25)
 GUI.New("my_mnu", 	"Menubox", 		3, 256, 176, 64, 20, "Options:", "1,2,3,4,5,6.12435213613")
 GUI.New("my_btn2",  "Button",       3, 256, 256, 64, 20, "Click me!", fade_lbl)
 GUI.New("my_txt", 	"Textbox", 		3, 96, 224, 96, 20, "Text:", 4)
 GUI.New("my_frm", 	"Frame", 		3, 16, 288, 192, 128, true, false, "elm_frame", 4)
 
 
--- Adding a suffix to the knob's values
-GUI.elms.my_knob.output = function(val)
+-- We have too many values to be legible if we draw them all; we'll disable them, and
+-- have the knob's caption update itself to show the value instead.
+GUI.elms.my_knob.vals = false
+function GUI.elms.my_knob:redraw()
 	
-	return tostring(val).."dB"
+    GUI.Knob.redraw(self)
+
+    self.caption = self.retval .. "dB"
 	
 end
 
-GUI.Val("my_frm",   "this is a really long string of text with no carriage returns so hopefully"..
+-- Make sure it shows the value right away
+GUI.elms.my_knob:redraw()
+
+
+GUI.Val("my_frm",   "this is a really long string of text with no carriage returns so hopefully "..
                     "it will be wrapped correctly to fit inside this frame")
 GUI.elms.my_frm.bg = "elm_bg"
 
 
 
 
-GUI.New("my_rng", 	"Slider", 		4, 32, 128, 256, "Sliders", 0, 30, 30, {5, 10, 15, 20, 25})
-GUI.New("my_sldr", 	"Slider",		4, 32, 192, 256, "Slider", 0, 30, 30, 15)
-GUI.New("my_pan", 	"Slider", 		4, 32, 256, 256, "Pan", -100, 100, 200, 100)
-GUI.New("my_rng2", 	"Slider",		4, 352, 96, 256, "Vertical?", 0, 30, 30, {5, 10, 15, 20, 25}, "v")
+GUI.New("my_rng", 	"Slider", 		4, 32, 128, 256, "Sliders", 0, 30, {5, 10, 15, 20, 25})
+GUI.New("my_pan", 	"Slider", 		4, 32, 192, 256, "Pan", -100, 100, 100)
+GUI.New("my_sldr", 	"Slider",		4, 128, 256, 128, "Slider", 0, 10, 20, 0.25, "v")
+GUI.New("my_rng2", 	"Slider",		4, 352, 96, 256, "Vertical?", 0, 30, {5, 10, 15, 20, 25}, nil, "v")
 
 -- Using a function to change the value label depending on the value
 GUI.elms.my_pan.output = function(val)

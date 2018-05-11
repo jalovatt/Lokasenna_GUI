@@ -22,7 +22,7 @@ local function req(file)
 	
 	if missing_lib then return function () end end
 	
-	local ret, err = loadfile(script_path .. file)
+    local ret, err = loadfile(( file:sub(2, 2) == ":" and "" or script_path) .. file)
 	if not ret then
 		reaper.ShowMessageBox("Couldn't load "..file.."\n\nError: "..tostring(err), "Library error", 0)
 		missing_lib = true		
@@ -38,7 +38,6 @@ end
 -- The Core library must be loaded prior to any classes, or the classes will throw up errors
 -- when they look for functions that aren't there.
 req("Core.lua")()
-
 req("Classes/Class - Label.lua")()
 req("Classes/Class - Slider.lua")()
 req("Classes/Class - Frame.lua")()
@@ -80,13 +79,13 @@ GUI.anchor, GUI.corner = "mouse", "C"
 
 	Frame		z, 	x, 	y, 	w, 	h[, shadow, fill, color, round]
 	Label		z, 	x, 	y,		caption[, shadow, font, color, bg]
-	Slider		z, 	x, 	y, 	w, 	caption, min, max, steps, handles[, dir]
+	Slider		z, 	x, 	y, 	w, 	caption, min, max, defaults[, inc, dir]
 	
 ]]--
 
 GUI.New("lbl_track", "Label",	1,	96, 8, "No track selected!", true, 2, "red")
 GUI.New("frm_track", "Frame",	2,	0, 0, 300, 128, false, true, "faded", 0)
-GUI.New("sldr_pan", "Slider",	3,	88, 64, 128, "First selected track's Pan:", -100, 100, 200, 100, "h")
+GUI.New("sldr_pan", "Slider",	3,	88, 64, 128, "First selected track's Pan:", -100, 100, 100, nil, "h")
 
 
 -- Layer 5 will never be shown or updated
@@ -184,10 +183,7 @@ local function Main()
 			
 			-- Converting the returned value (-1 to 1) to Slider steps (0 to 200)
 			pan = (math.floor(100*pan) - GUI.elms.sldr_pan.min )
-			
-			-- Pan knobs can actually be at 0% L or R; correcting for that.
-			if pan < 100 then pan = pan + 1 end
-			
+
 			GUI.Val("sldr_pan", pan )
 			
 		end	
