@@ -10,18 +10,25 @@ x, y			Coordinates of top-left corner
 w				Width of the slider track. Height is fixed.
 caption			Label shown above the slider track.
 min, max		Minimum and maximum values
+defaults        Table of default steps for each slider handle.
+
+                - Steps are inclusive, and start from 0.
+                
+				- If only one handle is needed, it can be given as a number rather than a table.                        
+                        
+Optional:
+inc             Amount to increment the value per step. Defaults to 1.
+                        
+dir				"h"	    Horizontal slider (default)
+				"v"	    Vertical slider
 
 
                 Slider values are counted in steps from min to max. The total number of 
                 steps will be:
                         
                         inc * |max - min|
-                        
 
-defaults        Table of default steps for each slider handle.
 
-                - Steps are inclusive, and start from 0.
-                
                 Examples:
                 
                     A slider from 1 to 10, defaulting to 5:
@@ -41,16 +48,6 @@ defaults        Table of default steps for each slider handle.
 						max		= 30
 						defaults= {20, 40, 60, 80, 100}
                         inc     = 0.25
-                        
-                        
-				- If only one handle is needed, it can be given as a number rather than a table.                        
-                        
-Optional:
-inc             Amount to increment the value per step. Defaults to 1.
-                        
-dir				"h"	    Horizontal slider (default)
-				"v"	    Vertical slider
-
 
 Additional:
 bg				Color to be drawn underneath the label. Defaults to "wnd_bg"

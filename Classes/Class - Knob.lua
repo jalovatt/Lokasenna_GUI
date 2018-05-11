@@ -9,15 +9,26 @@ z				Element depth, used for hiding and disabling layers. 1 is the highest.
 x, y, w			Coordinates of top-left corner, width. Height is fixed.
 caption			Label / question
 min, max		Minimum and maximum values
-steps			How many steps between min and max (inclusive, i.e. 0 - 11 = 12 steps)
-																	-3 - +12 = 16 (0 is a step)
-default			What step the knob should start on (inclusive, as above - a default of 12 would start at value 11)
+default			Default step for the knob. Steps are counted from min to max starting at 0.
 
 
 Optional:
+inc             Amount to increment the value per step. Defaults to 1.
+
 vals			Boolean, defaults to True. Display value labels?
 				For knobs with a lot of steps, i.e. Pan from -100 to +100, set this
 				to false and use a label to read the value, update the Knob's caption
+
+
+                Example:
+                
+                    A knob from 0 to 11, defaulting to 11, with a step size of 0.25:
+                    
+                        min     = 0
+                        max     = 11
+                        default = 44
+                        inc     = 0.25
+
 
 
 Additional:
