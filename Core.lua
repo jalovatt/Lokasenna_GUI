@@ -866,7 +866,7 @@ end
 
 ------------------------------------
 -------- Prototype element ---------
------ + all input methods ----------
+----- + all default methods --------
 ------------------------------------
 
 
@@ -904,10 +904,18 @@ end
 -- Called on every update loop, unless the element is hidden or frozen
 function GUI.Element:onupdate() end
 
--- Called when the element is deleted by GUI.update_elms_list()
--- Use it for freeing up buffers, or anything else memorywise that this
+function GUI.Element:delete()
+    
+    self.ondelete(self)
+    GUI.elms[self.name] = nil
+    
+end
+
+-- Called when the element is deleted by GUI.update_elms_list() or :delete.
+-- Use it for freeing up buffers and anything else memorywise that this
 -- element was doing
 function GUI.Element:ondelete() end
+
 
 -- Set or return the element's value
 -- Can be useful for something like a Slider that doesn't have the same
