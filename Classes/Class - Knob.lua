@@ -2,7 +2,7 @@
 
 	---- User parameters ----
 	
-	(name, z, x, y, w, caption, min, max, steps, default[, vals])
+	(name, z, x, y, w, caption, min, max, default,[ inc, vals])
 	
 Required:	
 z				Element depth, used for hiding and disabling layers. 1 is the highest.	
@@ -11,11 +11,11 @@ caption			Label / question
 min, max		Minimum and maximum values
 steps			How many steps between min and max (inclusive, i.e. 0 - 11 = 12 steps)
 																	-3 - +12 = 16 (0 is a step)
-default			What step the knob should start on (as above, a default of 12 would start at value 11)
+default			What step the knob should start on (inclusive, as above - a default of 12 would start at value 11)
 
 
 Optional:
-vals			Boolean. Display value labels?
+vals			Boolean, defaults to True. Display value labels?
 				For knobs with a lot of steps, i.e. Pan from -100 to +100, set this
 				to false and use a label to read the value, update the Knob's caption
 
@@ -59,7 +59,7 @@ end
 
 -- Knob - New.
 GUI.Knob = GUI.Element:new()
-function GUI.Knob:new(name, z, x, y, w, caption, min, max, steps, default, vals)
+function GUI.Knob:new(name, z, x, y, w, caption, min, max, default, inc, vals)
 	
 	local Knob = {}
 	
@@ -82,17 +82,31 @@ function GUI.Knob:new(name, z, x, y, w, caption, min, max, steps, default, vals)
 	Knob.col_body = "elm_frame"
 	
 	Knob.min, Knob.max = min, max
+    Knob.inc = inc or 1
+    Knob.steps = math.abs(max - min) / Knob.inc
+    
+    function Knob:formatretval(val)
+        
+        local decimal = tonumber(string.match(val, "%.(.*)") or 0)
+        local places = decimal ~= 0 and string.len( decimal) or 0
+        return string.format("%." .. places .. "f", val)
+        
+    end    
 	
-	Knob.steps, Knob.vals = steps - 1, vals
+	Knob.vals = vals
 	
 	-- Determine the step angle
 	Knob.stepangle = (3 / 2) / Knob.steps
 	
-	Knob.default, Knob.curstep = default - 1, default - 1
+	Knob.default, Knob.curstep = default, default
+    
+	Knob.curval = Knob.curstep / Knob.steps    
 	
-	Knob.retval = GUI.round(((max - min) / Knob.steps) * Knob.curstep + min)
+    Knob.retval = Knob:formatretval(
+                ((max - min) / Knob.steps) * Knob.curstep + min
+                                    )
 
-	Knob.curval = Knob.curstep / Knob.steps
+
 	
 	setmetatable(Knob, self)
 	self.__index = self
@@ -193,9 +207,8 @@ end
 function GUI.Knob:val(newval)
 	
 	if newval then
-		self.retval = newval
-		self.curstep = newval - self.min
-		self.curval = self.curstep / self.steps
+        
+        self:setcurstep(newval)
 
 		self:redraw()
 
@@ -219,14 +232,19 @@ function GUI.Knob:ondrag()
 	--					Ctrl	Normal
 	local adj = ctrl and 1200 or 150
 	
+    self:setcurval( GUI.clamp(self.curval + ((ly - y) / adj), 0, 1) )
+    
+    --[[
 	self.curval = self.curval + ((ly - y) / adj)
 	if self.curval > 1 then self.curval = 1 end
 	if self.curval < 0 then self.curval = 0 end
 	
+    
+    
 	self.curstep = GUI.round(self.curval * self.steps)
 	
 	self.retval = GUI.round(((self.max - self.min) / self.steps) * self.curstep + self.min)
-
+    ]]--
 	self:redraw()
 
 end
@@ -234,11 +252,14 @@ end
 
 -- Knob - Doubleclick
 function GUI.Knob:ondoubleclick()
-	
+	--[[
 	self.curstep = self.default
 	self.curval = self.curstep / self.steps
 	self.retval = GUI.round(((self.max - self.min) / self.steps) * self.curstep + self.min)
-	
+	]]--
+    
+    self:setcurstep(self.default)
+    
 	self:redraw()
 	
 end
@@ -254,16 +275,9 @@ function GUI.Knob:onwheel()
 	local coarse = math.max( GUI.round(self.steps / 30), 1)
 
 	local adj = ctrl and fine or coarse
-	
-	self.curval = self.curval + GUI.mouse.inc * adj / self.steps
-	
-	if self.curval < 0 then self.curval = 0 end
-	if self.curval > 1 then self.curval = 1 end
-
-	self.curstep = GUI.round(self.curval * self.steps)
-	
-	self:val()
-
+    
+    self:setcurval( GUI.clamp( self.curval + (GUI.mouse.inc * adj / self.steps), 0, 1))
+    
 	self:redraw()
 
 end
@@ -331,4 +345,35 @@ function GUI.Knob:drawvals(o, r)
             
     end
 
+end
+
+
+
+
+------------------------------------
+-------- Value helpers -------------
+------------------------------------
+
+function GUI.Knob:setcurstep(step)
+
+    self.curstep = step
+    self.curval = self.curstep / self.steps
+    self:setretval()
+
+end
+
+
+function GUI.Knob:setcurval(val)
+    
+    self.curval = val
+    self.curstep = GUI.round(val * self.steps)
+    self:setretval()
+    
+end
+
+
+function GUI.Knob:setretval()
+
+    self.retval = self:formatretval(self.inc * self.curstep + self.min)
+    
 end

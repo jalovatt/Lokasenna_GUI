@@ -2,7 +2,7 @@
 
 	---- User parameters ----
 
-	(name, z, x, y, w, caption, min, max, steps, handles[, dir])
+	(name, z, x, y, w, caption, min, max, defaults[, inc, dir])
 
 Required:
 z				Element depth, used for hiding and disabling layers. 1 is the highest.
@@ -10,29 +10,44 @@ x, y			Coordinates of top-left corner
 w				Width of the slider track. Height is fixed.
 caption			Label shown above the slider track.
 min, max		Minimum and maximum values
-steps			The number of steps the slider can be set to. The value is non-inclusive,
-				i.e. a slider from 0 - 30 would have 30 steps.
-handles			Table of default values (in steps, as per above) of each slider handle:
 
-					{5, 10, 15, 20, 25} would create a slider with five handles.
-					
-				If only one handle is needed, it can be given as a number rather than a table.
 
-				Examples:
-				
+                Slider values are counted in steps from min to max. The total number of 
+                steps will be:
+                        
+                        inc * |max - min|
+                        
+
+defaults        Table of default steps for each slider handle.
+
+                - Steps are inclusive, and start from 0.
+                
+                Examples:
+                
+                    A slider from 1 to 10, defaulting to 5:
+                        min     = 1
+                        max     = 10
+                        defaults= 4     <-- 0,1,2,3,[4]
+
 					A pan slider from -100 to 100, defaulting to 0:
 						min		= -100
 						max		= 100
-						steps	= 200
-						handles	= 100
+						defaults= 100
 
-					Five sliders from 0 to 30, defaulting to 5, 10, 15, 20, 25:
+					Five sliders from 0 to 30, with a step size of 0.25,
+                    defaulting to 5, 10, 15, 20, 25:
+                    
 						min		= 0
 						max		= 30
-						steps	= 30
-						handles = {5, 10, 15, 20, 25}
-
+						defaults= {20, 40, 60, 80, 100}
+                        inc     = 0.25
+                        
+                        
+				- If only one handle is needed, it can be given as a number rather than a table.                        
+                        
 Optional:
+inc             Amount to increment the value per step. Defaults to 1.
+                        
 dir				"h"	    Horizontal slider (default)
 				"v"	    Vertical slider
 
@@ -77,7 +92,7 @@ end
 
 GUI.Slider = GUI.Element:new()
 
-function GUI.Slider:new(name, z, x, y, w, caption, min, max, steps, handles, dir)
+function GUI.Slider:new(name, z, x, y, w, caption, min, max, defaults, inc, dir)
 	
 	local Slider = {}
 	
@@ -101,23 +116,34 @@ function GUI.Slider:new(name, z, x, y, w, caption, min, max, steps, handles, dir
 	Slider.col_fill = "elm_fill"
 	
 	Slider.dir = dir or "h"
-	
-	if Slider.dir == "v" then
-		min, max = max, min
-		
-	end
-	
-	Slider.show_handles = true
+    
+    Slider.show_handles = true
 	Slider.show_values = true
 	
 	Slider.cap_x = 0
 	Slider.cap_y = 0
 	
-	Slider.min, Slider.max = min, max
-	Slider.steps = steps
+	if Slider.dir == "v" then
+		min, max = max, min		
+	end
 	
+
+	
+	Slider.min, Slider.max = min, max
+    Slider.inc = inc or 1
+	Slider.steps = math.abs(max - min) / Slider.inc
+
+	
+    function Slider:formatretval(val)
+        
+        local decimal = tonumber(string.match(val, "%.(.*)") or 0)
+        local places = decimal ~= 0 and string.len( decimal) or 0
+        return string.format("%." .. places .. "f", val)
+        
+    end    
+    
 	-- If the user only asked for one handle
-	if type(handles) == "number" then handles = {handles} end
+	if type(defaults) == "number" then defaults = {defaults} end
 
     function Slider:init_handles(handles)
     
@@ -126,16 +152,19 @@ function GUI.Slider:new(name, z, x, y, w, caption, min, max, steps, handles, dir
             
             self.handles[i] = {}
             self.handles[i].default = (self.dir ~= "v" and handles[i] or (self.steps - handles[i]))
+            --self.handles[i].default = handles[i]
             self.handles[i].curstep = handles[i]
             self.handles[i].curval = handles[i] / self.steps
-            self.handles[i].retval = GUI.round(((self.max - self.min) / self.steps) * handles[i] + self.min)
+            self.handles[i].retval = self:formatretval(
+                                ((self.max - self.min) / self.steps) * handles[i] + self.min
+                                                        )
             --self.handles[i].retval = ((max - min) / (steps - 1)) * handles[i] + min
             
         end  
         
     end
 
-    Slider:init_handles(handles)
+    Slider:init_handles(defaults)
 
 	setmetatable(Slider, self)
 	self.__index = self
@@ -230,9 +259,7 @@ function GUI.Slider:val(newvals)
 	if newvals then
 		
 		if type(newvals) == "number" then newvals = {newvals} end
-		
-		local steps, min, max = self.steps, self.min, self.max
-		
+				
 		for i = 1, #self.handles do
 			
             self:setcurstep(i, newvals[i])
@@ -245,10 +272,12 @@ function GUI.Slider:val(newvals)
 		
 		local ret = {}
 		for i = 1, #self.handles do
-			
+			--[[
 			table.insert(ret, (self.dir ~= "v" 	and (self.handles[i].curstep + self.min)
 												or	(self.steps - self.handles[i].curstep)))
-			
+			]]--
+            table.insert(ret, tonumber(self.handles[i].retval))
+            
 		end
 		
 		if #ret == 1 then 
@@ -568,7 +597,6 @@ end
 
 function GUI.Slider:setcurstep(sldr, step)
 
-    local inc = (self.max - self.min) / self.steps 
     self.handles[sldr].curstep = step
     self.handles[sldr].curval = self.handles[sldr].curstep / self.steps
     self:setretval(sldr)
@@ -587,8 +615,10 @@ end
 
 
 function GUI.Slider:setretval(sldr)
+
+    local val = self.dir == "h" and self.inc * self.handles[sldr].curstep + self.min
+                                or self.min - self.inc * self.handles[sldr].curstep
     
-    local inc = (self.max - self.min) / self.steps    
-    self.handles[sldr].retval = GUI.round(inc * self.handles[sldr].curstep + self.min)   
+    self.handles[sldr].retval = self:formatretval(val)
     
 end
