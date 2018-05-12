@@ -125,13 +125,9 @@ function GUI.Slider:new(name, z, x, y, w, caption, min, max, defaults, inc, dir)
 	if Slider.dir == "v" then
 		min, max = max, min		
 	end
-	
-
-	
+		
 	Slider.min, Slider.max = min, max
     Slider.inc = inc or 1
-	Slider.steps = math.abs(max - min) / Slider.inc
-
 	
     function Slider:formatretval(val)
         
@@ -145,6 +141,8 @@ function GUI.Slider:new(name, z, x, y, w, caption, min, max, defaults, inc, dir)
 	if type(defaults) == "number" then defaults = {defaults} end
 
     function Slider:init_handles(handles)
+    
+    	self.steps = math.abs(max - min) / self.inc
     
         self.handles = {}
         for i = 1, #handles do
@@ -173,7 +171,7 @@ end
 
 
 function GUI.Slider:init()
-	
+    
 	self.buffs = self.buffs or GUI.GetBuffer(2)
     
     -- In case we were given a new set of handles without involving GUI.Val
