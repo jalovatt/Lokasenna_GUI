@@ -521,17 +521,25 @@ end
 -- Wrapper for creating new elements, allows them to know their own name
 -- If called after the script window has opened, will also run their :init
 -- method.
+-- Can be given a user class directly by passing the class itself as 'elm',
+-- or if 'elm' is a string will look for a class in GUI[elm]
 GUI.New = function (name, elm, ...)
 
-    if not GUI[elm] then
+    local elm = type(elm) == "string"   and GUI[elm]
+                                        or  elm
+
+
+    if not elm then
 		reaper.ShowMessageBox(  "Unable to create element '"..tostring(name)..
                                 "'.\nClass '"..tostring(elm).."' isn't available.", 
                                 "GUI Error", 0)
 		GUI.quit = true
 		return nil
 	end
+    
+    if GUI.elms[name] then GUI.elms[name]:delete() end
 	
-	GUI.elms[name] = GUI[elm]:new(name, ...)
+	GUI.elms[name] = elm:new(name, ...)
 	if GUI.gfx_open then GUI.elms[name]:init() end
     
     -- Return this so (I think) a bunch of new elements could be created
