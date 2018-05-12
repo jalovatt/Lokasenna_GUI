@@ -978,9 +978,43 @@ function GUI.Element:lostfocus() end
 ------------------------------------
 
 
--- Print stuff to the Reaper console. For debugging purposes.
+-- Print a string to the Reaper console.
 GUI.Msg = function (str)
 	reaper.ShowConsoleMsg(tostring(str).."\n")
+end
+
+-- Print the specified parameters for a given element to the Reaper console.
+-- If nothing is specified, prints all of the element's properties.
+function GUI.Element:Msg(...)
+    
+    local arg = {...}
+    
+    if #arg == 0 then
+        arg = {}
+        for k in GUI.kpairs(self, "full") do
+            arg[#arg+1] = k
+        end
+    end    
+    
+    if not self or not self.type then return end
+    local pre = tostring(self.name) .. "."
+    local strs = {}
+    
+    for i = 1, #arg do
+        
+        strs[#strs + 1] = pre .. tostring(arg[i]) .. " = "
+        
+        if type(self[arg[i]]) == "table" then 
+            strs[#strs] = strs[#strs] .. "table:"
+            strs[#strs + 1] = GUI.table_list(self[arg[i]], nil, 1)
+        else
+            strs[#strs] = strs[#strs] .. tostring(self[arg[i]])
+        end
+        
+    end
+    
+    reaper.ShowConsoleMsg( "\n" .. table.concat(strs, "\n") .. "\n")
+    
 end
 
 
@@ -1218,6 +1252,38 @@ GUI.table_copy = function (source, base, depth)
 	
 	return new
 	
+end
+
+
+-- Returns a string of the table's contents, indented to show nested tables
+-- If 't' contains classes, or a lot of nested tables, etc, be wary of using larger
+-- values for max_depth. This function will happily freeze Reaper for ten minutes.
+GUI.table_list = function (t, max_depth, cur_depth)
+    
+    local ret = {}
+    local n,v
+    cur_depth = cur_depth or 0
+    
+    for n,v in pairs(t) do
+                        
+                ret[#ret+1] = string.rep("\t", cur_depth) .. n .. " = "
+                
+                if type(v) == "table" then
+                    
+                    ret[#ret] = ret[#ret] .. "table:"
+                    if not max_depth or cur_depth <= max_depth then
+                        ret[#ret+1] = GUI.table_list(v, max_depth, cur_depth + 1)
+                    end
+                
+                else
+                
+                    ret[#ret] = ret[#ret] .. tostring(v)
+                end
+
+    end
+    
+    return table.concat(ret, "\n")
+    
 end
 
 
