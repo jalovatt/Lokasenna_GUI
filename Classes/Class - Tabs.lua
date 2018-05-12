@@ -344,12 +344,20 @@ function GUI.Tabs:update_sets(init)
 
 	for i = 1, #z_sets do
         
-        local hide = (i ~= state)
-        for tab, z in pairs(z_sets[i]) do
-            
-            GUI.elms_hide[z] = hide
-            
+        if i ~= state then
+            for _, z in pairs(z_sets[i]) do
+                
+                GUI.elms_hide[z] = true
+                
+            end
         end
+        
 	end
+    
+    for _, z in pairs(z_sets[state]) do
+        
+        GUI.elms_hide[z] = false
+        
+    end
 
 end
