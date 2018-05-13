@@ -130,7 +130,7 @@ function GUI.Slider:new(name, z, x, y, w, caption, min, max, defaults, inc, dir)
     Slider.inc = inc or 1
 	
     function Slider:formatretval(val)
-        
+
         local decimal = tonumber(string.match(val, "%.(.*)") or 0)
         local places = decimal ~= 0 and string.len( decimal) or 0
         return string.format("%." .. places .. "f", val)
@@ -139,21 +139,23 @@ function GUI.Slider:new(name, z, x, y, w, caption, min, max, defaults, inc, dir)
     
 	-- If the user only asked for one handle
 	if type(defaults) == "number" then defaults = {defaults} end
-
-    function Slider:init_handles(handles)
     
-    	self.steps = math.abs(max - min) / self.inc
+    Slider.defaults = defaults
+
+    function Slider:init_handles()
+               
+    	self.steps = math.abs(self.max - self.min) / self.inc
     
         self.handles = {}
-        for i = 1, #handles do
+        for i = 1, #self.defaults do
             
             self.handles[i] = {}
-            self.handles[i].default = (self.dir ~= "v" and handles[i] or (self.steps - handles[i]))
+            self.handles[i].default = (self.dir ~= "v" and self.defaults[i] or (self.steps - self.defaults[i]))
             --self.handles[i].default = handles[i]
-            self.handles[i].curstep = handles[i]
-            self.handles[i].curval = handles[i] / self.steps
+            self.handles[i].curstep = self.defaults[i]
+            self.handles[i].curval = self.defaults[i] / self.steps
             self.handles[i].retval = self:formatretval(
-                                ((self.max - self.min) / self.steps) * handles[i] + self.min
+                                ((self.max - self.min) / self.steps) * self.defaults[i] + self.min
                                                         )
             --self.handles[i].retval = ((max - min) / (steps - 1)) * handles[i] + min
             
@@ -171,11 +173,11 @@ end
 
 
 function GUI.Slider:init()
-    
+       
 	self.buffs = self.buffs or GUI.GetBuffer(2)
     
     -- In case we were given a new set of handles without involving GUI.Val
-    if not self.handles[1].default then self:init_handles(self.handles) end
+    if not self.handles[1].default then self:init_handles() end
 
     local w, h = self.w, self.h
 
