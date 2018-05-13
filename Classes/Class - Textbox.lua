@@ -20,6 +20,8 @@ shadow			Boolean. Draw a shadow beneath the label?
 color			Text color
 font_a			Label font
 font_b			Text font
+cap_pos         Position of the text box's label.
+                "left", "right", "top", "bottom"
 
 focus			Whether the textbox is "in focus" or not, allowing users to type.
 				This setting is automatically updated, so you shouldn't need to
@@ -73,6 +75,8 @@ function GUI.Textbox:new(name, z, x, y, w, h, caption, pad)
 	txt.font_a = 3
     
 	txt.font_b = "textbox"
+    
+    txt.cap_pos = "left"
 	
     txt.wnd_pos = 0
 	txt.caret = 0
@@ -291,8 +295,24 @@ function GUI.Textbox:drawcaption()
     GUI.font(self.font_a)
     
     local str_w, str_h = gfx.measurestr(caption)
-    gfx.x = self.x - str_w - self.pad
-    gfx.y = self.y + (self.h - str_h) / 2
+
+    if self.cap_pos == "left" then
+        gfx.x = self.x - str_w - self.pad
+        gfx.y = self.y + (self.h - str_h) / 2    
+    
+    elseif self.cap_pos == "top" then
+        gfx.x = self.x + (self.w - str_w) / 2
+        gfx.y = self.y - str_h - self.pad
+    
+    elseif self.cap_pos == "right" then
+        gfx.x = self.x + self.w + self.pad
+        gfx.y = self.y + (self.h - str_h) / 2
+    
+    elseif self.cap_pos == "bottom" then
+        gfx.x = self.x + (self.w - str_w) / 2
+        gfx.y = self.y + self.h + self.pad
+    
+    end
     
     GUI.text_bg(caption, self.bg)
     
@@ -313,9 +333,11 @@ function GUI.Textbox:drawtext()
 
     local str = string.sub(self.retval, self.wnd_pos + 1)
 
-	gfx.x = self.x + self.pad
+    -- I don't think self.pad should affect the text at all. Looks weird,
+    -- messes with the amount of visible text too much.
+	gfx.x = self.x + 4 -- + self.pad
 	gfx.y = self.y + (self.h - gfx.texth) / 2
-    local r = gfx.x + self.w - 2*self.pad
+    local r = gfx.x + self.w - 8 -- - 2*self.pad
     local b = gfx.y + gfx.texth
     
 	gfx.drawstr(str, 0, r, b)
