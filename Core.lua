@@ -540,11 +540,13 @@ GUI.New = function (name, elm, ...)
     if GUI.elms[name] then GUI.elms[name]:delete() end
 	
 	GUI.elms[name] = elm:new(name, ...)
+    
 	if GUI.gfx_open then GUI.elms[name]:init() end
     
     -- Return this so (I think) a bunch of new elements could be created
     -- within a table that would end up holding their names for easy bulk
     -- processing.
+
     return name
 	
 end
