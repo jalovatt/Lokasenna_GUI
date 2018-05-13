@@ -331,10 +331,10 @@ GUI.Main_Draw = function ()
 	-- Redraw all of the elements, starting from the bottom up.
 	local w, h = GUI.cur_w, GUI.cur_h
 
-
 	local need_redraw, global_redraw
 	if GUI.redraw_z[0] then
 		global_redraw = true
+        GUI.redraw_z[0] = false
 	else
 		for z, b in pairs(GUI.redraw_z) do
 			if b == true then 
