@@ -151,14 +151,11 @@ function GUI.Slider:new(name, z, x, y, w, caption, min, max, defaults, inc, dir)
             
             self.handles[i] = {}
             self.handles[i].default = (self.dir ~= "v" and self.defaults[i] or (self.steps - self.defaults[i]))
-            --self.handles[i].default = handles[i]
             self.handles[i].curstep = self.defaults[i]
             self.handles[i].curval = self.defaults[i] / self.steps
-            self.handles[i].retval = self:formatretval(
-                                ((self.max - self.min) / self.steps) * self.defaults[i] + self.min
-                                                        )
-            --self.handles[i].retval = ((max - min) / (steps - 1)) * handles[i] + min
-            
+            self.handles[i].retval = self:formatretval( ((self.max - self.min) / self.steps) 
+                                                        * self.defaults[i] + self.min)
+
         end  
         
     end
