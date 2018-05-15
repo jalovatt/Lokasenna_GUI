@@ -13,6 +13,15 @@ w, h			Button size
 caption			Label
 func			Function to perform when clicked
 
+                Note that you only need give a reference to the function:
+
+                GUI.New("my_button", "Button", 1, 32, 32, 64, 32, "Button", my_func)
+
+                Unless the function is returning a function (hey, Lua is weird), you don't 
+                want to actually run it:
+
+                GUI.New("my_button", "Button", 1, 32, 32, 64, 32, "Button", my_func())
+
 Optional:
 ...				Any parameters to pass to that function, separated by commas as they
 				would be if calling the function directly.
