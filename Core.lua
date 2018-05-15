@@ -932,15 +932,8 @@ function GUI.Element:ondelete() end
 -- value internally as what it's displaying
 function GUI.Element:val() end
 
-
--- Updates the current tooltip, if necessary
-function GUI.Element:onmouseover()
-	
-	if self.tooltip and not GUI.tooltip_elm then 
-		GUI.tooltip_elm = self 
-	end
-
-end
+-- Called on every update loop if the mouse is over this element.
+function GUI.Element:onmouseover() end
 
 -- Only called once; won't repeat if the button is held
 function GUI.Element:onmousedown() end
