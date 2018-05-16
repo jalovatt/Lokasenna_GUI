@@ -38,6 +38,7 @@ font_b          Value font
 col_txt         Text color
 col_head        Knob head color
 col_body        Knob body color
+cap_x, cap_y    Offset values for the knob's caption.
 output			Allows the value labels to be modified; accepts several different var types:
 				
 				string		Replaces all of the value labels
@@ -84,6 +85,8 @@ function GUI.Knob:new(name, z, x, y, w, caption, min, max, default, inc, vals)
 
 	Knob.caption = caption
 	Knob.bg = "wnd_bg"
+    
+    Knob.cap_x, Knob.cap_y = 0, 0
 	
 	Knob.font_a = 3
 	Knob.font_b = 4
@@ -91,7 +94,7 @@ function GUI.Knob:new(name, z, x, y, w, caption, min, max, default, inc, vals)
 	Knob.col_txt = "txt"
 	Knob.col_head = "elm_fill"
 	Knob.col_body = "elm_frame"
-	
+    
 	Knob.min, Knob.max = min, max
     Knob.inc = inc or 1
     Knob.steps = math.abs(max - min) / Knob.inc
@@ -306,7 +309,7 @@ function GUI.Knob:drawcaption(o, r)
 	GUI.font(self.font_a)
 	local cx, cy = GUI.polar2cart(1/2, r * 2, o.x, o.y)
 	local str_w, str_h = gfx.measurestr(str)
-	gfx.x, gfx.y = cx - str_w / 2, cy - str_h / 2
+	gfx.x, gfx.y = cx - str_w / 2 + self.cap_x, cy - str_h / 2  + 8 + self.cap_y
 	GUI.text_bg(str, self.bg)
 	GUI.shadow(str, self.col_txt, "shadow")
     
@@ -328,7 +331,8 @@ function GUI.Knob:drawvals(o, r)
             GUI.font(self.font_b)
         end
         
-        local output = i + self.min
+        --local output = (i * self.inc) + self.min
+        local output = self:formatretval( i * self.inc + self.min )
 
         if self.output then
             local t = type(self.output)
@@ -336,9 +340,9 @@ function GUI.Knob:drawvals(o, r)
             if t == "string" or t == "number" then
                 output = self.output
             elseif t == "table" then
-                output = self.output[i]
+                output = self.output[output]
             elseif t == "function" then
-                output = self.output(i)
+                output = self.output(output)
             end
         end
         
