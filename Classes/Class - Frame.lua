@@ -173,15 +173,15 @@ function GUI.Frame:drawtext()
     
 	if self.text and self.text:len() > 0 then
 
-		self.text = GUI.word_wrap(  self.text, self.font, self.w - 2*self.pad, 
+		local text = GUI.word_wrap( self.text, self.font, self.w - 2*self.pad, 
                                     self.txt_indent, self.txt_pad)
 
 		GUI.font(self.font)
 		GUI.color(self.col_txt)
         
 		gfx.x, gfx.y = self.pad + 1, self.pad + 1
-		if not fill then GUI.text_bg(self.text, self.bg) end
-		gfx.drawstr(self.text)
+		if not fill then GUI.text_bg(text, self.bg) end
+		gfx.drawstr(text)
 		
 	end
     
