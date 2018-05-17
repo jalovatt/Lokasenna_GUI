@@ -16,9 +16,11 @@ pad				Padding between the label and the text editor
 
 
 Additional:
-bg				Color to be drawn underneath the label. Defaults to "wnd_bg"
+bg				Backgound color for the editor
+cap_bg          Color to be drawn underneath the label. Defaults to "wnd_bg"
 shadow			Boolean. Draw a shadow beneath the label?
 color			Text color
+col_fill        Fill color
 font_a			Label font
 
 font_b			Text font. 
@@ -78,6 +80,7 @@ function GUI.TextEditor:new(name, z, x, y, w, h, text, caption, pad)
 	
 	txt.shadow = true
 	txt.bg = "elm_bg"
+    txt.cap_bg = "wnd_bg"
 	txt.color = "txt"
 	txt.blink = 0
 	
@@ -403,7 +406,7 @@ function GUI.TextEditor:drawcaption()
 	local str_w, str_h = gfx.measurestr(str)
 	gfx.x = self.x - str_w - self.pad
 	gfx.y = self.y + self.pad
-	GUI.text_bg(str, self.bg)
+	GUI.text_bg(str, self.cap_bg)
 	
 	if self.shadow then 
 		GUI.shadow(str, self.color, "shadow") 
