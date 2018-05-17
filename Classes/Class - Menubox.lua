@@ -26,6 +26,8 @@ noarrow         Boolean. Removes the arrow from the menubox.
 
 
 Additional:
+col_txt         Value color
+col_cap         Caption color
 bg				Color to be drawn underneath the label. Defaults to "wnd_bg"
 font_a			Font for the menu's label
 font_b			Font for the menu's current value
@@ -96,17 +98,18 @@ function GUI.Menubox:new(name, z, x, y, w, h, caption, opts, pad, noarrow)
     menu.noarrow = noarrow or false
     menu.align = 0
 	
-	-- Parse the string of options into a table
-	menu.optarray = {}
-	local tempidx = 1
+    if type(opts) == "string" then
+        -- Parse the string of options into a table
+        menu.optarray = {}
 
-	for word in string.gmatch(opts, '([^,]+)') do
-		menu.optarray[tempidx] = word
-		tempidx = tempidx + 1
-	end
+        for word in string.gmatch(opts, '([^,]+)') do
+            menu.optarray[#menu.optarray+1] = word
+        end
+    elseif type(opts) == "table" then
+        menu.optarray = opts
+    end
 	
 	menu.retval = 1
-	menu.numopts = tempidx - 1
 	
 	setmetatable(menu, self)
     self.__index = self 
@@ -177,6 +180,12 @@ end
 
 function GUI.Menubox:onmouseup()
 
+    -- Bypass option for GUI Builder
+    if not self.focus then
+        self:redraw()
+        return
+    end
+    
 	-- The menu doesn't count separators in the returned number,
 	-- so we'll do it here
 	local menu_str, sep_arr = self:prepmenu()
@@ -202,13 +211,12 @@ end
 function GUI.Menubox:onwheel()
 	
 	-- Avert a crash if there aren't at least two items in the menu
-	if not self.optarray[2] then return end	
+	--if not self.optarray[2] then return end	
 	
 	-- Check for illegal values, separators, and submenus
-    local curopt = self:adjustwheel()
-	
-	self.retval = curopt
-	
+    self.retval = self:validateoption(  GUI.round(self.retval - GUI.mouse.inc),
+                                        GUI.round((GUI.mouse.inc > 0) and 1 or -1) )
+
 	self:redraw()	
     
 end
@@ -288,9 +296,13 @@ end
 
 
 function GUI.Menubox:drawtext()
- 
-	local text = self.optarray[self.retval] 
- 
+
+    -- Make sure retval hasn't been accidentally set to something illegal
+    self.retval = self:validateoption(tonumber(self.retval) or 1)
+
+    -- Strip gfx.showmenu's special characters from the displayed value
+	local text = string.match(self.optarray[self.retval], "^[<!#]?(.+)")
+
 	-- Draw the text
 	GUI.font(self.font_b)
 	GUI.color(self.col_txt)
@@ -336,17 +348,11 @@ function GUI.Menubox:prepmenu()
     local sep_arr = {}    
     local menu_str = ""
     
-	for i = 1, self.numopts do
+	for i = 1, #self.optarray do
 		
 		-- Check off the currently-selected option
 		if i == self.retval then menu_str = menu_str .. "!" end
---[[
-		if type(self.optarray[i]) == "table" then
-			table.insert( str_arr, tostring(self.optarray[i][1]) )
-		else
-			table.insert( str_arr, tostring(self.optarray[i]) )
-		end
-]]--        
+
         table.insert(str_arr, tostring( type(self.optarray[i]) == "table"
                                             and self.optarray[i][1]
                                             or  self.optarray[i]
@@ -383,7 +389,44 @@ function GUI.Menubox:stripseps(curopt, sep_arr)
     return curopt
     
 end    
+
+
+function GUI.Menubox:validateoption(val, dir)
     
+    dir = dir or 1
+    
+    while true do
+
+        -- Past the first option, look upward instead
+        if val < 1 then
+            val = 1
+            dir = 1
+            GUI.Msg("<1, looking upward")            
+
+        -- Past the last option, look downward instead
+        elseif val > #self.optarray then
+            val = #self.optarray
+            dir = -1
+            GUI.Msg(">#, looking downward")
+
+        end
+        
+        -- Don't stop on separators, folders, or grayed-out options        
+        local opt = string.sub(self.optarray[val], 1, 1)
+        if opt == "" or opt == ">" or opt == "#" then
+            val = val - dir
+            
+        -- This option is good
+        else
+            break
+        end
+    
+    end
+    
+    return val    
+    
+end
+
 
 -- Make sure the wheel hasn't taken us out of range,
 -- and skip past any separators or folders
@@ -391,28 +434,41 @@ function GUI.Menubox:adjustwheel()
     
 	local curopt = GUI.round(self.retval - GUI.mouse.inc)
 	local inc = GUI.round((GUI.mouse.inc > 0) and 1 or -1)
-    
+
+--[[
 	while true do
 		
+        -- Past the first option, look upward instead
 		if curopt < 1 then 
 			curopt = 1 
 			inc = 1
-		elseif curopt > self.numopts then 
-			curopt = self.numopts 
+            
+
+            
+        -- Past the last option, look downward instead
+		elseif curopt > #self.optarray then 
+			curopt = #self.optarray
 			inc = -1
+            
+
+            
 		end	
 
-		if self.optarray[curopt] == "" or string.sub( self.optarray[curopt], 1, 1 ) == ">" then 
+        -- Don't stop on separators, folders, or grayed-out options
+		if self.optarray[curopt] == "" 
+        or string.sub( self.optarray[curopt], 1, 1 ) == ">" 
+        or string.sub( self.optarray[curopt], 1, 1 ) == "#" then 
+        
 			curopt = curopt - inc
 
+        -- All good
 		else
-		
-			-- All good, let's move on
+            GUI.Msg("landed on " .. self.optarray[curopt])
 			break
 		end
 		
 	end    
-    
+]]--    
     return curopt
 
 end
