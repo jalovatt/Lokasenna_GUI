@@ -389,7 +389,13 @@ end
 
 
 function GUI.Radio:onmouseup()
-		
+	
+    -- Bypass option for GUI Builder
+    if not self.focus then
+        self:redraw()
+        return
+    end
+	
 	-- Set the new option, or revert to the original if the cursor 
     -- isn't inside the list anymore
 	if GUI.IsInside(self, GUI.mouse.x, GUI.mouse.y) then
@@ -398,6 +404,7 @@ function GUI.Radio:onmouseup()
 		self.state = self.retval	
 	end
 
+    self.focus = false
 	self:redraw()
 
 end
@@ -513,13 +520,20 @@ end
 
 
 function GUI.Checklist:onmouseup()
-		
+    
+    -- Bypass option for GUI Builder
+    if not self.focus then
+        self:redraw()
+        return
+    end
+
     local mouseopt = self:getmouseopt()
 	
     if not mouseopt then return end
     
 	self.optsel[mouseopt] = not self.optsel[mouseopt] 
 
+    self.focus = false
 	self:redraw()
 
 end
