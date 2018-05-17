@@ -120,7 +120,11 @@ function GUI.Slider:new(name, z, x, y, w, caption, min, max, defaults, inc, dir)
 	Slider.cap_x = 0
 	Slider.cap_y = 0
 	
-    if min > max then min, max = max, min end
+    if min > max then 
+        min, max = max, min 
+    elseif min == max then
+        max = max + 1
+    end
     
 	if Slider.dir == "v" then
 		min, max = max, min		
@@ -145,16 +149,23 @@ function GUI.Slider:new(name, z, x, y, w, caption, min, max, defaults, inc, dir)
     function Slider:init_handles()
                
     	self.steps = math.abs(self.max - self.min) / self.inc
+        
+        -- Make sure the handles are all valid
+        for i = 1, #self.defaults do
+            self.defaults[i] = math.floor( GUI.clamp(0, self.defaults[i], self.steps) )
+        end
     
         self.handles = {}
+        local step
         for i = 1, #self.defaults do
             
+            step = self.defaults[i]
             self.handles[i] = {}
-            self.handles[i].default = (self.dir ~= "v" and self.defaults[i] or (self.steps - self.defaults[i]))
-            self.handles[i].curstep = self.defaults[i]
-            self.handles[i].curval = self.defaults[i] / self.steps
+            self.handles[i].default = (self.dir ~= "v" and step or (self.steps - step))
+            self.handles[i].curstep = step
+            self.handles[i].curval = step / self.steps
             self.handles[i].retval = self:formatretval( ((self.max - self.min) / self.steps) 
-                                                        * self.defaults[i] + self.min)
+                                                        * step + self.min)
 
         end  
         
