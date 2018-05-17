@@ -17,7 +17,8 @@ pad				Padding between the label and the text editor
 
 
 Additional:
-bg				Color to be drawn underneath the label. Defaults to "wnd_bg"
+bg				Color to be drawn underneath the list. Defaults to "wnd_bg"
+cap_bg          Color to be drawn underneath the list. Defaults to "wnd_bg"
 shadow			Boolean. Draw a shadow beneath the label?
 color			Text color
 font_a			Label font
@@ -67,6 +68,7 @@ function GUI.Listbox:new(name, z, x, y, w, h, list, multi, caption, pad)
 	
 	lst.shadow = true
 	lst.bg = "elm_bg"
+    lst.cap_bg = "wnd_bg"
 	lst.color = "txt"
 	
 	-- Scrollbar fill
@@ -247,7 +249,7 @@ function GUI.Listbox:onwheel(inc)
 	local dir = inc > 0 and -1 or 1
 
 	-- Scroll up/down one line
-	self.wnd_y = GUI.clamp(1, self.wnd_y + dir, #self.list - self.wnd_h + 1)
+	self.wnd_y = GUI.clamp(1, self.wnd_y + dir, math.max(#self.list - self.wnd_h + 1, 1))
 
 	self:redraw()
 	
@@ -267,7 +269,7 @@ function GUI.Listbox:drawcaption()
 	local str_w, str_h = gfx.measurestr(str)
 	gfx.x = self.x - str_w - self.pad
 	gfx.y = self.y + self.pad
-	GUI.text_bg(str, self.bg)
+	GUI.text_bg(str, self.cap_bg)
 	
 	if self.shadow then 
 		GUI.shadow(str, self.color, "shadow") 
