@@ -157,7 +157,8 @@ function GUI.Menubar:init()
        
     end
     
-    self.w = self.w or self:measuretitles(nil, true)
+    self.w = self.w or 0
+    self.w = math.max(self.w, self:measuretitles(nil, true))
     self.h = self.h or gfx.texth
     
     
@@ -258,13 +259,14 @@ end
 
 function GUI.Menubar:drawhighlight()
 
+    if self.menus[self.mousemnu].title == "" then return end
+
     GUI.color(self.col_over)
     gfx.mode = 1
     --                                Hover  Click
     gfx.a = GUI.mouse.cap & 1 ~= 1 and 0.3 or 0.5
     
-    
-    gfx.rect(self.mousemnu_x, self.y, self.menus[self.mousemnu].width + self.tab + self.pad, self.h, true)
+    gfx.rect(self.x + self.mousemnu_x, self.y, self.menus[self.mousemnu].width + self.tab + self.pad, self.h, true)
     
     gfx.a = 1
     gfx.mode = 0        
