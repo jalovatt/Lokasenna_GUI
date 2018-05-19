@@ -140,7 +140,7 @@ function GUI.Textbox:draw()
 		
 	end
     
-    if string.len(self.retval) > self.wnd_w - 2 then self:drawgradient() end    
+    self:drawgradient()    
 	
 end
 
@@ -406,27 +406,30 @@ end
 
 function GUI.Textbox:drawgradient()
     
+    local left, right = self.wnd_pos > 0, self.wnd_pos < (string.len(self.retval) - self.wnd_w + 2)
+    if not (left or right) then return end
+    
     local x, y, w, h = self.x, self.y, self.w, self.h
-    local fade_w = 16
-   
+    local fade_w = 12
+
     GUI.color("elm_bg")
     for i = 0, fade_w do
     
         gfx.a = i/fade_w
         
         -- Left
-        if self.wnd_pos > 0 then
+        if left then
             local x = x + 2 + fade_w - i
             gfx.line(x, y + 2, x, y + h - 4)
         end
         
         -- Right
-        if self.wnd_pos < (string.len(self.retval) - self.wnd_w + 2) then
+        if right then
             local x = x + w - 3 - fade_w + i
             gfx.line(x, y + 2, x, y + h - 4)
         end
         
-    end    
+    end
     
 end
 
@@ -506,6 +509,35 @@ function GUI.Textbox:getselectedtext()
 end
 
 
+function GUI.Textbox:toclipboard(cut)
+    
+    if self.sel_s and self:SWS_clipboard() then
+        
+        local str = self:getselectedtext()
+        reaper.CF_SetClipboard(str)
+        if cut then self:deleteselection() end
+        
+    end   
+    
+end
+
+
+function GUI.Textbox:fromclipboard()
+    
+    if self:SWS_clipboard() then
+        
+        -- reaper.SNM_CreateFastString( str )
+        -- reaper.CF_GetClipboardBig( output )
+        local fast_str = reaper.SNM_CreateFastString("")
+        local str = reaper.CF_GetClipboardBig(fast_str)
+        reaper.SNM_DeleteFastString(fast_str)
+        
+        self:insertstring(str, true)
+
+    end   
+    
+end
+
 
 
 ------------------------------------
@@ -573,6 +605,8 @@ function GUI.Textbox:insertstring(str, move_caret)
 
     self:storeundostate()
     
+    str = self:sanitizetext(str)
+    
     if self.sel_s then self:deleteselection() end
     
     local s = self.caret
@@ -606,6 +640,31 @@ function GUI.Textbox:carettoend()
     
 end
 
+
+-- Replace any characters that we're unable to reproduce properly
+function GUI.Textbox:sanitizetext(str)
+
+    str = tostring(str)
+    str = str:gsub("\t", "    ")
+    str = str:gsub("[\n\r]", " ")
+    return str
+
+end
+
+
+function GUI.Textbox:ctrlchar(func, ...)
+    
+    if GUI.mouse.cap & 4 == 4 then
+        func(self, ... and table.unpack({...}))
+        
+        -- Flag to bypass the "clear selection" logic in :ontype()        
+        return true
+        
+    else
+        self:insertchar(GUI.char)        
+    end    
+
+end
 
 -- Non-typing key commands
 -- A table of functions is more efficient to access than using really
@@ -704,113 +763,42 @@ GUI.Textbox.keys = {
 	-- A -- Select All
 	[1] = function(self)
 		
-		if GUI.mouse.cap & 4 == 4 then
-			
-			self:selectall()
-			
-			-- Flag to bypass the "clear selection" logic in :ontype()
-			return true	
-			
-		else
-			self:insertchar(GUI.char)
-		end
+		return self:ctrlchar(self.selectall)
 		
 	end,
 	
 	-- C -- Copy
 	[3] = function(self)
 		
-		if GUI.mouse.cap & 4 == 4 then
-			
-			if self.sel_s and self:SWS_clipboard() then
-				
-				local str = self:getselectedtext()
-				reaper.CF_SetClipboard(str)
-				
-			end
-					
-			-- Flag to bypass the "clear selection" logic in :ontype()		
-			return true			
-			
-		else
-			self:insertchar(GUI.char)
-		end
+		return self:ctrlchar(self.toclipboard)
 		
 	end,
 	
 	-- V -- Paste
 	[22] = function(self)
 		
-		if GUI.mouse.cap & 4 == 4 then
-	
-			if self:SWS_clipboard() then
-				
-				-- reaper.SNM_CreateFastString( str )
-				-- reaper.CF_GetClipboardBig( output )
-				local fast_str = reaper.SNM_CreateFastString("")
-				local str = reaper.CF_GetClipboardBig(fast_str)
-				reaper.SNM_DeleteFastString(fast_str)
-				
-				self:insertstring(str, true)
-
-			end
-		
-			-- Flag to bypass the "clear selection" logic in :ontype()		
-			return true
-			
-		else
-			self:insertchar(GUI.char)
-		end	
+        return self:ctrlchar(self.fromclipboard)	
 		
 	end,
 	
 	-- X -- Cut
 	[24] = function(self)
 	
-		if GUI.mouse.cap & 4 == 4 then
-			
-			if self.sel_s and self:SWS_clipboard() then
-				
-				local str = self:getselectedtext()
-				reaper.CF_SetClipboard(str)
-				self:deleteselection()
-				
-			end
-		
-			-- Flag to bypass the "clear selection" logic in :ontype()		
-			return true		
-	
-		else
-			self:insertchar(GUI.char)
-		end
+		return self:ctrlchar(self.toclipboard, true)
 		
 	end,	
 	
 	-- Y -- Redo
 	[25] = function (self)
 		
-		if GUI.mouse.cap & 4 == 4 then 
-			
-			self:redo() 
-			
-		else
-		
-			self:insertchar(GUI.char)
-			
-		end
+		return self:ctrlchar(self.redo)
 		
 	end,
 	
 	-- Z -- Undo
 	[26] = function (self)
 		
-		if GUI.mouse.cap & 4 == 4 then 
-			
-			self:undo()
-			
-		else
-			self:insertchar(GUI.char)
-		end		
+		return self:ctrlchar(self.undo)		
 		
 	end
 
