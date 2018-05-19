@@ -99,27 +99,26 @@ function GUI.Tabs:new(name, z, x, y, tab_w, tab_h, opts, pad)
     -- Placeholder for if I ever figure out downward tabs
 	Tab.dir = "u"
 	
-	Tab.pad = pad
+	Tab.pad = pad or 8
 	
 	-- Parse the string of options into a table
 	Tab.optarray = {}
-	local tempidx = 1
-	for word in string.gmatch(opts, '([^,]+)') do
-		Tab.optarray[tempidx] = word
-		tempidx = tempidx + 1
-	end
-	
-	Tab.numopts = tempidx - 1
+    if type(opts) == "string" then
+        for word in string.gmatch(opts, '([^,]+)') do
+            Tab.optarray[#Tab.optarray + 1] = word
+        end
+    elseif type(opts) == "table" then
+        Tab.optarray = opts
+    end
 	
 	Tab.z_sets = {}
-	for i = 1, Tab.numopts do
+	for i = 1, #Tab.optarray do
 		Tab.z_sets[i] = {}
 	end
-	
+    
 	-- Figure out the total size of the Tab frame now that we know the 
     -- number of buttons, so we can do the math for clicking on it
-	Tab.w, Tab.h = (tab_w + pad) * Tab.numopts, tab_h
-
+	Tab.w, Tab.h = (tab_w + Tab.pad) * #Tab.optarray + 2*Tab.pad + 12, tab_h
 
 	-- Currently-selected option
 	Tab.retval, Tab.state = 1, 1
@@ -140,40 +139,45 @@ end
 
 function GUI.Tabs:draw()
 	
-	local x, y, w, h = self.x + 16, self.y, self.tab_w, self.tab_h
+	local x, y = self.x + 16, self.y
+    local tab_w, tab_h = self.tab_w, self.tab_h
 	local pad = self.pad
 	local font = self.font_b
 	local dir = self.dir
 	local state = self.state
-	local optarray = self.optarray
+    
+    -- Make sure w is at least the size of the tabs. 
+    -- (GUI builder will let you try to set it lower)
+    self.w = math.max(self.w, (tab_w + pad) * #self.optarray + 2*pad + 12)  
 
 	GUI.color(self.bg)
-	gfx.rect(x - 16, y, self.w + 32, self.h, true)
+	gfx.rect(x - 16, y, self.w, self.h, true)
 			
-	local x_adj = w + pad
+	local x_adj = tab_w + pad
 	
 	-- Draw the inactive tabs first
-	for i = self.numopts, 1, -1 do
+	for i = #self.optarray, 1, -1 do
 
 		if i ~= state then
 			--											 
 			local tab_x, tab_y = x + GUI.shadow_dist + (i - 1) * x_adj, 
 								 y + GUI.shadow_dist * (dir == "u" and 1 or -1)
 
-			self:draw_tab(tab_x, tab_y, w, h, dir, font, self.col_txt, self.col_tab_b, optarray[i])
+			self:draw_tab(tab_x, tab_y, tab_w, tab_h, dir, font, self.col_txt, self.col_tab_b, self.optarray[i])
 
 		end
 	
 	end
 
-	self:draw_tab(x + (state - 1) * x_adj, y, w, h, dir, self.font_a, self.col_txt, self.col_tab_a, optarray[state])
+	self:draw_tab(x + (state - 1) * x_adj, y, tab_w, tab_h, dir, self.font_a, self.col_txt, self.col_tab_a, self.optarray[state])
 	
+    -- Keep the active tab's top separate from the window background
 	GUI.color(self.bg)
-	gfx.line(x - 16, y, x + self.w + 16, y, 1)
+    gfx.line(x + (state - 1) * x_adj, y, x + state * x_adj, y, 1)
 
-	-- Cover up the bottom of the tabs
+	-- Cover up some ugliness at the bottom of the tabs
 	GUI.color("wnd_bg")		
-	gfx.rect(self.x, self.y + (dir == "u" and h or -6), (self.w + self.h), 6, true)
+	gfx.rect(self.x, self.y + (dir == "u" and tab_h or -6), self.w, 6, true)
 
 	
 end
@@ -206,9 +210,9 @@ function GUI.Tabs:onmousedown()
     -- Offset for the first tab
 	local adj = 0.75*self.h
 
-	local mouseopt = (GUI.mouse.x - (self.x + adj)) / (self.numopts * (self.tab_w + self.pad))
+	local mouseopt = (GUI.mouse.x - (self.x + adj)) / (#self.optarray * (self.tab_w + self.pad))
 		
-	mouseopt = GUI.clamp((math.floor(mouseopt * self.numopts) + 1), 1, self.numopts)
+	mouseopt = GUI.clamp((math.floor(mouseopt * #self.optarray) + 1), 1, #self.optarray)
 
 	self.state = mouseopt
 
@@ -247,7 +251,7 @@ function GUI.Tabs:onwheel()
 	self.state = GUI.round(self.state + GUI.mouse.inc)
 	
 	if self.state < 1 then self.state = 1 end
-	if self.state > self.numopts then self.state = self.numopts end
+	if self.state > #self.optarray then self.state = #self.optarray end
 	
 	self.retval = self.state
 	self:update_sets()
@@ -337,8 +341,8 @@ function GUI.Tabs:update_sets(init)
 	local z_sets = self.z_sets
 
 	if not z_sets or #z_sets[1] < 1 then
-		reaper.ShowMessageBox("GUI element '"..self.name.."':\nNo z sets found.", "Library error", 0)
-		GUI.quit = true
+		--reaper.ShowMessageBox("GUI element '"..self.name.."':\nNo z sets found.", "Library error", 0)
+		--GUI.quit = true
 		return 0
 	end
 
