@@ -1957,7 +1957,7 @@ end
 GUI.triangle = function (fill, ...)
 	
 	-- Pass any calls for a filled triangle on to the original function
-	if fill == 1 then
+	if fill then
 		
 		gfx.triangle(...)
 		
