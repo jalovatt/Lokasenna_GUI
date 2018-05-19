@@ -231,8 +231,6 @@ end
 
 function GUI.TextEditor:onmousedown(scroll)
 
-
-
 	-- If over the scrollbar, or we came from :ondrag with an origin point
 	-- that was over the scrollbar...
 	local scroll = scroll or self:overscrollbar()
@@ -278,8 +276,8 @@ function GUI.TextEditor:ondrag()
 	
 	local scroll = self:overscrollbar(GUI.mouse.ox, GUI.mouse.oy)
 	if scroll then 
-		
-		self:onmousedown(scroll)
+
+        self:setscrollbar(scroll)
 		
 	-- Select from where the mouse is now to where it started
 	else
@@ -371,7 +369,7 @@ function GUI.TextEditor:onwheel(inc)
 
 		-- Scroll right/left
 		local dir = inc > 0 and 3 or -3
-		self.wnd_pos.x = GUI.clamp(0, self.wnd_pos.x + dir, len - self.wnd_w)
+		self.wnd_pos.x = GUI.clamp(0, self.wnd_pos.x + dir, len - self.wnd_w + 4)
 	
 	-- Vertical scroll
 	else
@@ -382,7 +380,7 @@ function GUI.TextEditor:onwheel(inc)
 
 		-- Scroll up/down
 		local dir = inc > 0 and -3 or 3
-		self.wnd_pos.y = GUI.clamp(1, self.wnd_pos.y + dir, len - self.wnd_h)
+		self.wnd_pos.y = GUI.clamp(1, self.wnd_pos.y + dir, len - self.wnd_h + 1)
 		
 	end
 	
@@ -505,16 +503,19 @@ end
 function GUI.TextEditor:drawscrollbars()
 
 	-- Do we need to be here?
-	local max_w = self:getmaxlength()
-	local vert, horz = 	self:getwndlength() > self.wnd_h,
+	local max_w, txt_h = self:getmaxlength(), self:getwndlength()
+	local vert, horz = 	txt_h > self.wnd_h,
 						max_w > self.wnd_w
-	if not (vert or horz) then return end
+
 
 	local x, y, w, h = self.x, self.y, self.w, self.h
 	local vx, vy, vw, vh = x + w - 8 - 4, y + 4, 8, h - 16
 	local hx, hy, hw, hh = x + 4, y + h - 8 - 4, w - 16, 8
-	local fade_w = 16
+	local fade_w = 12
 	local _
+    
+    -- Only draw the empty tracks if we don't need scroll bars
+	if not (vert or horz) then goto tracks end
 	
 	-- Draw a gradient to fade out the last ~16px of text
 	GUI.color("elm_bg")
@@ -546,37 +547,38 @@ function GUI.TextEditor:drawscrollbars()
 	
 	_ = vert and gfx.rect(vx, y + 2, vw + 2, h - 4, true)
 	_ = horz and gfx.rect(x + 2, hy, w - 4, hh + 2, true)
-	
+
+
+    ::tracks::
+    
 	-- Draw slider track
 	GUI.color("tab_bg")
-	_ = vert and GUI.roundrect(vx, vy, vw, vh, 4, 1, 1)
-	_ = horz and GUI.roundrect(hx, hy, hw, hh, 4, 1, 1)
+	GUI.roundrect(vx, vy, vw, vh, 4, 1, 1)
+	GUI.roundrect(hx, hy, hw, hh, 4, 1, 1)
 	GUI.color("elm_outline")
-	_ = vert and GUI.roundrect(vx, vy, vw, vh, 4, 1, 0)
-	_ = horz and GUI.roundrect(hx, hy, hw, hh, 4, 1, 0)
-		
+	GUI.roundrect(vx, vy, vw, vh, 4, 1, 0)
+	GUI.roundrect(hx, hy, hw, hh, 4, 1, 0)
+
+
 	-- Draw slider fill
 	GUI.color(self.col_fill)	
-	
-	local fx, fy, fw, fh
-	
+
 	if vert then
-		fh = (self.wnd_h / self:getwndlength()) * vh - 4
+		local fh = (self.wnd_h / txt_h) * vh - 4
 		if fh < 4 then fh = 4 end
-		fy = vy + ((self.wnd_pos.y - 1) / self:getwndlength()) * vh + 2
+		local fy = vy + ((self.wnd_pos.y - 1) / txt_h) * vh + 2
 		
 		GUI.roundrect(vx + 2, fy, vw - 4, fh, 2, 1, 1)
 	end
 	
 	if horz then
-		fw = (self.wnd_w / max_w) * hw - 4
+		local fw = (self.wnd_w / (max_w + 4)) * hw - 4
 		if fw < 4 then fw = 4 end
-		fx = hx + (self.wnd_pos.x / max_w) * hw + 2
+		local fx = hx + (self.wnd_pos.x / (max_w + 4)) * hw + 2
 		
 		GUI.roundrect(fx, hy + 2, fw, hh - 4, 2, 1, 1)
 	end
 	
-		
 end
 
 
@@ -587,18 +589,27 @@ end
 ------------------------------------
 
 
--- Figure out what portions of the text are selected
-function GUI.TextEditor:getselection()
-
+function GUI.TextEditor:getselectioncoords()
+    
 	local sx, sy = self.sel_s.x, self.sel_s.y
 	local ex, ey = self.sel_e.x, self.sel_e.y
-	
+    
 	-- Make sure the Start is before the End
 	if sy > ey then
 		sx, sy, ex, ey = ex, ey, sx, sy
 	elseif sy == ey and sx > ex then
 		sx, ex = ex, sx
 	end
+    
+    return sx, sy, ex, ey
+
+end
+
+
+-- Figure out what portions of the text are selected
+function GUI.TextEditor:getselection()
+
+    local sx, sy, ex, ey = self:getselectioncoords()
 
 	local x, w
 	local sel_coords = {}
@@ -712,18 +723,11 @@ end
 function GUI.TextEditor:deleteselection()
 	
 	if not (self.sel_s and self.sel_e) then return 0 end
-	
-	local sx, sy, ex, ey = self.sel_s.x, self.sel_s.y, self.sel_e.x, self.sel_e.y
 
 	self:storeundostate()
-
-	-- Make sure the Start is before the End
-	if sy > ey then
-		sx, sy, ex, ey = ex, ey, sx, sy
-	elseif sy == ey and sx > ex then
-		sx, ex = ex, sx
-	end	
-	
+    
+    local sx, sy, ex, ey = self:getselectioncoords()
+    
 	-- Easiest case; single line
 	if sy == ey then
 		
@@ -750,14 +754,7 @@ end
 
 function GUI.TextEditor:getselectedtext()
 
-	local sx, sy, ex, ey = self.sel_s.x, self.sel_s.y, self.sel_e.x, self.sel_e.y
-	
-	-- Make sure the Start is before the End
-	if sy > ey then
-		sx, sy, ex, ey = ex, ey, sx, sy
-	elseif sy == ey and sx > ex then
-		sx, ex = ex, sx
-	end
+    local sx, sy, ex, ey = self:getselectioncoords()
 
 	local tmp = {}
 	
@@ -775,7 +772,34 @@ function GUI.TextEditor:getselectedtext()
 end
 
 
+function GUI.TextEditor:toclipboard(cut)
+    
+    if self.sel_s and self:SWS_clipboard() then
+        
+        local str = self:getselectedtext()
+        reaper.CF_SetClipboard(str)
+        if cut then self:deleteselection() end
+        
+    end   
+    
+end
 
+
+function GUI.TextEditor:fromclipboard()
+    
+    if self:SWS_clipboard() then
+        
+        -- reaper.SNM_CreateFastString( str )
+        -- reaper.CF_GetClipboardBig( output )
+        local fast_str = reaper.SNM_CreateFastString("")
+        local str = reaper.CF_GetClipboardBig(fast_str)
+        reaper.SNM_DeleteFastString(fast_str)
+        
+        self:insertstring(str, true)
+
+    end   
+    
+end
 
 ------------------------------------
 -------- Window/Pos Helpers --------
@@ -890,7 +914,7 @@ function GUI.TextEditor:getcaret(x, y)
 						/	self.char_h)
 			+ self.wnd_pos.y
 
-	tmp.y = GUI.clamp(1, tmp.y, #self.retval + 1)
+	tmp.y = GUI.clamp(1, tmp.y, #self.retval)
 	tmp.x = GUI.clamp(0, tmp.x, #(self.retval[tmp.y] or ""))
 
 	return tmp
@@ -933,13 +957,14 @@ function GUI.TextEditor:setscrollbar(scroll)
                                     
     -- Horizontal scroll	
     else
+    --self.caret.x + 4 - self.wnd_w
         
         local len = self:getmaxlength()
         local wnd_c = GUI.round( ((GUI.mouse.x - self.x) / self.w) * len   )
         self.wnd_pos.x = GUI.round(
                             GUI.clamp(	0,
                                         wnd_c - (self.wnd_w / 2),
-                                        len - self.wnd_w
+                                        len + 4 - self.wnd_w
                                     )
                                     )
     
@@ -1078,6 +1103,21 @@ function GUI.TextEditor:backtab()
     self.caret.x = string.len(pre)
     self.retval[self.caret.y] = pre..post
     
+end
+
+
+function GUI.TextEditor:ctrlchar(func, ...)
+    
+    if GUI.mouse.cap & 4 == 4 then
+        func(self, ... and table.unpack({...}))
+        
+        -- Flag to bypass the "clear selection" logic in :ontype()        
+        return true
+        
+    else
+        self:insertchar(GUI.char)        
+    end    
+
 end
 
 
@@ -1258,7 +1298,9 @@ GUI.TextEditor.keys = {
 
 	-- A -- Select All
 	[1] = function(self)
-		
+        
+        return self:ctrlchar(self.selectall)
+--[[
 		if GUI.mouse.cap & 4 == 4 then
 			
 			self:selectall()
@@ -1269,103 +1311,41 @@ GUI.TextEditor.keys = {
 		else
 			self:insertchar(GUI.char)
 		end
-		
+]]--		
 	end,
-	
+
 	-- C -- Copy
 	[3] = function(self)
 		
-		if GUI.mouse.cap & 4 == 4 then
-			
-			if self.sel_s and self:SWS_clipboard() then
-				
-				local str = self:getselectedtext()
-				reaper.CF_SetClipboard(str)
-				
-			end
-					
-			-- Flag to bypass the "clear selection" logic in :ontype()		
-			return true			
-			
-		else
-			self:insertchar(GUI.char)
-		end
+		return self:ctrlchar(self.toclipboard)
 		
 	end,
 	
 	-- V -- Paste
 	[22] = function(self)
 		
-		if GUI.mouse.cap & 4 == 4 then
-	
-			if self:SWS_clipboard() then
-				
-				-- reaper.SNM_CreateFastString( str )
-				-- reaper.CF_GetClipboardBig( output )
-				local fast_str = reaper.SNM_CreateFastString("")
-				local str = reaper.CF_GetClipboardBig(fast_str)
-				reaper.SNM_DeleteFastString(fast_str)
-				
-				self:insertstring(str, true)
-
-			end
-		
-			-- Flag to bypass the "clear selection" logic in :ontype()		
-			return true
-			
-		else
-			self:insertchar(GUI.char)
-		end	
+		return self:ctrlchar(self.fromclipboard)	
 		
 	end,
 	
 	-- X -- Cut
 	[24] = function(self)
 	
-		if GUI.mouse.cap & 4 == 4 then
-			
-			if self.sel_s and self:SWS_clipboard() then
-				
-				local str = self:getselectedtext()
-				reaper.CF_SetClipboard(str)
-				self:deleteselection()
-				
-			end
-		
-			-- Flag to bypass the "clear selection" logic in :ontype()		
-			return true		
-	
-		else
-			self:insertchar(GUI.char)
-		end
+		return self:ctrlchar(self.toclipboard, true)
 		
 	end,	
 	
 	-- Y -- Redo
 	[25] = function (self)
 		
-		if GUI.mouse.cap & 4 == 4 then 
-			
-			self:redo() 
-			
-		else
-		
-			self:insertchar(GUI.char)
-			
-		end
+		return self:ctrlchar(self.redo)
 		
 	end,
 	
 	-- Z -- Undo
 	[26] = function (self)
 		
-		if GUI.mouse.cap & 4 == 4 then 
-			
-			self:undo()
-			
-		else
-			self:insertchar(GUI.char)
-		end		
+		return self:ctrlchar(self.undo)	
 		
 	end
 }
