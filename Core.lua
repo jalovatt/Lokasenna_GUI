@@ -1425,7 +1425,7 @@ GUI.font = function (fnt)
 	-- Different OSes use different font sizes, for some reason
 	-- This should give a roughly equal size on Mac
 	if string.find(reaper.GetOS(), "OSX") then
-		size = math.floor(size * 0.8)
+		size = math.floor(size * 0.7)
 	end
 	
 	-- Cheers to Justin and Schwa for this
