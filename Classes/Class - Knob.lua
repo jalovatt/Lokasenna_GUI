@@ -155,9 +155,9 @@ function GUI.Knob:init()
 		
 	-- Head
 	GUI.color(self.col_head)
-	GUI.triangle(1, Ax, Ay, Bx, By, Cx, Cy)
+	GUI.triangle(true, Ax, Ay, Bx, By, Cx, Cy)
 	GUI.color("elm_outline")
-	GUI.triangle(0, Ax, Ay, Bx, By, Cx, Cy)	
+	GUI.triangle(false, Ax, Ay, Bx, By, Cx, Cy)	
 	
 	-- Body
 	GUI.color(self.col_body)
