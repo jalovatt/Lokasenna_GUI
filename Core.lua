@@ -1209,8 +1209,7 @@ GUI.pi = 3.14159
 ------------------------------------
 
 
---[[
-	Copy the contents of one table to another, since Lua can't do it natively
+--[[	Copy the contents of one table to another, since Lua can't do it natively
 	
 	Provide a second table as 'base' to use it as the basis for copying, only
 	bringing over keys from the source table that don't exist in the base
@@ -1256,9 +1255,10 @@ GUI.table_copy = function (source, base, depth)
 end
 
 
+-- (For debugging)
 -- Returns a string of the table's contents, indented to show nested tables
 -- If 't' contains classes, or a lot of nested tables, etc, be wary of using larger
--- values for max_depth. This function will happily freeze Reaper for ten minutes.
+-- values for max_depth - this function will happily freeze Reaper for ten minutes.
 GUI.table_list = function (t, max_depth, cur_depth)
     
     local ret = {}
@@ -1289,6 +1289,7 @@ end
 
 
 -- Compare the contents of one table to another, since Lua can't do it natively
+-- Returns true if all of t_a's keys + and values match all of t_b's.
 GUI.table_compare = function (t_a, t_b)
 	
 	if type(t_a) ~= "table" or type(t_b) ~= "table" then return false end
@@ -1303,6 +1304,8 @@ GUI.table_compare = function (t_a, t_b)
 		if not key_exists[k2] then return false end
 	end
 	
+    return true
+    
 end
 
 
@@ -1335,8 +1338,8 @@ GUI.full_sort = function (op1, op2)
 end
 
 
---[[
-	Allows "for x, y in pairs(z) do" in alphabetical/numerical order
+--[[	Allows "for x, y in pairs(z) do" in alphabetical/numerical order
+    
 	Copied from Programming In Lua, 19.3
 	
 	Call with f = "full" to use the full sorting function above, or
@@ -1371,7 +1374,35 @@ GUI.kpairs = function (t, f)
 end
 
 
+-- Accepts a table, and returns a table with the keys and values swapped, i.e.
+-- {a = 1, b = 2, c = 3} --> {1 = "a", 2 = "b", 3 = "c"}
+GUI.table_invert = function(t)
+    
+    local tmp = {}
+    
+    for k, v in pairs(t) do
+        tmp[v] = k
+    end
+    
+    return tmp
 
+end
+
+
+-- Looks through a table using ipairs (specify a different function with 'f') and returns
+-- the first key whose value matches 'find'. 'find' is checked using string.match, so patterns
+-- should be allowable. No (captures) though.
+
+-- If you need to find multiple values in the same table, and each of them only occurs once, 
+-- it will be more efficient to just copy the table with GUI.table_invert and check by key.
+GUI.table_find = function(t, find, f)      
+    local iter = f or ipairs
+    
+    for k, v in iter(t) do
+        if string.match(tostring(v), find) then return k end
+    end
+    
+end
 
 ------------------------------------
 -------- Text functions ------------
