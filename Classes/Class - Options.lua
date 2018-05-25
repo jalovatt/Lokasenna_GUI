@@ -44,7 +44,7 @@ pad				Separation in px between options. Defaults to 4.
 
 
 Additional:
-bg				Color to be drawn underneath the caption. Defaults to "wnd_bg"
+bg				Color to be drawn underneath the text. Defaults to "wnd_bg"
 frame			Boolean. Draw a frame around the options.
 size			Width of the unfilled options in px. Defaults to 20.
 				* Changing this might mess up the spacing *
@@ -128,7 +128,7 @@ function Option:new(name, z, x, y, w, h, caption, opts, dir, pad)
     else
     
         local tempidx = 1
-        for word in string.gmatch(opts, '([^,]+)') do
+        for word in string.gmatch(opts, '([^,]*)') do
             option.optarray[tempidx] = word
             tempidx = tempidx + 1
         end
@@ -245,9 +245,7 @@ function Option:drawoptions()
 	local pad = self.pad
     
     -- Bump everything down for the caption
-    if self.caption and self.caption ~= "" then 
-        y = y + self.cap_h + 1.5 * pad 
-    end
+    y = y + ((self.caption and self.caption ~= "") and self.cap_h or 0) + 1.5 * pad 
 
     -- Bump the options down more for horizontal options
     -- with the text on top
@@ -255,9 +253,9 @@ function Option:drawoptions()
         y = y + self.cap_h + 2*pad 
     end
 
-	local size = self.opt_size
+	local opt_size = self.opt_size
     
-    local adj = size + pad
+    local adj = opt_size + pad
 
     local str, opt_x, opt_y
 
@@ -273,9 +271,9 @@ function Option:drawoptions()
             opt_y = y + (i - 1) * (horz and 0 or adj)
                 
 			-- Draw the option bubble
-            self:drawoption(opt_x, opt_y, size, self:isoptselected(i))
+            self:drawoption(opt_x, opt_y, opt_size, self:isoptselected(i))
 
-            self:drawvalue(opt_x,opt_y, size, str)
+            self:drawvalue(opt_x,opt_y, opt_size, str)
             
 		end
 		
@@ -296,8 +294,10 @@ end
 
 function Option:drawvalue(opt_x, opt_y, size, str)
 
+    if not str or str == "" then return end
+    
 	GUI.font(self.font_b) 
-
+    
     local str_w, str_h = gfx.measurestr(str)
     
     if self.dir == "h" then
@@ -504,11 +504,10 @@ end
 
 
 function GUI.Checklist:val(newval)
-	
-	if new then
-		if type(new) == "table" then
-			for i = 1, #new do
-				self.optsel[i] = new[i]
+	if newval then
+		if type(newval) == "table" then
+			for k, v in pairs(newval) do
+				self.optsel[tonumber(k)] = v
 			end
 			self:redraw()	
 		end
