@@ -268,7 +268,7 @@ function GUI.Menubox:drawarrow()
     local Bx, By = GUI.polar2cart(0, r, ox, oy)
     local Cx, Cy = GUI.polar2cart(1, r, ox, oy)
     
-    GUI.triangle(1, Ax, Ay, Bx, By, Cx, Cy)
+    GUI.triangle(true, Ax, Ay, Bx, By, Cx, Cy)
     
     oy = oy + h + 2
     
@@ -276,7 +276,7 @@ function GUI.Menubox:drawarrow()
     Bx, By = GUI.polar2cart(0, r, ox, oy)
     Cx, Cy = GUI.polar2cart(1, r, ox, oy)	
     
-    GUI.triangle(1, Ax, Ay, Bx, By, Cx, Cy)	    
+    GUI.triangle(true, Ax, Ay, Bx, By, Cx, Cy)	    
     
 end
 
@@ -400,14 +400,12 @@ function GUI.Menubox:validateoption(val, dir)
         -- Past the first option, look upward instead
         if val < 1 then
             val = 1
-            dir = 1
-            GUI.Msg("<1, looking upward")            
+            dir = 1        
 
         -- Past the last option, look downward instead
         elseif val > #self.optarray then
             val = #self.optarray
             dir = -1
-            GUI.Msg(">#, looking downward")
 
         end
         
