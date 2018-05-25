@@ -122,100 +122,96 @@ GUI.elms_freeze = {}
 
 
 GUI.Init = function ()
-	
-	
-	-- Create the window
-	gfx.clear = reaper.ColorToNative(table.unpack(GUI.colors.wnd_bg))
-	
-	if not GUI.x then GUI.x = 0 end
-	if not GUI.y then GUI.y = 0 end
-	if not GUI.w then GUI.w = 640 end
-	if not GUI.h then GUI.h = 480 end
+    xpcall( function()
+        
+        
+        -- Create the window
+        gfx.clear = reaper.ColorToNative(table.unpack(GUI.colors.wnd_bg))
+        
+        if not GUI.x then GUI.x = 0 end
+        if not GUI.y then GUI.y = 0 end
+        if not GUI.w then GUI.w = 640 end
+        if not GUI.h then GUI.h = 480 end
 
-	if GUI.anchor and GUI.corner then
-		GUI.x, GUI.y = GUI.get_window_pos(  GUI.x, GUI.y, GUI.w, GUI.h, 
-                                            GUI.anchor, GUI.corner)
-	end
-		
-	gfx.init(GUI.name, GUI.w, GUI.h, GUI.dock or 0, GUI.x, GUI.y)
-	
-	
-	GUI.cur_w, GUI.cur_h = gfx.w, gfx.h
+        if GUI.anchor and GUI.corner then
+            GUI.x, GUI.y = GUI.get_window_pos(  GUI.x, GUI.y, GUI.w, GUI.h, 
+                                                GUI.anchor, GUI.corner)
+        end
+            
+        gfx.init(GUI.name, GUI.w, GUI.h, GUI.dock or 0, GUI.x, GUI.y)
+        
+        
+        GUI.cur_w, GUI.cur_h = gfx.w, gfx.h
 
-	-- Measure the window's title bar, in case we need it
-	local __, __, wnd_y, __, __ = gfx.dock(-1, 0, 0, 0, 0)
-	local __, gui_y = gfx.clienttoscreen(0, 0)
-	GUI.title_height = gui_y - wnd_y
+        -- Measure the window's title bar, in case we need it
+        local __, __, wnd_y, __, __ = gfx.dock(-1, 0, 0, 0, 0)
+        local __, gui_y = gfx.clienttoscreen(0, 0)
+        GUI.title_height = gui_y - wnd_y
 
 
-	-- Initialize a few values
-	GUI.last_time = 0
-	GUI.mouse = {
-	
-		x = 0,
-		y = 0,
-		cap = 0,
-		down = false,
-		wheel = 0,
-		lwheel = 0
-		
-	}
-  
-	-- Store which element the mouse was clicked on.
-	-- This is essential for allowing drag behaviour where dragging affects 
-    -- the element position.
-	GUI.mouse_down_elm = nil
-	GUI.rmouse_down_elm = nil
-	GUI.mmouse_down_elm = nil
-		
-	-- Convert color presets from 0..255 to 0..1
-	for i, col in pairs(GUI.colors) do
-		col[1], col[2], col[3], col[4] =    col[1] / 255, col[2] / 255, 
-                                            col[3] / 255, col[4] / 255
-	end
-	
-	-- Initialize the tables for our z-order functions
-	GUI.update_elms_list(true)	
-	
-	if GUI.exit then reaper.atexit(GUI.exit) end
-	
-	GUI.gfx_open = true
+        -- Initialize a few values
+        GUI.last_time = 0
+        GUI.mouse = {
+        
+            x = 0,
+            y = 0,
+            cap = 0,
+            down = false,
+            wheel = 0,
+            lwheel = 0
+            
+        }
+      
+        -- Store which element the mouse was clicked on.
+        -- This is essential for allowing drag behaviour where dragging affects 
+        -- the element position.
+        GUI.mouse_down_elm = nil
+        GUI.rmouse_down_elm = nil
+        GUI.mmouse_down_elm = nil
+            
+        -- Convert color presets from 0..255 to 0..1
+        for i, col in pairs(GUI.colors) do
+            col[1], col[2], col[3], col[4] =    col[1] / 255, col[2] / 255, 
+                                                col[3] / 255, col[4] / 255
+        end
+        
+        -- Initialize the tables for our z-order functions
+        GUI.update_elms_list(true)	
+        
+        if GUI.exit then reaper.atexit(GUI.exit) end
+        
+        GUI.gfx_open = true
 
+    end, GUI.crash)
 end
-
 
 GUI.Main = function ()
-   
-   xpcall(  GUI.Main_Loop, GUI.crash)
+    xpcall( function ()    
 
-end
+        GUI.Main_Update_State()
 
+        GUI.Main_Update_Elms()
 
-GUI.Main_Loop = function ()
+        -- If the user gave us a function to run, check to see if it needs to be 
+        -- run again, and do so. 
+        if GUI.func then
+            
+            local new_time = os.time()
+            if new_time - GUI.last_time >= (GUI.freq or 1) then
+                GUI.func()
+                GUI.last_time = new_time
+            
+            end
+        end
+        
+        
+        -- Maintain a list of elms and zs in case any have been moved or deleted
+        GUI.update_elms_list()    
+        
+        
+        GUI.Main_Draw()
 
-    GUI.Main_Update_State()
-
-    GUI.Main_Update_Elms()
-
-	-- If the user gave us a function to run, check to see if it needs to be 
-    -- run again, and do so. 
-	if GUI.func then
-		
-		local new_time = os.time()
-		if new_time - GUI.last_time >= (GUI.freq or 1) then
-			GUI.func()
-			GUI.last_time = new_time
-		
-		end
-	end
-	
-    
-    -- Maintain a list of elms and zs in case any have been moved or deleted
-	GUI.update_elms_list()    
-    
-    
-    GUI.Main_Draw()
-
+    end, GUI.crash)
 end
 
 
@@ -528,8 +524,7 @@ GUI.New = function (name, elm, ...)
     local elm = type(elm) == "string"   and GUI[elm]
                                         or  elm
 
-
-    if not elm then
+    if not elm or type(elm) ~= "table" then
 		reaper.ShowMessageBox(  "Unable to create element '"..tostring(name)..
                                 "'.\nClass '"..tostring(elm).."' isn't available.", 
                                 "GUI Error", 0)
@@ -618,6 +613,10 @@ GUI.Update = function (elm)
 					
 					GUI.mouse.down = true
 					GUI.mouse.ox, GUI.mouse.oy = x, y
+                    
+                    -- Where in the elm the mouse was clicked. For dragging stuff
+                    -- and keeping it in the place relative to the cursor.
+                    GUI.mouse.off_x, GUI.mouse.off_y = x - elm.x, y - elm.y
 					
 				end
 							
@@ -644,6 +643,7 @@ GUI.Update = function (elm)
 				GUI.mouse.down = false
 				GUI.mouse.dbl_clicked = false
 				GUI.mouse.ox, GUI.mouse.oy = -1, -1
+                GUI.mouse.off_x, GUI.mouse.off_y = -1, -1
 				GUI.mouse.lx, GUI.mouse.ly = -1, -1
 				GUI.mouse.downtime = reaper.time_precise()
 
@@ -692,6 +692,9 @@ GUI.Update = function (elm)
 					
 					GUI.mouse.r_down = true
 					GUI.mouse.r_ox, GUI.mouse.r_oy = x, y
+                    -- Where in the elm the mouse was clicked. For dragging stuff
+                    -- and keeping it in the place relative to the cursor.
+                    GUI.mouse.r_off_x, GUI.mouse.r_off_y = x - elm.x, y - elm.y                    
 
 				end
 				
@@ -720,6 +723,7 @@ GUI.Update = function (elm)
 			GUI.mouse.r_down = false
 			GUI.mouse.r_dbl_clicked = false
 			GUI.mouse.r_ox, GUI.mouse.r_oy = -1, -1
+            GUI.mouse.r_off_x, GUI.mouse.r_off_y = -1, -1
 			GUI.mouse.r_lx, GUI.mouse.r_ly = -1, -1
 			GUI.mouse.r_downtime = reaper.time_precise()
 
@@ -768,6 +772,7 @@ GUI.Update = function (elm)
 
 					GUI.mouse.m_down = true
 					GUI.mouse.m_ox, GUI.mouse.m_oy = x, y
+                    GUI.mouse.m_off_x, GUI.mouse.m_off_y = x - elm.x, y - elm.y
 
 				end
 				
@@ -797,6 +802,7 @@ GUI.Update = function (elm)
 			GUI.mouse.m_down = false
 			GUI.mouse.m_dbl_clicked = false
 			GUI.mouse.m_ox, GUI.mouse.m_oy = -1, -1
+            GUI.mouse.m_off_x, GUI.mouse.m_off_y = -1, -1
 			GUI.mouse.m_lx, GUI.mouse.m_ly = -1, -1
 			GUI.mouse.m_downtime = reaper.time_precise()
 
