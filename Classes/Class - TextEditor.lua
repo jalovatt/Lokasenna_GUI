@@ -229,11 +229,11 @@ end
 -----------------------------------
 
 
-function GUI.TextEditor:onmousedown(scroll)
+function GUI.TextEditor:onmousedown()
 
 	-- If over the scrollbar, or we came from :ondrag with an origin point
 	-- that was over the scrollbar...
-	local scroll = scroll or self:overscrollbar()
+	local scroll = self:overscrollbar()
 	if scroll then 
         
         self:setscrollbar(scroll)        
