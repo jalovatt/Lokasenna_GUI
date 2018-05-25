@@ -63,7 +63,7 @@ function GUI.Frame:new(name, z, x, y, w, h, shadow, fill, color, round)
 	Frame.color = color or "elm_frame"
 	Frame.round = round or 0
 	
-	Frame.text = ""
+	Frame.text, Frame.last_text = "", ""
 	Frame.txt_indent = 0
 	Frame.txt_pad = 0
     
@@ -173,16 +173,33 @@ function GUI.Frame:drawtext()
     
 	if self.text and self.text:len() > 0 then
 
-		local text = GUI.word_wrap( self.text, self.font, self.w - 2*self.pad, 
-                                    self.txt_indent, self.txt_pad)
+        if self.text ~= self.last_text then
+            self.text = self:wrap_text(self.text)
+            self.last_text = self.text            
+        end
 
 		GUI.font(self.font)
 		GUI.color(self.col_txt)
         
 		gfx.x, gfx.y = self.pad + 1, self.pad + 1
-		if not fill then GUI.text_bg(text, self.bg) end
-		gfx.drawstr(text)
+		if not fill then GUI.text_bg(self.text, self.bg) end
+		gfx.drawstr(self.text)
 		
 	end
     
+end
+
+
+
+
+------------------------------------
+-------- Helpers -------------------
+------------------------------------
+
+
+function GUI.Frame:wrap_text(text)
+    
+    return GUI.word_wrap(   text, self.font, self.w - 2*self.pad, 
+                            self.txt_indent, self.txt_pad)
+
 end
