@@ -509,10 +509,15 @@ function GUI.Checklist:val(newval)
 			for k, v in pairs(newval) do
 				self.optsel[tonumber(k)] = v
 			end
-			self:redraw()	
+			self:redraw()
+        elseif type(newval) == "boolean" and #self.optarray == 1 then
+        
+            GUI.Msg("Checklist, newval is boolean")
+            self.optsel[1] = newval
+            self:redraw()
 		end
 	else
-		return self.optsel
+		return #self.optsel > 1 and self.optsel or self.optsel[1]
 	end
 	
 end
