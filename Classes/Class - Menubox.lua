@@ -167,7 +167,7 @@ function GUI.Menubox:val(newval)
 		self.retval = newval
 		self:redraw()		
 	else
-		return math.floor(self.retval)
+		return math.floor(self.retval), self.optarray[self.retval]
 	end
 	
 end
