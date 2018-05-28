@@ -138,12 +138,15 @@ function GUI.Button:draw()
 	
 	-- Draw the caption
 	GUI.color(self.col_txt)
-	GUI.font(self.font)	
+	GUI.font(self.font)
+    
+    local str = self.caption
+    str = str:gsub([[\n]],"\n")
 	
-	local str_w, str_h = gfx.measurestr(self.caption)
+	local str_w, str_h = gfx.measurestr(str)
 	gfx.x = x + 2 * state + ((w - str_w) / 2)
 	gfx.y = y + 2 * state + ((h - str_h) / 2)
-	gfx.drawstr(self.caption)
+	gfx.drawstr(str)
 	
 end
 
