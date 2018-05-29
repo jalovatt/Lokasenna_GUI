@@ -810,7 +810,6 @@ GUI.Update = function (elm)
 	-- If the mouse is hovering over the element
 	if inside and not GUI.mouse.down and not GUI.mouse.r_down then
 		elm:onmouseover()
-		GUI.elm_updated = true
 		elm.mouseover = true
 	else
 		elm.mouseover = false
