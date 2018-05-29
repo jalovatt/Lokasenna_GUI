@@ -175,6 +175,12 @@ function GUI.Textbox:onupdate()
 	
 end
 
+-- Make sure the box highlight goes away
+function GUI.Textbox:lostfocus()
+    
+    self:redraw()
+    
+end
 
 
 
