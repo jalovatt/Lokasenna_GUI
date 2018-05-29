@@ -504,6 +504,7 @@ end
 
 
 function GUI.Checklist:val(newval)
+      
 	if newval then
 		if type(newval) == "table" then
 			for k, v in pairs(newval) do
@@ -512,7 +513,6 @@ function GUI.Checklist:val(newval)
 			self:redraw()
         elseif type(newval) == "boolean" and #self.optarray == 1 then
         
-            GUI.Msg("Checklist, newval is boolean")
             self.optsel[1] = newval
             self:redraw()
 		end
