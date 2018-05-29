@@ -163,7 +163,7 @@ function GUI.Menubar:init()
     
     
     -- Draw the background + shadow    
-    gfx.setimgdim(self.buff, self.w * 2, self.h)
+    gfx.setimgdim(self.buff, self.w, self.h * 2)
         
     GUI.color(self.col_bg)
     
@@ -172,8 +172,8 @@ function GUI.Menubar:init()
     GUI.color("shadow")
     local r, g, b, a = table.unpack(GUI.colors["shadow"])
 	gfx.set(r, g, b, 1)    
-    gfx.rect(self.w + 1, 0, self.w, self.h, true)
-    gfx.muladdrect(self.w + 1, 0, self.w, self.h, 1, 1, 1, a, 0, 0, 0, 0 )
+    gfx.rect(0, self.h + 1, self.w, self.h, true)
+    gfx.muladdrect(0, self.h + 1, self.w, self.h, 1, 1, 1, a, 0, 0, 0, 0 )
     
     self.did_init = true
     
@@ -194,7 +194,7 @@ function GUI.Menubar:draw()
         
         for i = 1, GUI.shadow_dist do
 
-            gfx.blit(self.buff, 1, 0, w + 1, 0, w, h, x, y + i, w, h)
+            gfx.blit(self.buff, 1, 0, 0, h, w, h, x, y + i, w, h)
             
         end
         

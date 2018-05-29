@@ -154,7 +154,7 @@ function GUI.Frame:drawframe()
     -- Shadow
     local r, g, b, a = table.unpack(GUI.colors["shadow"])
 	gfx.set(r, g, b, 1)
-	GUI.roundrect(self.w + 2, 1, self.w, self.h, 4, 1, 1)
+	GUI.roundrect(self.w + 2, 1, self.w, self.h, round, 1, 1)
 	gfx.muladdrect(self.w + 2, 1, self.w + 2, self.h + 2, 1, 1, 1, a, 0, 0, 0, 0 )
 
     
