@@ -252,12 +252,14 @@ GUI.Main_Update_State = function()
 	--if GUI.char == 27 or GUI.char == -1 or GUI.quit == true then
 	if (GUI.char == 27 and not (	GUI.mouse.cap & 4 == 4 
 								or 	GUI.mouse.cap & 8 == 8 
-								or 	GUI.mouse.cap & 16 == 16))
+								or 	GUI.mouse.cap & 16 == 16
+                                or  GUI.escape_bypass))
 			or GUI.char == -1 
 			or GUI.quit == true then
 		
 		return 0
 	else
+        if GUI.char == 27 and GUI.escape_bypass then GUI.escape_bypass = "close" end
 		reaper.defer(GUI.Main)
 	end
     
