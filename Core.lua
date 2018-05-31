@@ -873,6 +873,19 @@ GUI.IsInside = function (elm, x, y)
 end
 
 
+-- Returns the x,y that would center elm2 within elm1. 
+-- Axis can be "x", "y", or "xy".
+GUI.center = function (elm1, elm2)
+    
+    if not (    elm1.x and elm1.y and elm1.w and elm1.h
+            and elm2.x and elm2.y and elm2.w and elm2.h) then return end
+            
+    return (elm1.x + (elm1.w - elm2.w) / 2), (elm1.y + (elm1.h - elm2.h) / 2)
+    
+    
+end
+
+
 
 
 ------------------------------------
