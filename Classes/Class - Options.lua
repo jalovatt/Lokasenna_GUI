@@ -517,7 +517,16 @@ function GUI.Checklist:val(newval)
             self:redraw()
 		end
 	else
-		return #self.optarray > 1 and self.optsel or self.optsel[1]
+        if #self.optarray == 1 then
+            return self.optsel[1]
+        else
+            local tmp = {}
+            for i = 1, #self.optarray do
+                tmp[i] = not not self.optsel[i]
+            end
+            return tmp            
+        end
+		--return #self.optarray > 1 and self.optsel or self.optsel[1]
 	end
 	
 end
