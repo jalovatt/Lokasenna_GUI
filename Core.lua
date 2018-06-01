@@ -2111,6 +2111,8 @@ if not os then
         GUI.quit = true
         GUI.error_message = "(Restricted permissions error)"
         
+        return nil, "Error: Restricted permissions"
+        
     end
     
     os = setmetatable({}, { __index = GUI.error_restricted })
