@@ -46,8 +46,10 @@ GUI.crash = function (errObject)
                                       "Oops", 4)
     
     if ret == 6 then 
-        reaper.ShowConsoleMsg("Error: "..err.."\n\n"..
-                              "Stack traceback:\n\t"..table.concat(tmp, "\n\t", 2).."\n\n")
+
+        reaper.ShowConsoleMsg(  "Error: "..err.."\n"..
+                                (GUI.error_message and tostring(GUI.error_message).."\n\n" or "\n") ..
+                                "Stack traceback:\n\t"..table.concat(tmp, "\n\t", 2).."\n\n")
     end
     
     gfx.quit()
@@ -188,7 +190,7 @@ end
 GUI.Main = function ()
     xpcall( function ()    
 
-        GUI.Main_Update_State()
+        if GUI.Main_Update_State() == 0 then return end
 
         GUI.Main_Update_Elms()
 
@@ -196,7 +198,7 @@ GUI.Main = function ()
         -- run again, and do so. 
         if GUI.func then
             
-            local new_time = os.time()
+            local new_time = reaper.time_precise()
             if new_time - GUI.last_time >= (GUI.freq or 1) then
                 GUI.func()
                 GUI.last_time = new_time
@@ -403,6 +405,30 @@ GUI.Main_Draw = function ()
 	
 	gfx.update()
 
+end
+
+
+
+-- Display the GUI version number
+-- Set GUI.version = 0 to hide this
+GUI.Draw_Version = function ()
+	
+	if not GUI.version then return 0 end
+
+	local str = "Lokasenna_GUI "..GUI.version
+	
+	GUI.font("version")
+	GUI.color("txt")
+	
+	local str_w, str_h = gfx.measurestr(str)
+	
+	--gfx.x = GUI.w - str_w - 4
+	--gfx.y = GUI.h - str_h - 4
+	gfx.x = gfx.w - str_w - 6
+	gfx.y = gfx.h - str_h - 4
+	
+	gfx.drawstr(str)	
+	
 end
 
 
@@ -2031,12 +2057,12 @@ end
 
 
 ------------------------------------
--------- Misc. functions -----------
+-------- File functions ------------
 ------------------------------------
 
 
 --[[	Use when working with file paths if you need to add your own /s
-		(Borrowed from X-Raym)
+    (Borrowed from X-Raym)
         
         Apr. 22/18 - Further reading leads me to believe that simply using
         '/' as a separator should work just fine on Windows, Mac, and Linux.
@@ -2059,16 +2085,43 @@ GUI.open_file = function (path)
 end
 
 
+
+
+------------------------------------
+-------- Reaper functions ----------
+------------------------------------
+
+
+-- Checks for Reaper's "restricted permissions" script mode
+-- GUI.script_restricted will be true if restrictions are in place
+-- Call GUI.error_restricted to display an error message about restricted permissions
+-- and exit the script.
+if not os then
+    
+    GUI.script_restricted = true
+    
+    GUI.error_restricted = function()
+
+        reaper.MB(  "This script tried to access a function that isn't available in Reaper's 'restricted permissions' mode." ..
+                    "\n\nThe script was NOT necessarily doing something malicious - restricted scripts are unable " ..
+                    "to access a number of basic functions such as reading and writing files." ..
+                    "\n\nPlease let the script's author know, or consider running the script without restrictions if you feel comfortable.",
+                    "Script Error", 0)
+        
+        GUI.quit = true
+        GUI.error_message = "(Restricted permissions error)"
+        
+    end
+    
+    os = setmetatable({}, { __index = GUI.error_restricted })
+    io = setmetatable({}, { __index = GUI.error_restricted })    
+    
+end
+
+
 -- Also might need to know this
 GUI.SWS_exists = reaper.APIExists("CF_GetClipboardBig")
 
-
--- Why does Lua not have an operator for this?
-GUI.xor = function(a, b)
-   
-   return (a or b) and not (a and b)
-    
-end
 
 
 --[[
@@ -2139,26 +2192,18 @@ GUI.get_window_pos = function (x, y, w, h, anchor, corner)
 end
 
 
--- Display the GUI version number
--- Set GUI.version = 0 to hide this
-GUI.Draw_Version = function ()
-	
-	if not GUI.version then return 0 end
 
-	local str = "Lokasenna_GUI "..GUI.version
-	
-	GUI.font("version")
-	GUI.color("txt")
-	
-	local str_w, str_h = gfx.measurestr(str)
-	
-	--gfx.x = GUI.w - str_w - 4
-	--gfx.y = GUI.h - str_h - 4
-	gfx.x = gfx.w - str_w - 6
-	gfx.y = gfx.h - str_h - 4
-	
-	gfx.drawstr(str)	
-	
+
+------------------------------------
+-------- Misc. functions -----------
+------------------------------------
+
+
+-- Why does Lua not have an operator for this?
+GUI.xor = function(a, b)
+   
+   return (a or b) and not (a and b)
+    
 end
 
 
