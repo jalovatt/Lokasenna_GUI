@@ -1,15 +1,9 @@
 --[[
-	Lokasenna_GUI 2.0
+	Lokasenna_GUI
 
 	- Blank GUI template
 
 ]]--
-
-local dm, _ = debug_mode
-local function Msg(str)
-	reaper.ShowConsoleMsg(tostring(str).."\n")
-end
-
 local info = debug.getinfo(1,'S');
 script_path = info.source:match[[^@?(.*[\/])[^\/]-$]]
 
@@ -20,7 +14,7 @@ local function req(file)
 	
 	if missing_lib then return function () end end
 	
-	local ret, err = loadfile(script_path .. file)
+    local ret, err = loadfile(( file:sub(2, 2) == ":" and "" or script_path) .. file)
 	if not ret then
 		reaper.ShowMessageBox("Couldn't load "..file.."\n\nError: "..tostring(err), "Library error", 0)
 		missing_lib = true		
@@ -49,13 +43,18 @@ if missing_lib then return 0 end
 
 
 ------------------------------------
--------- GUI Stuff -----------------
+-------- Window settings -----------
 ------------------------------------
 
 
 GUI.name = "Example - Script template"
 GUI.x, GUI.y, GUI.w, GUI.h = 0, 0, 400, 200
 GUI.anchor, GUI.corner = "mouse", "C"
+
+
+------------------------------------
+-------- GUI Elements --------------
+------------------------------------
 
 
 --[[

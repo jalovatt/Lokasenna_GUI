@@ -1,17 +1,11 @@
 --[[
-	Lokasenna_GUI 2.0
+	Lokasenna_GUI
 
 	- Using the Main loop to monitor and interact with things in Reaper
 	- Using z layers and related functions to move elements around
 	- Changing elements' methods for your own purposes
 
 ]]--
-
-local dm, _ = debug_mode
-local function Msg(str)
-	reaper.ShowConsoleMsg(tostring(str).."\n")
-end
-
 local info = debug.getinfo(1,'S');
 script_path = info.source:match[[^@?(.*[\/])[^\/]-$]]
 
@@ -67,13 +61,21 @@ end
 
 
 ------------------------------------
--------- GUI Stuff -----------------
+-------- Window settings -----------
 ------------------------------------
 
 
 GUI.name = "Example - Main, Z, and Methods"
 GUI.x, GUI.y, GUI.w, GUI.h = 0, 0, 300, 128
 GUI.anchor, GUI.corner = "mouse", "C"
+
+
+
+
+------------------------------------
+-------- GUI Elements --------------
+------------------------------------
+
 
 --[[	
 

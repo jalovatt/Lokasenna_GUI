@@ -1,15 +1,9 @@
 --[[
-	Lokasenna_GUI 2.0
+	Lokasenna_GUI example
 	
-	- Demonstration of the Listbox and TextEditor classes
+	- Demonstration of the Listbox, Menubar, and TextEditor classes
 
 ]]--
-
-local dm, _ = debug_mode
-local function Msg(str)
-	reaper.ShowConsoleMsg(tostring(str).."\n")
-end
-
 local info = debug.getinfo(1,'S');
 script_path = info.source:match[[^@?(.*[\/])[^\/]-$]]
 
@@ -48,7 +42,7 @@ if missing_lib then return 0 end
 
 
 ------------------------------------
--------- Menu stuff ----------------
+-------- Menu functions ------------
 ------------------------------------
 
 
@@ -169,7 +163,14 @@ local mnu_help = {
 }
 
 
--- This one gets passed to the Menubar
+
+
+------------------------------------
+-------- Menu contents -------------
+------------------------------------
+
+
+-- This table is passed to the Menubar
 -- Must be structured like this (.title, .options, etc)
 local menus = {
     
@@ -222,7 +223,7 @@ local menus = {
 
 
 ------------------------------------
--------- List/text stuff -----------
+-------- Listbox contents ----------
 ------------------------------------
 
 
@@ -322,13 +323,22 @@ end
 
 
 
+
 ------------------------------------
--------- GUI Stuff -----------------
+-------- Window settings -----------
 ------------------------------------
 
 GUI.name = "Example - Menubar, Listbox, and TextEditor"
 GUI.x, GUI.y, GUI.w, GUI.h = 0, 0, 800, 272
 GUI.anchor, GUI.corner = "mouse", "C"
+
+
+
+
+------------------------------------
+-------- GUI Elements --------------
+------------------------------------
+
 
 --[[
     
@@ -338,11 +348,6 @@ GUI.anchor, GUI.corner = "mouse", "C"
 	TextEditor	z,	x,	y,	w,	h[, text, caption, pad])
 	
 ]]--
-
-
-
-
-
 
 
 GUI.New("mnu_menu", "Menubar",      1,  0,   0,   menus, GUI.w)

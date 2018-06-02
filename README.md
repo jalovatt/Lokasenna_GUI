@@ -13,6 +13,8 @@ extending the same fragments of code, cobbled together from a handful of forum t
 with examples of REAPER's graphical functions, and eventually decided to just stop what I
 was doing and put it all together into a proper GUI toolkit.
 
+![https://github.com/jalovatt/Lokasenna_GUI/wiki/images/showcase thumb.png][5]
+
 Enjoy. :)
 
 Or don't. See if I care.
@@ -32,3 +34,4 @@ source of documentation will always be comments in the _Example_ scripts and lib
 [2]: https://github.com/jalovatt/Lokasenna_GUI/wiki
 [3]: https://forum.cockos.com/showthread.php?t=177772
 [4]: https://github.com/jalovatt/Lokasenna_GUI/wiki/1.01-Getting-started
+[5]: https://github.com/jalovatt/Lokasenna_GUI/wiki/images/showcase.png
