@@ -1,16 +1,12 @@
 --[[
-	Lokasenna_GUI 2.0
-	
-	-- Tabs and layer sets
-	-- Accessing elements' parameters
+    Lokasenna_GUI example
+    
+    - General demonstration
+	- Tabs and layer sets
+    - Subwindows
+	- Accessing elements' parameters
 
 ]]--
-
-local dm, _ = debug_mode
-local function Msg(str)
-	reaper.ShowConsoleMsg(tostring(str).."\n")
-end
-
 local info = debug.getinfo(1,'S');
 script_path = info.source:match[[^@?(.*[\/])[^\/]-$]]
 
@@ -46,6 +42,7 @@ req("Classes/Class - Menubox.lua")()
 req("Classes/Class - Textbox.lua")()
 req("Classes/Class - Frame.lua")()
 req("Classes/Class - Options.lua")()
+req("Classes/Class - Window.lua")()
 
 -- If any of the requested libraries weren't found, abort the script.
 if missing_lib then return 0 end
@@ -54,44 +51,13 @@ if missing_lib then return 0 end
 
 
 ------------------------------------
--------- Data + functions ----------
+-------- Functions -----------------
 ------------------------------------
-
-
-local function btn_click()
-	
-	local tab_num = GUI.Val("tabs")
-	Msg("Displaying values for tab "..tostring(tab_num))
-	
-	-- The '+ 2' here is just to translate from a tab number to its' 
-	-- associated z layer. More complicated scripts would have to 
-	-- actually access GUI.elms.tabs.z_sets[tab_num] and iterate over
-	-- the table's contents (see the call to GUI.elms.tabs:update_sets
-	-- below)
-	for k, v in pairs(GUI.elms_list[tab_num + 2]) do
-		
-		local val = GUI.Val(v)
-		if type(val) == "table" then
-			local str = ""
-			for i = 1, #val do
-				str = str..", "..tostring(val[i])
-			end
-			val = string.sub(str, 3)
-		end
-		Msg("\t"
-			..tostring(v)
-			.."\t\t"
-			..tostring(val)
-		   )
-		
-	end
-	
-end
 
 
 local function fade_lbl()
    
-    -- Fade out the label
+   -- Fade out the label
     if GUI.elms.my_lbl.z == 3 then
         GUI.elms.my_lbl:fade(1, 3, 6)
         
@@ -103,10 +69,69 @@ local function fade_lbl()
 end
 
 
+local function btn_click()
+	
+    -- Open the Window element
+	GUI.elms.wnd_test:open()
+	
+end
+
+
+local function wnd_OK()
+
+    -- Close the Window element
+    GUI.elms.wnd_test:close()
+    
+end
+
+
+-- Returns a list of every element on the specified z-layer and
+-- a second list of each element's values
+local function get_values_for_tab(tab_num)
+    
+	-- The '+ 2' here is just to translate from a tab number to its' 
+	-- associated z layer. More complicated scripts would have to 
+	-- actually access GUI.elms.tabs.z_sets[tab_num] and iterate over
+	-- the table's contents (see the call to GUI.elms.tabs:update_sets
+	-- below)
+    local strs_v, strs_val = {}, {}
+	for k, v in pairs(GUI.elms_list[tab_num + 2]) do
+		
+        strs_v[#strs_v + 1] = v
+		local val = GUI.Val(v)
+		if type(val) == "table" then
+			local strs = {}
+			for k, v in pairs(val) do
+                local str = tostring(v) 
+                
+                -- For conciseness, reduce boolean values to T/F
+				if str == "true" then
+                    str = "T"
+                elseif str == "false" then
+                    str = "F"
+                end
+                strs[#strs + 1] = str
+			end
+			val = table.concat(strs, ", ")
+		end
+        
+        -- Limit the length of the returned string so it doesn't
+        -- spill out past the edge of the window
+		strs_val[#strs_val + 1] = string.len(tostring(val)) <= 35
+                                and tostring(val)
+                                or  string.sub(val, 1, 32) .. "..."
+		
+	end
+    
+    return strs_v, strs_val
+    
+end
+
+
 
 
 ------------------------------------
--------- GUI Stuff -----------------
+-------- Window settings -----------
 ------------------------------------
 
 
@@ -127,8 +152,20 @@ GUI.anchor, GUI.corner = "mouse", "C"
 	Slider		z, 	x, 	y, 	w, 	caption, min, max, defaults[, inc, dir]
 	Tabs		z, 	x, 	y, 		tab_w, tab_h, opts[, pad]
 	Textbox		z, 	x, 	y, 	w, 	h[, caption, pad]
+    Window      z,  x,  y,  w,  h,  caption, z_set[, center]
 	
 ]]--
+
+
+-- Elements can be created in any order you want. I find it easiest to organize them
+-- by tab, or by what part of the script they're involved in.
+
+
+
+
+------------------------------------
+-------- General elements ----------
+------------------------------------
 
 
 GUI.New("tabs", 	"Tabs", 		1, 0, 0, 64, 20, "Stuff,Sliders,Options", 16)
@@ -153,8 +190,13 @@ GUI.elms.tabs:update_sets(
 
 
 
+------------------------------------
+-------- Tab 1 Elements ------------
+------------------------------------
+
+
 GUI.New("my_lbl", 	"Label", 		3, 256, 96, "Label!", true, 1)
-GUI.New("my_knob", 	"Knob", 		3, 64, 112, 64, "Volume", 0, 11, 44, 0.25)
+GUI.New("my_knob", 	"Knob", 		3, 64, 112, 48, "Volume", 0, 11, 44, 0.25)
 GUI.New("my_mnu", 	"Menubox", 		3, 256, 176, 64, 20, "Options:", "1,2,3,4,5,6.12435213613")
 GUI.New("my_btn2",  "Button",       3, 256, 256, 64, 20, "Click me!", fade_lbl)
 GUI.New("my_txt", 	"Textbox", 		3, 96, 224, 96, 20, "Text:", 4)
@@ -183,6 +225,11 @@ GUI.elms.my_frm.bg = "elm_bg"
 
 
 
+------------------------------------
+-------- Tab 2 Elements ------------
+------------------------------------
+
+
 GUI.New("my_rng", 	"Slider", 		4, 32, 128, 256, "Sliders", 0, 30, {5, 10, 15, 20, 25})
 GUI.New("my_pan", 	"Slider", 		4, 32, 192, 256, "Pan", -100, 100, 100)
 GUI.New("my_sldr", 	"Slider",		4, 128, 256, 128, "Slider", 0, 10, 20, 0.25, "v")
@@ -203,6 +250,11 @@ end
 
 
 
+------------------------------------
+-------- Tab 3 Elements ------------
+------------------------------------
+
+
 GUI.New("my_chk", 	"Checklist", 	5, 32, 96, 160, 160, "Checklist:", "Alice,Bob,Charlie,Denise,Edward,Francine", "v", 4)
 GUI.New("my_opt", 	"Radio", 		5, 200, 96, 160, 160, "Options:", "Apples,Bananas,_,Donuts,Eggplant", "v", 4)
 GUI.New("my_chk2",	"Checklist",	5, 32, 280, 384, 64, "Whoa, another Checklist", "A,B,C,_,D,E,F,_,G,H,I", "h", 4)
@@ -215,7 +267,54 @@ GUI.elms.my_chk2.swap = true
 
 
 ------------------------------------
--------- Main function -------------
+-------- Subwindow and -------------
+-------- its elements  -------------
+------------------------------------
+
+
+GUI.New("wnd_test", "Window", 10, 0, 0, 312, 244, "Dialog Box", {9, 10})
+GUI.New("lbl_elms", "Label", 9, 16, 16, "", false, 4)
+GUI.New("lbl_vals", "Label", 9, 96, 16, "", false, 4, nil, elm_bg)
+GUI.New("btn_close", "Button", 9, 0, 184, 48, 24, "OK", wnd_OK)
+
+-- We want these elements out of the way until the window is opened
+GUI.elms_hide[9] = true
+GUI.elms_hide[10] = true
+
+
+-- :onopen is a hook provided by the Window class. This function will be run
+-- every time the window opens.
+function GUI.elms.wnd_test:onopen()
+    
+    -- :adjustelm places the element's specified x,y coordinates relative to
+    -- the Window. i.e. creating an element at 0,0 and adjusting it will put
+    -- the element in the Window's top-left corner.
+    self:adjustelm(GUI.elms.btn_close)
+    
+    -- Buttons look nice when they're centered.
+    GUI.elms.btn_close.x, _ = GUI.center(GUI.elms.btn_close, self)    
+    
+    self:adjustelm(GUI.elms.lbl_elms)
+    self:adjustelm(GUI.elms.lbl_vals)
+    
+    -- Set the Window's title
+	local tab_num = GUI.Val("tabs")
+    self.caption = "Element values for Tab " .. tab_num
+	
+    -- This Window provides a readout of the values for every element
+    -- on the current tab.
+    local strs_v, strs_val = get_values_for_tab(tab_num)
+    
+    GUI.Val("lbl_elms", table.concat(strs_v, "\n"))
+    GUI.Val("lbl_vals", table.concat(strs_val, "\n"))
+    
+end
+
+
+
+
+------------------------------------
+-------- Main functions ------------
 ------------------------------------
 
 
@@ -237,6 +336,7 @@ local function Main()
 end
 
 
+-- Open the script window and initialize a few things
 GUI.Init()
 
 -- Tell the GUI library to run Main on each update loop
@@ -247,4 +347,5 @@ GUI.func = Main
 GUI.freq = 0
 
 
+-- Start the main loop
 GUI.Main()
