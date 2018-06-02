@@ -1,41 +1,11 @@
 --[[	Lokasenna_GUI - Frame class
 	
-	---- User parameters ----
+    For documentation, see this class's page on the project wiki:
+    https://github.com/jalovatt/Lokasenna_GUI/wiki/Frame
+    
+    Creation parameters:
+	name, z, x, y, w, h[, shadow, fill, color, round]
 
-	(name, z, x, y, w, h[, shadow, fill, color, round])
-
-Required:
-z				Element depth, used for hiding and disabling layers. 1 is the highest.
-x, y			Coordinates of top-left corner
-w, h			Frame size
-
-Optional:
-shadow			Boolean. Draw a shadow beneath the frame?	Defaults to False.
-fill			Boolean. Fill in the frame?	Defaults to False.
-color			Frame (and fill) color.	Defaults to "elm_frame".
-round			Radius of the frame's corners. Defaults to 0.
-
-Additional:
-text			Text to be written inside the frame. Will automatically be wrapped
-				to fit self.w - 2*self.pad.
-txt_indent		Number of spaces to indent the first line of each paragraph
-txt_pad			Number of spaces to indent wrapped lines (to match up with bullet
-				points, etc)
-pad				Padding between the frame's edges and text. Defaults to 0.				
-bg				Color to be drawn underneath the text. Defaults to "wnd_bg",
-				but will use the frame's fill color instead if Fill = True
-font			Text font. Defaults to preset 4.
-col_txt			Text color. Defaults to "txt".
-
-
-Extra methods:
-
-
-GUI.Val()		Returns the frame's text.
-GUI.Val(new)	Sets the frame's text and formats it to fit within the frame, as above.
-
-	
-	
 ]]--
 
 if not GUI then

@@ -1,71 +1,10 @@
 --[[	Lokasenna_GUI - Tabs class
 	
-	---- User parameters ----
-
-(name, z, x, y, tab_w, tab_h, opts[, pad])
-
-Required:
-z				Element depth, used for hiding and disabling layers. 1 is the highest.
-x, y			Coordinates of top-left corner
-tab_w, tab_h	Size of each tab
-opts			Comma-separated string of tab names
-
-Optional:
-pad				Padding between tabs
-
-Additional:
-w, h			Overall width and height of the tab strip. These are determined
-				automatically based on the number of tabs and their size.
-				
-bg				Color to be drawn underneath the tabs. Defaults to "elm_bg".
-col_txt			Text color. Defaults to "txt".
-col_tab_a		Active tab color. Defaults to "wnd_bg"
-col_tab_b		Inactive tab color. Defaults to "tab_bg"
-font_a			Active tab font. Defaults to 3.
-font_b			Inactive tab font. Defaults to 4.
-
-state			The current tab. Numbered from left to right, starting at 1.
-
-
-
-Extra methods:
-update_sets		Controls the z layers that are shown for each tab.
-
-				Define z sets like so:
-				(Only needs to be done once, at startup)
-
-				GUI.elms.my_tabs:update_sets(
-					{
-							   __ z-layers shown on that tab
-					  __ tab  /
-					 /		  |
-					 |		  v
-					 v     
-					[1] = {2, 3, 4}, 
-					[2] = {2, 5, 6}, 
-					[3] = {2, 7, 8},
-					}
-				)
-				
-				
-				update_sets() will be called automatically when a tab is clicked, or if
-				a new tab is set using GUI.Val.
-				
-
-				- z-layers not included in any set (z = 1, above) will always be active 
-				  unless frozen/hidden manually
-				- z-layers in multiple sets (z = 2, above) will be active on all of those tabs
-				- Elements can have their z changed at any time, handy if you want to hide 
-				  specific bits rather than the whole layer
-				
-
-GUI.Val()		Returns the active tab. Numbered from 1.
-GUI.Val(new)	Sets the active tab. Numbered from 1.
-
-
-
-
-
+    For documentation, see this class's page on the project wiki:
+    https://github.com/jalovatt/Lokasenna_GUI/wiki/Tabs
+    
+    Creation parameters:
+    name, z, x, y, tab_w, tab_h, opts[, pad]
 
 ]]--
 

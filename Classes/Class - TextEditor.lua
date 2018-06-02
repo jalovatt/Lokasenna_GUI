@@ -1,50 +1,10 @@
 --[[	Lokasenna_GUI - TextEditor class
 	
-	---- User parameters ----
-
-	(name, z, x, y, w, h[, text, caption, pad])
-
-Required:
-z				Element depth, used for hiding and disabling layers. 1 is the highest.
-x, y			Coordinates of top-left corner
-w, h			Width and height of the text editor
-
-Optional:
-text			Multiline string of text
-caption			Label shown to the left of the text editor
-pad				Padding between the label and the text editor
-
-
-Additional:
-bg				Backgound color for the editor
-cap_bg          Color to be drawn underneath the label. Defaults to "wnd_bg"
-shadow			Boolean. Draw a shadow beneath the label?
-color			Text color
-col_fill        Fill color
-font_a			Label font
-
-font_b			Text font. 
-				*** Only monospaced fonts will work properly ***
-
-focus			Whether the text editor is "in focus" or not, allowing users to type.
-				This setting is automatically updated, so you shouldn't need to
-				change it yourself in most cases.
-				
-undo_limit		How many undo states can be stored before the first is erased.
-				Defaults to 20.
-				
-
-Extra methods:
-
-GUI.Val()		Returns self.retval as a string
-GUI.Val(new)	Accepts a multiline string
-
-:wnd_recalc()	If your script needs to resize the text editor, move it around, etc,
-				run this afterward so it can update a few internal values
-
-
-*** Note: Reaper doesn't support the Tab character ("\t") properly, so any tabs are
-    automatically replaced with four spaces. ***
+    For documentation, see this class's page on the project wiki:
+    https://github.com/jalovatt/Lokasenna_GUI/wiki/TextEditor
+    
+    Creation parameters:
+	name, z, x, y, w, h[, text, caption, pad]
 
 ]]--
 

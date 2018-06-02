@@ -1,49 +1,10 @@
 --[[	Lokasenna_GUI - Button class 
 	
-	(Adapted from eugen2777's simple GUI template.)
-	
-	---- User parameters ----
-
-	(name, z, x, y, w, h, caption, func[, ...])
-
-Required:
-z				Element depth, used for hiding and disabling layers. 1 is the highest.
-x, y			Coordinates of top-left corner
-w, h			Button size
-caption			Label
-func			Function to perform when clicked
-
-                Note that you only need give a reference to the function:
-
-                GUI.New("my_button", "Button", 1, 32, 32, 64, 32, "Button", my_func)
-
-                Unless the function is returning a function (hey, Lua is weird), you don't 
-                want to actually run it:
-
-                GUI.New("my_button", "Button", 1, 32, 32, 64, 32, "Button", my_func())
-
-Optional:
-...				Any parameters to pass to that function, separated by commas as they
-				would be if calling the function directly.
-
-
-Additional:
-r_func			Function to perform when right-clicked
-r_params		If provided, any parameters to pass to that function
-font			Button label's font
-col_txt			Button label's color
-
-col_fill		Button color. 
-				*** If you change this, call :init() afterward ***
-
-
-Extra methods:
-exec			Force a button-click, i.e. for allowing buttons to have a hotkey:
-					[Y]es	[N]o	[C]ancel
-					
-				Params:
-				r			Boolean, optional. r = true will run the button's
-							right-click action instead
+    For documentation, see this class's page on the project wiki:
+    https://github.com/jalovatt/Lokasenna_GUI/wiki/TextEditor
+    
+    Creation parameters:
+	name, z, x, y, w, h, caption, func[, ...]
 
 ]]--
 

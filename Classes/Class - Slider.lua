@@ -1,83 +1,11 @@
 --[[	Lokasenna_GUI - Slider class
 
-	---- User parameters ----
+    For documentation, see this class's page on the project wiki:
+    https://github.com/jalovatt/Lokasenna_GUI/wiki/Slider
+    
+    Creation parameters:
+	name, z, x, y, w, caption, min, max, defaults[, inc, dir]
 
-	(name, z, x, y, w, caption, min, max, defaults[, inc, dir])
-
-Required:
-z				Element depth, used for hiding and disabling layers. 1 is the highest.
-x, y			Coordinates of top-left corner
-w				Width of the slider track. Height is fixed.
-caption			Label shown above the slider track.
-min, max		Minimum and maximum values
-defaults        Table of default steps for each slider handle.
-
-                - Steps are inclusive, and start from 0.
-                
-				- If only one handle is needed, it can be given as a number rather than a table.                        
-                        
-Optional:
-inc             Amount to increment the value per step. Defaults to 1.
-                        
-dir				"h"	    Horizontal slider (default)
-				"v"	    Vertical slider
-
-
-                Slider values are counted in steps from min to max. The total number of 
-                steps will be:
-                        
-                        inc * |max - min|
-
-
-                Examples:
-                
-                    A slider from 1 to 10, defaulting to 5:
-                        min     = 1
-                        max     = 10
-                        defaults= 4     <-- 0,1,2,3,[4]
-
-					A pan slider from -100 to 100, defaulting to 0:
-						min		= -100
-						max		= 100
-						defaults= 100
-
-					Five sliders from 0 to 30, with a step size of 0.25,
-                    defaulting to 5, 10, 15, 20, 25:
-                    
-						min		= 0
-						max		= 30
-						defaults= {20, 40, 60, 80, 100}
-                        inc     = 0.25
-
-Additional:
-bg				Color to be drawn underneath the label. Defaults to "wnd_bg"
-font_a			Label font
-font_b			Value font
-col_txt			Text color
-col_fill		Fill bar color
-show_handles	Boolean. If false, will hide the slider handles.
-				i.e. displaying a VU meter
-show_values		Boolean. If false, will hide the handles' value labels.
-cap_x, cap_y	Offset values for the slider's caption
-
-output			Allows the value labels to be modified; accepts several different var types:
-				
-				string		Replaces all of the value labels
-				number
-				table		Replaces each value label with self.output[retval]
-				functions	Replaces each value with the returned value from
-							self.output(retval)
-							
-
-
-Extra methods:
-
-
-GUI.Val()		Returns a table of values for each handle, sorted from smallest to largest
-GUI.Val(new)	Accepts a table of values for each handle, as above
-
-
-	
 ]]--
 
 

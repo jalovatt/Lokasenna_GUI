@@ -1,39 +1,10 @@
 --[[	Lokasenna_GUI - Textbox class
 	
-	---- User parameters ----
-
-	(name, z, x, y, w, h[, caption, pad])
-
-Required:
-z				Element depth, used for hiding and disabling layers. 1 is the highest.
-x, y			Coordinates of top-left corner
-w, h			Width and height of the textbox
-
-Optional:
-caption			Label shown to the left of the textbox
-pad				Padding between the label and the textbox
-
-
-Additional:
-bg				Color to be drawn underneath the label. Defaults to "wnd_bg"
-shadow			Boolean. Draw a shadow beneath the label?
-color			Text color
-font_a			Label font
-font_b			Text font
-cap_pos         Position of the text box's label.
-                "left", "right", "top", "bottom"
-
-focus			Whether the textbox is "in focus" or not, allowing users to type.
-				This setting is automatically updated, so you shouldn't need to
-				change it yourself in most cases.
-				
-
-Extra methods:
-
-
-GUI.Val()		Returns the contents of the textbox.
-GUI.Val(new)	Sets the contents of the textbox.
-
+    For documentation, see this class's page on the project wiki:
+    https://github.com/jalovatt/Lokasenna_GUI/wiki/Textbox
+    
+    Creation parameters:
+	name, z, x, y, w, h[, caption, pad]
 
 ]]--
 

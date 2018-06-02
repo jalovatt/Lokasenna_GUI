@@ -1,66 +1,11 @@
 --[[	Lokasenna_GUI - Knob class.
 
-	---- User parameters ----
-	
-	(name, z, x, y, w, caption, min, max, default,[ inc, vals])
-	
-Required:	
-z				Element depth, used for hiding and disabling layers. 1 is the highest.	
-x, y, w			Coordinates of top-left corner, width. Height is fixed.
-caption			Label / question
-min, max		Minimum and maximum values
-default			Default step for the knob. Steps are counted from min to max starting at 0.
+    For documentation, see this class's page on the project wiki:
+    https://github.com/jalovatt/Lokasenna_GUI/wiki/Knob
+    
+    Creation parameters:
+	name, z, x, y, w, caption, min, max, default,[ inc, vals]
 
-
-Optional:
-inc             Amount to increment the value per step. Defaults to 1.
-
-vals			Boolean, defaults to True. Display value labels?
-				For knobs with a lot of steps, i.e. Pan from -100 to +100, set this
-				to false and use a label to read the value, update the Knob's caption
-
-
-                Example:
-                
-                    A knob from 0 to 11, defaulting to 11, with a step size of 0.25:
-                    
-                        min     = 0
-                        max     = 11
-                        default = 44
-                        inc     = 0.25
-
-
-
-Additional:
-bg				Color to be drawn underneath the label. Defaults to "wnd_bg"
-font_a          Caption font
-font_b          Value font
-col_txt         Text color
-col_head        Knob head color
-col_body        Knob body color
-cap_x, cap_y    Offset values for the knob's caption.
-output			Allows the value labels to be modified; accepts several different var types:
-				
-				string		Replaces all of the value labels
-				number
-				table		Replaces each value label with output[step], with the steps
-							being numbered as above
-				functions	Replaces each value with the returned value from
-							output(step), numbered as above
-							
-				Output will always count steps starting from 0, so you'll have to account for minimum
-				values in the final string yourself.
-	
-	
-Extra methods:
-
-GUI.Val()		Returns the current display value of the knob. i.e. 
-				
-					For a Pan knob, -100 to +100, with 201 steps,
-					GUI.Val("my_knob") will return an integer from -100 to +100
-					
-GUI.Val(new)	Sets the display value of the knob, as above.				
-	
 ]]--
 
 if not GUI then

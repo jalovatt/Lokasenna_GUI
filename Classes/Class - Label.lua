@@ -1,59 +1,11 @@
 --[[	Lokasenna_GUI - Label class.
 
-	---- User parameters ----
-	
-	(name, z, x, y, caption[, shadow, font, color, bg])
-	
-Required:
-z				Element depth, used for hiding and disabling layers. 1 is the highest.
-x, y			Coordinates of top-left corner
-caption			Label text
+    For documentation, see this class's page on the project wiki:
+    https://github.com/jalovatt/Lokasenna_GUI/wiki/Label
+    
+    Creation parameters:
+	name, z, x, y, caption[, shadow, font, color, bg]
 
-Optional:
-shadow			Boolean. Draw a shadow?
-font			Which of the GUI's font values to use
-color			Use one of the GUI.colors keys to override the standard text color
-bg				Color to be drawn underneath the label. Defaults to "wnd_bg"
-
-Additional:
-w, h			These are set when the Label is initially drawn, and updated any
-				time the label's text is changed via GUI.Val().
-
-Extra methods:
-fade			Allows a label to fade out and disappear. Nice for briefly displaying
-				a status message like "Saved to disk..."
-
-				Params:
-				len			Length of the fade, in seconds
-				z_new		z layer to move the label to when called
-							i.e. popping up a tooltip
-				z_end		z layer to move the label to when finished
-							i.e. putting the tooltip label back in a
-							frozen layer until you need it again
-							
-							Set to -1 to have the label deleted instead
-				
-				curve		Optional. Sets the "shape" of the fade.
-							
-							1 	will produce a linear fade
-							>1	will keep the text at full-strength longer,
-								but with a sharper fade at the end
-							<1	will drop off very steeply
-                            
-							Defaults to 3 if not specified                            
-                            
-                            Use negative values to fade in on z_new, rather
-                            than fading out. In this case, the value of
-                            z_end doesn't matter.
-							
-
-							
-				Note: While fading, the label's z layer will be redrawn on every
-				update loop, which may affect CPU usage for scripts with many elements.
-                
-                If this is the case, try to put the label on a layer with as few
-                other elements as possible.
-							  
 ]]--
 
 if not GUI then

@@ -1,67 +1,10 @@
 --[[	Lokasenna_GUI - MenuBox class
 	
-	---- User parameters ----
-	
-	(name, z, x, y, w, h, caption, opts[, pad, noarrow])
-	
-Required:
-z				Element depth, used for hiding and disabling layers. 1 is the highest.
-x, y			Coordinates of top-left corner
-w, h
-caption			Label displayed to the left of the menu box
-opts			Comma-separated string of options. As with gfx.showmenu, there are
-				a few special symbols that can be added at the beginning of an option:
-				
-                    ! : Checked
-					# : grayed out
-					> : this menu item shows a submenu
-					< : last item in the current submenu
-					An empty field will appear as a separator in the menu.
-					
-				
-				
-Optional:
-pad				Padding between the label and the box
-noarrow         Boolean. Removes the arrow from the menubox.
-
-
-Additional:
-col_txt         Value color
-col_cap         Caption color
-bg				Color to be drawn underneath the label. Defaults to "wnd_bg"
-font_a			Font for the menu's label
-font_b			Font for the menu's current value
-align           Flags for gfx.drawstr:
-
-                    flags&1: center horizontally
-                    flags&2: right justify
-                    flags&4: center vertically
-                    flags&8: bottom justify
-                    flags&256: ignore right/bottom, 
-                    otherwise text is clipped to (gfx.x, gfx.y, right, bottom)
-                    
-
-Extra methods:
-
-
-
-GUI.Val()		Returns the current menu option, numbered from 1. Numbering does include
-				separators and submenus:
-				
-					New					1
-					--					
-					Open				3
-					Save				4
-					--					
-					Recent	>	a.txt	7
-								b.txt	8
-								c.txt	9
-					--
-					Options				11
-					Quit				12
-										
-GUI.Val(new)	Sets the current menu option, numbered as above.
-
+    For documentation, see this class's page on the project wiki:
+    https://github.com/jalovatt/Lokasenna_GUI/wiki/Menubox
+    
+    Creation parameters:
+	name, z, x, y, w, h, caption, opts[, pad, noarrow]
 
 ]]--
 

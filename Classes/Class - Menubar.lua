@@ -1,93 +1,10 @@
 --[[	Lokasenna_GUI - Menubar clas
 	
-	---- User parameters ----
-
-	(name, z, x, y, menus[, w, h, pad])
-
-Required:
-z				Element depth, used for hiding and disabling layers. 1 is the highest.
-x, y			Coordinates of top-left corner
-w, h			Width and height of the Menubar
-menus           Accepts a specifically formatted table.
-
-                menus = {
-                    
-                    
-                    -- Menu title
-                    {title = "File", options = {
-                    
-                        -- Menu item            Function to run when clicked
-                        {"New",                 mnu_file.new},
-                        {""},
-                        {"Open",                mnu_file.open},
-                        {">Recent Files"},
-                            {"blah.txt",        mnu_file.recent_blah},
-                            {"stuff.txt",       mnu_file.recent_stuff},
-                            {"<readme.md",      mnu_file.recent_readme},
-                        {"Save",                mnu_file.save},
-                        {"Save As",             mnu_file.save_as},
-                        {""},
-                        {"#Print",               mnu_file.print},
-                        {"#Print Preview",       mnu_file.print_preview},
-                        {""},
-                        {"Exit",                mnu_file.exit}
-                        
-                    }},
-                    
-                    {title = "Edit", options = {....}},
-                    
-                    ...etc...
-                    
-                }
-
-                - Menu options can be prefixed with the following:
-                
-                    ! : Checked
-					# : grayed out
-					> : this menu item shows a submenu
-					< : last item in the current submenu
-                    
-                - An empty item ({""}) will appear as a separator in the menu.
-                
-                - Functions don't need to be in any particular format or even associated
-                  with each other; this would also work:
-                  
-                        {"New",                 new_func),
-                        {"Open",                open),
-                        {"Save",                savestuff),
-                
-                
-
- 
- 
-
-Optional:
-w, h            Specify an overall width and height. If omitted, these will be calculated
-                automatically from the menu titles
-pad             Extra width added between menus. Defaults to 0.
-
-Additional:
-font            Font for the menu titles
-col_txt         Color the menu titles
-col_bg          Color for the menu bar
-col_over        Color for the highlighted menu
-
-
-Extra methods:
-
-
-GUI.Val()		Returns the menu table
-GUI.Val(new)	Accepts a new menu table and reinitializes some internal values.
-
-                Should only be necessary if the menu titles need to be changed; for things 
-                like checking off/graying out menu items, or even updating dynamic menus 
-                like "Recent Files", it would probably be easier to just edit the
-                ' options = {....} ' yourself and directly replace it:
-                
-                local new_file_options = GUI.elms.my_menubar.menus[1].options
-                ...edit the names or whatever...
-                GUI.elms.my_menubar.menus[1].options = new_file_options
-
+    For documentation, see this class's page on the project wiki:
+    https://github.com/jalovatt/Lokasenna_GUI/wiki/Menubar
+    
+    Creation parameters:
+	name, z, x, y, menus[, w, h, pad]
 
 ]]--
 

@@ -1,4 +1,4 @@
---[[	Lokasenna_GUI - Options class
+--[[	Lokasenna_GUI - Options classes
 	
     This file provides two separate element classes:
     
@@ -8,69 +8,12 @@
     Both classes take the same parameters on creation, and offer the same parameters
     afterward - their usage only differs when it comes to their respective :val methods.
     
+    For documentation, see the class pages on the project wiki:
+    https://github.com/jalovatt/Lokasenna_GUI/wiki/Checklist
+    https://github.com/jalovatt/Lokasenna_GUI/wiki/Radio
     
-
-
-
-	Adapted from eugen2777's simple GUI template.
-	
-	---- User parameters ----
-	
-	(name, z, x, y, w, h, caption, opts[, dir, pad])
-	
-Required:
-z				Element depth, used for hiding and disabling layers. 1 is the highest.
-x, y			Coordinates of top-left corner
-caption			Element title. Feel free to just use a blank string: ""
-opts			Accepts either a table* or a comma-separated string of options.
-
-				Options can be separated by a gap in the list by using "_":
-				
-				opts = "Alice,Bob,Charlie,_,Edward,Francine"
-				->
-				Alice       1
-				Bob         2
-				Charlie     3
-				
-				Edward      5
-				Francine    6
-
-                * Must be indexed contiguously, starting from 1.
-
-Optional:
-dir				"h"		Options will extend to the right, with labels above them
-				"v"		Options will extend downward, with labels to their right
-pad				Separation in px between options. Defaults to 4.
-
-
-Additional:
-bg				Color to be drawn underneath the text. Defaults to "wnd_bg"
-frame			Boolean. Draw a frame around the options.
-size			Width of the unfilled options in px. Defaults to 20.
-				* Changing this might mess up the spacing *
-col_txt			Text color
-col_fill		Filled option color
-font_a			List title font
-font_b			List option font
-shadow			Boolean. Draw a shadow under the text? Defaults to true.
-swap			If dir = "h", draws the option labels below them rather than above
-						 "v", shifts the options over and draws the option labels 
-                              to the left rather than the right.
-
-
-Extra methods:
-
-
-    Radio
-
-GUI.Val()		Returns the current option, numbered from 1.
-GUI.Val(new)	Sets the current option, numbered from 1.
-
-
-    Checklist
-    
-GUI.Val()		Returns a table of boolean values for each option. Indexed from 1.
-GUI.Val(new)	Accepts a table of boolean values for each option. Indexed from 1.
+    Creation parameters:
+	name, z, x, y, w, h, caption, opts[, dir, pad]
 
 ]]--
 

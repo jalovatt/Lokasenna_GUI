@@ -1,40 +1,10 @@
 --[[	Lokasenna_GUI - Listbox class
 	
-	---- User parameters ----
-
-	(name, z, x, y, w, h[, list, multi, caption, pad])
-
-Required:
-z				Element depth, used for hiding and disabling layers. 1 is the highest.
-x, y			Coordinates of top-left corner
-w, h			Width and height of the text editor
-
-Optional:
-list			Accepts either a comma-separated string of options or a table.
-multi			Boolean. Can the user select multiple items (Ctrl, Shift)?
-caption			Label shown to the left of the text editor
-pad				Padding between the label and the text editor
-
-
-Additional:
-bg				Color to be drawn underneath the list. Defaults to "wnd_bg"
-cap_bg          Color to be drawn underneath the list. Defaults to "wnd_bg"
-shadow			Boolean. Draw a shadow beneath the label?
-color			Text color
-font_a			Label font
-font_b			Text font. 
-				
-
-Extra methods:
-
-GUI.Val()		Returns either a single item number (multi = false), or a table with indices
-				for each selected item (multi = true)
-				
-GUI.Val(new)	Accepts a table with [#] = true for any list items to be selected.
-
-:wnd_recalc()	If your script needs to resize the listbox, move it around, etc,
-				run this afterward so it can update a few internal values
-
+    For documentation, see this class's page on the project wiki:
+    https://github.com/jalovatt/Lokasenna_GUI/wiki/Listbox
+    
+    Creation parameters:
+	name, z, x, y, w, h[, list, multi, caption, pad]
 
 ]]--
 
