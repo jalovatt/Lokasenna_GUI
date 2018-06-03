@@ -1021,8 +1021,9 @@ GUI.Msg = function (str)
 	reaper.ShowConsoleMsg(tostring(str).."\n")
 end
 
--- Print the specified parameters for a given element to the Reaper console.
--- If nothing is specified, prints all of the element's properties.
+-- Returns the specified parameters for a given element.
+-- If nothing is specified, returns all of the element's properties.
+-- ex. local str = GUI.elms.my_element:Msg("x", "y", "caption", "col_txt")
 function GUI.Element:Msg(...)
     
     local arg = {...}
@@ -1051,7 +1052,8 @@ function GUI.Element:Msg(...)
         
     end
     
-    reaper.ShowConsoleMsg( "\n" .. table.concat(strs, "\n") .. "\n")
+    --reaper.ShowConsoleMsg( "\n" .. table.concat(strs, "\n") .. "\n")
+    return table.concat(strs, "\n")
     
 end
 
@@ -1650,7 +1652,7 @@ GUI.shadow = function (str, col1, col2)
 	
 	local x, y = gfx.x, gfx.y
 	
-	GUI.color(col2)
+	GUI.color(col2 or "shadow")
 	for i = 1, GUI.shadow_dist do
 		gfx.x, gfx.y = x + i, y + i
 		gfx.drawstr(str)
