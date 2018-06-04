@@ -240,7 +240,6 @@ GUI.Main_Update_State = function()
 	if GUI.cur_w ~= gfx.w or GUI.cur_h ~= gfx.h then
 		GUI.cur_w, GUI.cur_h = gfx.w, gfx.h
         
-        -- Deprecated
 		GUI.resized = true
         
         -- Hook for user code
@@ -581,7 +580,8 @@ GUI.Update = function (elm)
 	local inside = GUI.IsInside(elm, x, y)
 	
 	local skip = elm:onupdate() or false
-		
+    
+    if GUI.resized then elm:onresize() end
 	
 	if GUI.elm_updated then
 		if elm.focus then
@@ -1008,7 +1008,12 @@ function GUI.Element:ontype() end
 -- when the user clicks out of the box.
 function GUI.Element:lostfocus() end
 
+-- Called when the script window has been resized
+function GUI.Element:onresize() 
+    
+    GUI.Msg(self.name .. ":onresize")
 
+end
 
 
 ------------------------------------
