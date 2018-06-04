@@ -260,6 +260,19 @@ function GUI.Window:adjustelm(elm, force)
 end
 
 
+function GUI.Window:adjustchildelms(force)
+
+    for k in pairs( self:getchildelms() ) do
+        
+        if not self.noadjust[k] then
+            
+            self:adjustelm(GUI.elms[k], force)
+            
+        end
+        
+    end    
+    
+end
 
 
 ------------------------------------
@@ -326,5 +339,19 @@ function GUI.Window:showlayers()
     for k, v in pairs(self.z_set) do
         GUI.elms_hide[v] = true
     end
+    
+end
+
+
+function GUI.Window:getchildelms()
+    
+    local elms = {}
+    for _, n in pairs(self.z_set) do
+        for k, v in pairs(GUI.elms_list[n]) do
+            if v ~= self.name then elms[v] = true end
+        end
+    end
+    
+    return elms
     
 end
