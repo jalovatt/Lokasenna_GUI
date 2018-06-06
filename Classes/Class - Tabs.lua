@@ -26,7 +26,7 @@ function GUI.Tabs:new(name, z, x, y, tab_w, tab_h, opts, pad)
 	GUI.redraw_z[z] = true	
 	
 	Tab.x, Tab.y = x, y
-	Tab.tab_w, Tab.tab_h = tab_w, tab_h
+	Tab.tab_w, Tab.tab_h = tab_w or 48, tab_h or 20
 
 	Tab.font_a, Tab.font_b = 3, 4
 	
@@ -57,7 +57,9 @@ function GUI.Tabs:new(name, z, x, y, tab_w, tab_h, opts, pad)
     
 	-- Figure out the total size of the Tab frame now that we know the 
     -- number of buttons, so we can do the math for clicking on it
-	Tab.w, Tab.h = (tab_w + Tab.pad) * #Tab.optarray + 2*Tab.pad + 12, tab_h
+	Tab.w, Tab.h = (Tab.tab_w + Tab.pad) * #Tab.optarray + 2*Tab.pad + 12, Tab.tab_h
+    
+    Tab.fullwidth = true
 
 	-- Currently-selected option
 	Tab.retval, Tab.state = 1, 1
@@ -87,7 +89,7 @@ function GUI.Tabs:draw()
     
     -- Make sure w is at least the size of the tabs. 
     -- (GUI builder will let you try to set it lower)
-    self.w = math.max(self.w, (tab_w + pad) * #self.optarray + 2*pad + 12)  
+    self.w = self.fullwidth and (GUI.cur_w - self.x) or math.max(self.w, (tab_w + pad) * #self.optarray + 2*pad + 12)  
 
 	GUI.color(self.bg)
 	gfx.rect(x - 16, y, self.w, self.h, true)
@@ -137,6 +139,11 @@ function GUI.Tabs:val(newval)
 end
 
 
+function GUI.Tabs:onresize()
+    
+    if self.fullwidth then self:redraw() end
+    
+end
 
 
 ------------------------------------
