@@ -36,6 +36,8 @@ function GUI.Menubar:new(name, z, x, y, menus, w, h, pad) -- Add your own params
     mnu.shadow = true
 
     mnu.w, h = w or nil, h or nil
+    
+    mnu.fullwidth = true
 
     -- Optional parameters should be given default values to avoid errors/crashes:
     mnu.pad = pad or 0
@@ -75,7 +77,7 @@ function GUI.Menubar:init()
     end
     
     self.w = self.w or 0
-    self.w = math.max(self.w, self:measuretitles(nil, true))
+    self.w = self.fullwidth and (GUI.cur_w - self.x) or math.max(self.w, self:measuretitles(nil, true))
     self.h = self.h or gfx.texth
     
     
@@ -144,6 +146,17 @@ function GUI.Menubar:val(newval)
     end
     
 end
+
+
+function GUI.Menubar:onresize()
+    
+    if self.fullwidth then 
+        self:init() 
+        self:redraw()
+    end
+
+end
+
 
 ------------------------------------
 -------- Drawing methods -----------
