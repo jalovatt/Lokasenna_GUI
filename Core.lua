@@ -538,16 +538,69 @@ end
 ------------------------------------
 
 
--- Wrapper for creating new elements, allows them to know their own name
--- If called after the script window has opened, will also run their :init
--- method.
--- Can be given a user class directly by passing the class itself as 'elm',
--- or if 'elm' is a string will look for a class in GUI[elm]
+--[[
+    Wrapper for creating new elements, allows them to know their own name
+    If called after the script window has opened, will also run their :init
+    method.
+    Can be given a user class directly by passing the class itself as 'elm',
+    or if 'elm' is a string will look for a class in GUI[elm]
+
+    Elements can be created in two ways:
+
+        ex. Label:  name, z, x, y, caption[, shadow, font, color, bg]
+        
+    1. Function arguments
+
+                name        type
+        GUI.New("my_label", "Label", 1, 16, 16, "Hello!", true, 1, "red", "white")
+        
+        
+    2. Keyed tables
+    
+        GUI.New({
+            name = "my_label",
+            type = "Label",
+            z = 1,
+            x = 16,
+            y = 16,
+            caption = "Hello!",
+            shadow = true,
+            font = 1,
+            color = "red",
+            bg = "white"
+        })   
+        
+    The only functional difference is that, when using a keyed table, additional parameters can
+    be specified beyond the basic creation parameters given for that class. When using method 1,
+    any additional parameters simply have to be specified afterward via:
+    
+        GUI.elms.my_label.shadow = false
+        
+    See the class documentation for more detail.
+]]--
 GUI.New = function (name, elm, ...)
 
+    -- Support for passing all of the element params as a single keyed table
+    local name = name
+    local elm = elm
+    local params
+    if not elm and type(name) == "table" then
+        
+        -- Copy the table so we can pass it on
+        params = name
+        
+        -- Grab the name and type
+        elm = name.type
+        name = name.name
+        
+    end
+        
+        
+    -- Support for passing element classes directly as a table
     local elm = type(elm) == "string"   and GUI[elm]
                                         or  elm
 
+    -- If we don't have an elm at this point there's a problem
     if not elm or type(elm) ~= "table" then
 		reaper.ShowMessageBox(  "Unable to create element '"..tostring(name)..
                                 "'.\nClass '"..tostring(elm).."' isn't available.", 
@@ -556,9 +609,10 @@ GUI.New = function (name, elm, ...)
 		return nil
 	end
     
-    if GUI.elms[name] then GUI.elms[name]:delete() end
+    -- If we're overwriting a previous elm, make sure it frees its buffers, etc
+    if GUI.elms[name] and GUI.elms.type then GUI.elms[name]:delete() end
 	
-	GUI.elms[name] = elm:new(name, ...)
+	GUI.elms[name] = elm:new(name, params or ...)
     
 	if GUI.gfx_open then GUI.elms[name]:init() end
     
@@ -568,6 +622,35 @@ GUI.New = function (name, elm, ...)
 
     return name
 	
+end
+
+
+--  Create multiple elms at once
+--[[
+    Pass a table of keyed tables for each element:
+
+    local elms = {}
+    elms.my_label = {
+        type = "Label"
+        x = 16
+        ...
+    }
+    elms.my_button = {
+        type = "Button"
+        ...
+    }
+    
+    GUI.CreateElms(elms)
+    
+
+]]--
+function GUI.CreateElms(elms)
+    
+    for name, params in pairs(elms) do
+        params.name = name
+        GUI.New(params)
+    end    
+    
 end
 
 
