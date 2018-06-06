@@ -18,32 +18,39 @@ end
 GUI.Menubar = GUI.Element:new()
 function GUI.Menubar:new(name, z, x, y, menus, w, h, pad) -- Add your own params here
 	
-	local mnu = {}
+	local mnu = (not x and type(z) == "table") and z or {}
 	
 	mnu.name = name
 	mnu.type = "Menubar"
 	
-	mnu.z = z
-	GUI.redraw_z[z] = true	
-	
-	mnu.x, mnu.y = x, y
-    
-    mnu.font = 2
-    mnu.col_txt = "txt"
-    mnu.col_bg = "elm_frame"
-    mnu.col_over = "elm_fill"
-    
-    mnu.shadow = true
+	mnu.z = mnu.z or z
 
-    mnu.w, h = w or nil, h or nil
+	mnu.x = mnu.x or x
+    mnu.y = mnu.y or y
     
-    mnu.fullwidth = true
+    mnu.font = mnu.font or 2
+    mnu.col_txt = mnu.col_txt or "txt"
+    mnu.col_bg = mnu.col_bg or "elm_frame"
+    mnu.col_over = mnu.col_over or "elm_fill"
+    
+    if mnu.shadow == nil then
+        mnu.shadow = true
+    end
+
+    mnu.w = mnu.w or w
+    mnu.h = mnu.h or h
+    
+    if mnu.fullwidth == nil then
+        mnu.fullwidth = true
+    end
 
     -- Optional parameters should be given default values to avoid errors/crashes:
-    mnu.pad = pad or 0
+    mnu.pad = mnu.pad or pad or 0
     
-    mnu.menus = menus    
+    mnu.menus = mnu.menus or menus    
 	
+	GUI.redraw_z[z] = true	
+    
 	setmetatable(mnu, self)
 	self.__index = self
 	return mnu

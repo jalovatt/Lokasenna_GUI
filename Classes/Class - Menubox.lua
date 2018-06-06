@@ -18,29 +18,41 @@ end
 GUI.Menubox = GUI.Element:new()
 function GUI.Menubox:new(name, z, x, y, w, h, caption, opts, pad, noarrow)
 	
-	local menu = {}
+	local menu = (not x and type(z) == "table") and z or {}
 	
 	menu.name = name
 	menu.type = "Menubox"
 	
-	menu.z = z
-	GUI.redraw_z[z] = true	
-	
-	menu.x, menu.y, menu.w, menu.h = x, y, w, h
+	menu.z = menu.z or z
 
-	menu.caption = caption
-	menu.bg = "wnd_bg"
 	
-	menu.font_a = 3
-	menu.font_b = 4
+	menu.x = menu.x or x
+    menu.y = menu.y or y
+    menu.w = menu.w or w
+    menu.h = menu.h or h
+
+	menu.caption = menu.caption or caption
+	menu.bg = menu.bg or "wnd_bg"
 	
-	menu.col_cap = "txt"
-	menu.col_txt = "txt"
+	menu.font_a = menu.font_a or 3
+	menu.font_b = menu.font_b or 4
 	
-	menu.pad = pad or 4
-    menu.noarrow = noarrow or false
-    menu.align = 0
+	menu.col_cap = menu.col_cap or "txt"
+	menu.col_txt = menu.col_txt or "txt"
 	
+	menu.pad = menu.pad or pad or 4
+    
+    if menu.noarrow == nil then
+        
+        menu.noarrow = noarrow or false
+        
+    end
+    menu.align = menu.align or 0
+		
+	menu.retval = menu.retval or 1
+
+    local opts = menu.opts or opts
+    
     if type(opts) == "string" then
         -- Parse the string of options into a table
         menu.optarray = {}
@@ -51,9 +63,9 @@ function GUI.Menubox:new(name, z, x, y, w, h, caption, opts, pad, noarrow)
     elseif type(opts) == "table" then
         menu.optarray = opts
     end
-	
-	menu.retval = 1
-	
+
+	GUI.redraw_z[z] = true	
+
 	setmetatable(menu, self)
     self.__index = self 
     return menu

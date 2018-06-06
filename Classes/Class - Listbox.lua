@@ -18,39 +18,47 @@ end
 GUI.Listbox = GUI.Element:new()
 function GUI.Listbox:new(name, z, x, y, w, h, list, multi, caption, pad)
 	
-	local lst = {}
+	local lst = (not x and type(z) == "table") and z or {}
 	
 	lst.name = name
 	lst.type = "Listbox"
 	
-	lst.z = z
-	GUI.redraw_z[z] = true	
+	lst.z = lst.z or z	
 	
-	lst.x, lst.y, lst.w, lst.h = x, y, w, h
+	lst.x = lst.x or x
+    lst.y = lst.y or y
+    lst.w = lst.w or w
+    lst.h = lst.h or h
 
-	lst.list = list or {}
-	lst.retval = {}
+	lst.list = list.list or list or {}
+	lst.retval = list.retval or {}
 	
-	lst.multi = multi or false
+    if lst.multi == nil then
+        lst.multi = multi or false
+    end
 	
-	lst.caption = caption or ""
-	lst.pad = pad or 4
+	lst.caption = lst.caption or caption or ""
+	lst.pad = lst.pad or pad or 4
 	
-	lst.shadow = true
-	lst.bg = "elm_bg"
-    lst.cap_bg = "wnd_bg"
-	lst.color = "txt"
+    if lst.shadow == nil then
+        lst.shadow = true
+    end
+	lst.bg = lst.bg or "elm_bg"
+    lst.cap_bg = lst.cap_bg or "wnd_bg"
+	lst.color = lst.color or "txt"
 	
 	-- Scrollbar fill
-	lst.col_fill = "elm_fill"
+	lst.col_fill = lst.col_fill or "elm_fill"
 	
-	lst.font_a = 3
+	lst.font_a = lst.font_a or 3
 
-	lst.font_b = 4
+	lst.font_b = lst.font_b or 4
 	
 	lst.wnd_y = 1
 
 	lst.wnd_h, lst.wnd_w, lst.char_w = nil, nil, nil
+
+	GUI.redraw_z[z] = true
 
 	setmetatable(lst, self)
 	self.__index = self

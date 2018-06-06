@@ -19,26 +19,30 @@ end
 GUI.Button = GUI.Element:new()
 function GUI.Button:new(name, z, x, y, w, h, caption, func, ...)
 
-	local Button = {}
+	local Button = (not x and type(z) == "table") and z or {}
 	
 	Button.name = name
 	Button.type = "Button"
 	
-	Button.z = z
-	GUI.redraw_z[z] = true	
+	Button.z = Button.z or z
 	
-	Button.x, Button.y, Button.w, Button.h = x, y, w, h
+	Button.x = Button.x or x
+    Button.y = Button.y or y
+    Button.w = Button.w or w
+    Button.h = Button.h or h
 
-	Button.caption = caption
+	Button.caption = Button.caption or caption
 	
-	Button.font = 3
-	Button.col_txt = "txt"
-	Button.col_fill = "elm_frame"
+	Button.font = Button.font or 3
+	Button.col_txt = Button.col_txt or "txt"
+	Button.col_fill = Button.col_fill or "elm_frame"
 	
-	Button.func = func or function () end
-	Button.params = {...}
+	Button.func = Button.func or func or function () end
+	Button.params = Button.params or {...}
 	
 	Button.state = 0
+    
+	GUI.redraw_z[z] = true    
 
 	setmetatable(Button, self)
 	self.__index = self

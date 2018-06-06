@@ -18,25 +18,31 @@ end
 GUI.Window = GUI.Element:new()
 function GUI.Window:new(name, z, x, y, w, h, caption, z_set, center) -- Add your own params here
 	
-	local wnd = {}
+	local wnd = (not x and type(z) == "table") and z or {}
 	
 	wnd.name = name
 	wnd.type = "Window"
 	
-	wnd.z = z
-	GUI.redraw_z[z] = true	
+	wnd.z = wnd.z or z
 	
-	wnd.x, wnd.y, wnd.w, wnd.h = x, y, w, h
+	wnd.x = wnd.x or x
+    wnd.y = wnd.y or y
+    wnd.w = wnd.w or w
+    wnd.h = wnd.h or h
 
-    wnd.caption = caption
+    wnd.caption = wnd.caption or caption
     
-    wnd.title_height = 20
+    wnd.title_height = wnd.title_height or 20
     wnd.close_size = wnd.title_height - 8
     
-    wnd.center = center == nil and true or center
+    if wnd.center == nil then
+        wnd.center = not center and true or center
+    end
     
-    wnd.z_set = z_set
+    wnd.z_set = wnd.z_set or z_set
 	
+	GUI.redraw_z[z] = true
+    
 	setmetatable(wnd, self)
 	self.__index = self
 	return wnd

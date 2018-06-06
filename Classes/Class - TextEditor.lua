@@ -22,35 +22,37 @@ GUI.fonts.texteditor = {"Courier", 8}
 GUI.TextEditor = GUI.Element:new()
 function GUI.TextEditor:new(name, z, x, y, w, h, text, caption, pad)
 	
-	local txt = {}
+	local txt = (not x and type(z) == "table") and z or {}
 	
 	txt.name = name
 	txt.type = "TextEditor"
 	
-	txt.z = z
-	GUI.redraw_z[z] = true	
+	txt.z = txt.z or z
 	
-	txt.x, txt.y, txt.w, txt.h = x, y, w, h
+	txt.x = txt.x or x
+    txt.y = txt.y or y
+    txt.w = txt.w or w
+    txt.h = txt.h or h
 
-	txt.retval = text or {}
-	txt.undo_states = {}
-	txt.redo_states = {}
-	txt.caption = caption or ""
-	txt.pad = pad or 4
+	txt.retval = txt.retval or text or {}
+
+	txt.caption = txt.caption or caption or ""
+	txt.pad = txt.pad or pad or 4
 	
-	txt.shadow = true
-	txt.bg = "elm_bg"
-    txt.cap_bg = "wnd_bg"
-	txt.color = "txt"
-	txt.blink = 0
-	
+    if txt.shadow == nil then
+        txt.shadow = true
+    end
+	txt.bg = txt.bg or "elm_bg"
+    txt.cap_bg = txt.cap_bg or "wnd_bg"
+	txt.color = txt.color or "txt"
+
 	-- Scrollbar fill
-	txt.col_fill = "elm_fill"
+	txt.col_fill = txt.col_fill or "elm_fill"
 	
-	txt.font_a = 3
+	txt.font_a = txt.font_a or 3
 	
 	-- Forcing a safe monospace font to make our lives easier
-	txt.font_b = "texteditor"
+	txt.font_b = txt.font_bg or "texteditor"
 	
 	txt.wnd_pos = {x = 0, y = 1}
 	txt.caret = {x = 0, y = 1}
@@ -60,7 +62,13 @@ function GUI.TextEditor:new(name, z, x, y, w, h, text, caption, pad)
 	txt.focus = false
 	
 	txt.undo_limit = 20
-		
+	txt.undo_states = {}
+	txt.redo_states = {}	
+
+	txt.blink = 0
+
+	GUI.redraw_z[z] = true	
+    
 	setmetatable(txt, self)
 	self.__index = self
 	return txt

@@ -22,33 +22,40 @@ GUI.fonts.textbox = {"Courier", 8}
 GUI.Textbox = GUI.Element:new()
 function GUI.Textbox:new(name, z, x, y, w, h, caption, pad)
 	
-	local txt = {}
+	local txt = (not x and type(z) == "table") and z or {}
 	
 	txt.name = name
 	txt.type = "Textbox"
 	
 	txt.z = z
-	GUI.redraw_z[z] = true	
 	
-	txt.x, txt.y, txt.w, txt.h = x, y, w, h
+	txt.x = txt.x or x
+    txt.y = txt.y or y
+    txt.w = txt.w or w
+    txt.h = txt.h or h
 
-    txt.retval = ""
+    txt.retval = txt.retval or ""
+
+	txt.caption = txt.caption or caption or ""
+	txt.pad = txt.pad or pad or 4
+	
+    if txt.shadow == nil then
+        txt.shadow = true
+    end
+	txt.bg = txt.bg or "wnd_bg"
+	txt.color = txt.color or "txt"
+	
+	txt.font_a = txt.font_a or 3
+    
+	txt.font_b = txt.font_b or "textbox"
+    
+    txt.cap_pos = txt.cap_pos or "left"
+	    
+    txt.undo_limit = txt.undo_limit or 20
+
     txt.undo_states = {}
     txt.redo_states = {}
-	txt.caption = caption or ""
-	txt.pad = pad or 4
-	
-	txt.shadow = true
-	txt.bg = "wnd_bg"
-	txt.color = "txt"
-	txt.blink = 0    
-	
-	txt.font_a = 3
-    
-	txt.font_b = "textbox"
-    
-    txt.cap_pos = "left"
-	
+
     txt.wnd_pos = 0
 	txt.caret = 0
 	txt.sel_s, txt.sel_e = nil, nil
@@ -56,9 +63,11 @@ function GUI.Textbox:new(name, z, x, y, w, h, caption, pad)
     txt.char_h, txt.wnd_h, txt.wnd_w, txt.char_w = nil, nil, nil, nil
 
 	txt.focus = false
-    
-    txt.undo_limit = 20
-	
+
+	txt.blink = 0    
+
+	GUI.redraw_z[z] = true	
+
 	setmetatable(txt, self)
 	self.__index = self
 	return txt

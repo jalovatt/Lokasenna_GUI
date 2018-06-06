@@ -18,30 +18,36 @@ end
 GUI.Knob = GUI.Element:new()
 function GUI.Knob:new(name, z, x, y, w, caption, min, max, default, inc, vals)
 	
-	local Knob = {}
+	local Knob = (not x and type(z) == "table") and z or {}
 	
 	Knob.name = name
 	Knob.type = "Knob"
 	
-	Knob.z = z
-	GUI.redraw_z[z] = true	
+	Knob.z = Knob.z or z
 	
-	Knob.x, Knob.y, Knob.w, Knob.h = x, y, w, w
+	Knob.x = Knob.x or x
+    Knob.y = Knob.y or y
+    Knob.w = Knob.w or w
+    Knob.h = Knob.w
 
-	Knob.caption = caption
-	Knob.bg = "wnd_bg"
+	Knob.caption = Knob.caption or caption
+	Knob.bg = Knob.bg or "wnd_bg"
     
-    Knob.cap_x, Knob.cap_y = 0, 0
+    Knob.cap_x = Knob.cap_x or 0
+    Knob.cap_y = Knob.cap_y or 0
 	
-	Knob.font_a = 3
-	Knob.font_b = 4
+	Knob.font_a = Knob.font_a or 3
+	Knob.font_b = Knob.font_b or 4
 	
-	Knob.col_txt = "txt"
-	Knob.col_head = "elm_fill"
-	Knob.col_body = "elm_frame"
+	Knob.col_txt = Knob.col_txt or "txt"
+	Knob.col_head = Knob.col_head or "elm_fill"
+	Knob.col_body = Knob.col_body or "elm_frame"
     
-	Knob.min, Knob.max = min, max
-    Knob.inc = inc or 1
+	Knob.min = Knob.min or min
+    Knob.max = Knob.max or max
+    Knob.inc = Knob.inc or inc or 1
+    
+    
     Knob.steps = math.abs(max - min) / Knob.inc
     
     function Knob:formatretval(val)
@@ -52,12 +58,13 @@ function GUI.Knob:new(name, z, x, y, w, caption, min, max, default, inc, vals)
         
     end    
 	
-	Knob.vals = vals
+	Knob.vals = Knob.vals or vals
 	
 	-- Determine the step angle
 	Knob.stepangle = (3 / 2) / Knob.steps
 	
-	Knob.default, Knob.curstep = default, default
+	Knob.default = Knob.default or default
+    Knob.curstep = Knob.default
     
 	Knob.curval = Knob.curstep / Knob.steps    
 	
@@ -66,7 +73,8 @@ function GUI.Knob:new(name, z, x, y, w, caption, min, max, default, inc, vals)
                                     )
 
 
-	
+	GUI.redraw_z[z] = true	
+
 	setmetatable(Knob, self)
 	self.__index = self
 	return Knob

@@ -19,28 +19,27 @@ end
 GUI.Label = GUI.Element:new()
 function GUI.Label:new(name, z, x, y, caption, shadow, font, color, bg)
 	
-	local label = {}	
+	local label = (not x and type(z) == "table") and z or {}	
 	
 	label.name = name
-	
 	label.type = "Label"
 	
-	label.z = z
-	GUI.redraw_z[z] = true
+	label.z = label.z or z
+	label.x = label.x or x
+    label.y = label.y or y
 
-	label.x, label.y = x, y
-	
     -- Placeholders; we'll get these at runtime
 	label.w, label.h = 0, 0
-	
-	label.caption = caption
-	
-	label.shadow = shadow or false
-	label.font = font or 2
-	
-	label.color = color or "txt"
-	label.bg = bg or "wnd_bg"
-	
+
+	label.caption = label.caption   or caption
+	label.shadow =  label.shadow    or shadow   or false
+	label.font =    label.font      or font     or 2
+	label.color =   label.color     or color    or "txt"
+	label.bg =      label.bg        or bg       or "wnd_bg"
+
+
+	GUI.redraw_z[label.z] = true
+
 	setmetatable(label, self)
     self.__index = self 
     return label

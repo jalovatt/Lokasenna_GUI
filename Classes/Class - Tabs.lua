@@ -17,30 +17,34 @@ end
 GUI.Tabs = GUI.Element:new()
 function GUI.Tabs:new(name, z, x, y, tab_w, tab_h, opts, pad)
 	
-	local Tab = {}
+	local Tab = (not x and type(z) == "table") and z or {}
 	
 	Tab.name = name
 	Tab.type = "Tabs"
 	
-	Tab.z = z
-	GUI.redraw_z[z] = true	
+	Tab.z = Tab.z or z
 	
-	Tab.x, Tab.y = x, y
-	Tab.tab_w, Tab.tab_h = tab_w or 48, tab_h or 20
+	Tab.x = Tab.x or x
+    Tab.y = Tab.y or y
+	Tab.tab_w = Tab.tab_w or tab_w or 48
+    Tab.tab_h = Tab.tab_h or tab_h or 20
 
-	Tab.font_a, Tab.font_b = 3, 4
+	Tab.font_a = Tab.font_a or 3
+    Tab.font_b = Tab.font_b or 4
 	
-	Tab.bg = "elm_bg"
-	Tab.col_txt = "txt"
-	Tab.col_tab_a = "wnd_bg"
-	Tab.col_tab_b = "tab_bg"
+	Tab.bg = Tab.bg or "elm_bg"
+	Tab.col_txt = Tab.col_txt or "txt"
+	Tab.col_tab_a = Tab.col_tab_a or "wnd_bg"
+	Tab.col_tab_b = Tab.col_tab_b or "tab_bg"
 	
     -- Placeholder for if I ever figure out downward tabs
-	Tab.dir = "u"
+	Tab.dir = Tab.dir or "u"
 	
-	Tab.pad = pad or 8
+	Tab.pad = Tab.pad or pad or 8
 	
 	-- Parse the string of options into a table
+    local opts = Tab.opts or opts
+    
 	Tab.optarray = {}
     if type(opts) == "string" then
         for word in string.gmatch(opts, '([^,]+)') do
@@ -59,10 +63,15 @@ function GUI.Tabs:new(name, z, x, y, tab_w, tab_h, opts, pad)
     -- number of buttons, so we can do the math for clicking on it
 	Tab.w, Tab.h = (Tab.tab_w + Tab.pad) * #Tab.optarray + 2*Tab.pad + 12, Tab.tab_h
     
-    Tab.fullwidth = true
-
+    if Tab.fullwidth == nil then
+        Tab.fullwidth = true
+    end
+    
 	-- Currently-selected option
-	Tab.retval, Tab.state = 1, 1
+	Tab.retval = Tab.retval or 1
+    Tab.state = Tab.retval or 1
+
+	GUI.redraw_z[z] = true	
 
 	setmetatable(Tab, self)
 	self.__index = self

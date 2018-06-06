@@ -19,35 +19,49 @@ GUI.Slider = GUI.Element:new()
 
 function GUI.Slider:new(name, z, x, y, w, caption, min, max, defaults, inc, dir)
 	
-	local Slider = {}
+	local Slider = (not x and type(z) == "table") and z or {}
 	
 	Slider.name = name
 	Slider.type = "Slider"
 	
-	Slider.z = z
-	GUI.redraw_z[z] = true
+	Slider.z = Slider.z or z
 
-	Slider.x, Slider.y = x, y
-	Slider.w, Slider.h = table.unpack(dir ~= "v" and {w, 8} or {8, w})
+	Slider.x = Slider.x or x
+    Slider.y = Slider.y or y
 
-	Slider.caption = caption
-	Slider.bg = "wnd_bg"
-	
-	Slider.font_a = 3
-	Slider.font_b = 4
-	
-	Slider.col_txt = "txt"
-	Slider.col_hnd = "elm_frame"
-	Slider.col_fill = "elm_fill"
-	
-	Slider.dir = dir or "h"
+	Slider.dir = Slider.dir or dir or "h"
     
-    Slider.show_handles = true
-	Slider.show_values = true
+    Slider.w, Slider.h = table.unpack(Slider.dir ~= "v"
+                        and {Slider.w or w, 8}
+                        or  {8, Slider.w or w} )
+    
+    GUI.Msg("dir = " .. Slider.dir .. ": w,h = " .. Slider.w .. ", " .. Slider.h)
+
+	Slider.caption = Slider.caption or caption
+	Slider.bg = Slider.bg or "wnd_bg"
 	
-	Slider.cap_x = 0
-	Slider.cap_y = 0
+	Slider.font_a = Slider.font_a or 3
+	Slider.font_b = Slider.font_b or 4
 	
+	Slider.col_txt = Slider.col_txt or "txt"
+	Slider.col_hnd = Slider.col_hnd or "elm_frame"
+	Slider.col_fill = Slider.col_fill or "elm_fill"
+	
+
+    
+    if Slider.show_handles == nil then
+        Slider.show_handles = true
+    end
+    if Slider.show_values == nil then
+        Slider.show_values = true
+    end
+	
+	Slider.cap_x = Slider.cap_x or 0
+	Slider.cap_y = Slider.cap_y or 0
+	
+    local min = Slider.min or min
+    local max = Slider.max or max
+    
     if min > max then 
         min, max = max, min 
     elseif min == max then
@@ -69,10 +83,12 @@ function GUI.Slider:new(name, z, x, y, w, caption, min, max, defaults, inc, dir)
         
     end    
     
-	-- If the user only asked for one handle
-	if type(defaults) == "number" then defaults = {defaults} end
+    Slider.defaults = Slider.defaults or defaults    
     
-    Slider.defaults = defaults
+	-- If the user only asked for one handle
+	if type(Slider.defaults) == "number" then Slider.defaults = {Slider.defaults} end
+    
+
 
     function Slider:init_handles()
                
@@ -100,6 +116,8 @@ function GUI.Slider:new(name, z, x, y, w, caption, min, max, defaults, inc, dir)
     end
 
     Slider:init_handles(defaults)
+
+	GUI.redraw_z[z] = true
 
 	setmetatable(Slider, self)
 	self.__index = self

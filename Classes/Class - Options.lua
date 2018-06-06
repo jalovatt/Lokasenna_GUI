@@ -28,39 +28,49 @@ local Option = GUI.Element:new()
 
 function Option:new(name, z, x, y, w, h, caption, opts, dir, pad)
     
-	local option = {}
+	local option = (not x and type(z) == "table") and z or {}
 	
 	option.name = name
 	option.type = "Option"
 	
-	option.z = z
-	GUI.redraw_z[z] = true	
-	
-	option.x, option.y, option.w, option.h = x, y, w, h
+	option.z = option.z or z
 
-	option.caption = caption
+	option.x = option.x or x
+    option.y = option.y or y
+    option.w = option.w or w
+    option.h = option.h or h
 
-	option.frame = true
-	option.bg = "wnd_bg"
+	option.caption = option.caption or caption
+
+    if option.frame == nil then
+        option.frame = true
+    end
+	option.bg = option.bg or "wnd_bg"
     
-	option.dir = dir or "v"
-	option.pad = pad or 4
+	option.dir = option.dir or dir or "v"
+	option.pad = option.pad or pad or 4
         
-	option.col_txt = "txt"
-	option.col_fill = "elm_fill"
+	option.col_txt = option.col_txt or "txt"
+	option.col_fill = option.col_fill or "elm_fill"
 
-	option.font_a = 2
-	option.font_b = 3
+	option.font_a = option.font_a or 2
+	option.font_b = option.font_b or 3
 	
-	option.shadow = true
+    if option.shadow == nil then
+        option.shadow = true
+    end
 	
-    option.swap = false
+    if option.shadow == nil then
+        option.swap = false
+    end
     
 	-- Size of the option bubbles
-	option.opt_size = 20
+	option.opt_size = option.opt_size or 20
 	
 	-- Parse the string of options into a table
 	option.optarray = {}
+    
+    local opts = option.opts or opts
     
     if type(opts) == "table" then
         
@@ -77,6 +87,8 @@ function Option:new(name, z, x, y, w, h, caption, opts, dir, pad)
         end
         
     end
+
+	GUI.redraw_z[z] = true	
 
 	setmetatable(option, self)
     self.__index = self 

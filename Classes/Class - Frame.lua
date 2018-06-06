@@ -19,30 +19,37 @@ end
 GUI.Frame = GUI.Element:new()
 function GUI.Frame:new(name, z, x, y, w, h, shadow, fill, color, round)
 	
-	local Frame = {}
+	local Frame = (not x and type(z) == "table") and z or {}
 	Frame.name = name
 	Frame.type = "Frame"
 	
-	Frame.z = z
-	GUI.redraw_z[z] = true	
+	Frame.z = Frame.z or z
 	
-	Frame.x, Frame.y, Frame.w, Frame.h = x, y, w, h
+	Frame.x = Frame.x or x
+    Frame.y = Frame.y or y
+    Frame.w = Frame.w or w
+    Frame.h = Frame.h or h
 	
-	Frame.shadow = shadow or false
-	Frame.fill = fill or false
-	Frame.color = color or "elm_frame"
-	Frame.round = round or 0
+    if Frame.shadow == nil then
+        Frame.shadow = shadow or false
+    end
+    if Frame.fill == nil then
+        Frame.fill = fill or false
+    end
+	Frame.color = Frame.color or color or "elm_frame"
+	Frame.round = Frame.round or round or 0
 	
-	Frame.text, Frame.last_text = "", ""
-	Frame.txt_indent = 0
-	Frame.txt_pad = 0
+	Frame.text, Frame.last_text = Frame.text or "", ""
+	Frame.txt_indent = Frame.txt_indent or 0
+	Frame.txt_pad = Frame.txt_pad or 0
     
-	Frame.bg = "wnd_bg"
+	Frame.bg = Frame.bg or "wnd_bg"
     
-	Frame.font = 4
-	Frame.col_txt = "txt"
-	Frame.pad = 4
+	Frame.font = Frame.font or 4
+	Frame.col_txt = Frame.col_txt or "txt"
+	Frame.pad = Frame.pad or 4
 	
+	GUI.redraw_z[z] = true	    
 	
 	setmetatable(Frame, self)
 	self.__index = self
