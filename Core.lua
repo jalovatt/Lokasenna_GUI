@@ -1527,6 +1527,22 @@ GUI.table_find = function(t, find, f)
     
 end
 
+
+-- Returns the length of a table, counting both indexed and keyed elements
+GUI.table_length(t)
+
+    local len = 0
+    for k in pairs(t) do
+        len = len + 1
+    end
+    
+    return len
+
+end
+
+
+
+
 ------------------------------------
 -------- Text functions ------------
 ------------------------------------
