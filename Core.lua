@@ -1529,7 +1529,7 @@ end
 
 
 -- Returns the length of a table, counting both indexed and keyed elements
-GUI.table_length(t)
+GUI.table_length = function(t)
 
     local len = 0
     for k in pairs(t) do
@@ -1539,10 +1539,6 @@ GUI.table_length(t)
     return len
 
 end
-
-
-
-
 ------------------------------------
 -------- Text functions ------------
 ------------------------------------
