@@ -45,7 +45,7 @@ function GUI.Label:new(name, z, x, y, caption, shadow, font, color, bg)
     self.__index = self 
     return label
 	
-    end
+end
 
 
 function GUI.Label:init(open)
