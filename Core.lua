@@ -1009,11 +1009,7 @@ function GUI.Element:ontype() end
 function GUI.Element:lostfocus() end
 
 -- Called when the script window has been resized
-function GUI.Element:onresize() 
-    
-    GUI.Msg(self.name .. ":onresize")
-
-end
+function GUI.Element:onresize() end
 
 
 ------------------------------------
