@@ -27,8 +27,9 @@ Questions, comments, feature requests, bug reports, and the latest celebrity gos
 directed to the project's [official thread][3] on the REAPER forum.
 
 ## Further Detail
-I'll try to keep [the project Wiki][2] up to date, but ultimately the most detailed and accurate
-source of documentation will always be comments in the _Example_ scripts and libraries/classes.
+The examples, library and class files have as much documentation as I could stuff into them, so
+between them and [the project Wiki][2] I hope you'll find enough detail to answer any questions.
+If something's missing or vague, by all means let me know.
 
 [1]: https://www.reaper.fm/
 [2]: https://github.com/jalovatt/Lokasenna_GUI/wiki
