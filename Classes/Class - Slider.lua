@@ -34,8 +34,6 @@ function GUI.Slider:new(name, z, x, y, w, caption, min, max, defaults, inc, dir)
     Slider.w, Slider.h = table.unpack(Slider.dir ~= "v"
                         and {Slider.w or w, 8}
                         or  {8, Slider.w or w} )
-    
-    GUI.Msg("dir = " .. Slider.dir .. ": w,h = " .. Slider.w .. ", " .. Slider.h)
 
 	Slider.caption = Slider.caption or caption
 	Slider.bg = Slider.bg or "wnd_bg"
