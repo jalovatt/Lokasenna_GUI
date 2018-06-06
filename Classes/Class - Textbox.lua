@@ -66,7 +66,7 @@ function GUI.Textbox:new(name, z, x, y, w, h, caption, pad)
 
 	txt.blink = 0    
 
-	GUI.redraw_z[z] = true	
+	GUI.redraw_z[txt.z] = true	
 
 	setmetatable(txt, self)
 	self.__index = self

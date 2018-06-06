@@ -117,7 +117,7 @@ function GUI.Slider:new(name, z, x, y, w, caption, min, max, defaults, inc, dir)
 
     Slider:init_handles(defaults)
 
-	GUI.redraw_z[z] = true
+	GUI.redraw_z[Slider.z] = true
 
 	setmetatable(Slider, self)
 	self.__index = self

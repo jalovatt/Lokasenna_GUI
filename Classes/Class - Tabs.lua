@@ -71,7 +71,7 @@ function GUI.Tabs:new(name, z, x, y, tab_w, tab_h, opts, pad)
 	Tab.retval = Tab.retval or 1
     Tab.state = Tab.retval or 1
 
-	GUI.redraw_z[z] = true	
+	GUI.redraw_z[Tab.z] = true	
 
 	setmetatable(Tab, self)
 	self.__index = self

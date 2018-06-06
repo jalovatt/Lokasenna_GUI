@@ -42,7 +42,7 @@ function GUI.Button:new(name, z, x, y, w, h, caption, func, ...)
 	
 	Button.state = 0
     
-	GUI.redraw_z[z] = true    
+	GUI.redraw_z[Button.z] = true    
 
 	setmetatable(Button, self)
 	self.__index = self

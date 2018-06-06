@@ -49,7 +49,7 @@ function GUI.Frame:new(name, z, x, y, w, h, shadow, fill, color, round)
 	Frame.col_txt = Frame.col_txt or "txt"
 	Frame.pad = Frame.pad or 4
 	
-	GUI.redraw_z[z] = true	    
+	GUI.redraw_z[Frame.z] = true	    
 	
 	setmetatable(Frame, self)
 	self.__index = self

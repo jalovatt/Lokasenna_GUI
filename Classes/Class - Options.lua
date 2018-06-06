@@ -88,7 +88,7 @@ function Option:new(name, z, x, y, w, h, caption, opts, dir, pad)
         
     end
 
-	GUI.redraw_z[z] = true	
+	GUI.redraw_z[option.z] = true	
 
 	setmetatable(option, self)
     self.__index = self 

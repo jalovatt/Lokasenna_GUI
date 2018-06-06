@@ -73,7 +73,7 @@ function GUI.Knob:new(name, z, x, y, w, caption, min, max, default, inc, vals)
                                     )
 
 
-	GUI.redraw_z[z] = true	
+	GUI.redraw_z[Knob.z] = true	
 
 	setmetatable(Knob, self)
 	self.__index = self

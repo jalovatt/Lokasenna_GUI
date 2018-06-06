@@ -49,7 +49,7 @@ function GUI.Menubar:new(name, z, x, y, menus, w, h, pad) -- Add your own params
     
     mnu.menus = mnu.menus or menus    
 	
-	GUI.redraw_z[z] = true	
+	GUI.redraw_z[mnu.z] = true	
     
 	setmetatable(mnu, self)
 	self.__index = self

@@ -41,7 +41,7 @@ function GUI.Window:new(name, z, x, y, w, h, caption, z_set, center) -- Add your
     
     wnd.z_set = wnd.z_set or z_set
 	
-	GUI.redraw_z[z] = true
+	GUI.redraw_z[wnd.z] = true
     
 	setmetatable(wnd, self)
 	self.__index = self

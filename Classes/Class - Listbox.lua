@@ -30,8 +30,8 @@ function GUI.Listbox:new(name, z, x, y, w, h, list, multi, caption, pad)
     lst.w = lst.w or w
     lst.h = lst.h or h
 
-	lst.list = list.list or list or {}
-	lst.retval = list.retval or {}
+	lst.list = lst.list or list or {}
+	lst.retval = lst.retval or {}
 	
     if lst.multi == nil then
         lst.multi = multi or false
@@ -58,7 +58,7 @@ function GUI.Listbox:new(name, z, x, y, w, h, list, multi, caption, pad)
 
 	lst.wnd_h, lst.wnd_w, lst.char_w = nil, nil, nil
 
-	GUI.redraw_z[z] = true
+	GUI.redraw_z[lst.z] = true
 
 	setmetatable(lst, self)
 	self.__index = self

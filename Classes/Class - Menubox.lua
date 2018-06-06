@@ -64,7 +64,7 @@ function GUI.Menubox:new(name, z, x, y, w, h, caption, opts, pad, noarrow)
         menu.optarray = opts
     end
 
-	GUI.redraw_z[z] = true	
+	GUI.redraw_z[menu.z] = true	
 
 	setmetatable(menu, self)
     self.__index = self 
