@@ -107,7 +107,7 @@ GUI.anchor, GUI.corner = "mouse", "C"
 ]]--
 
 --[[
-    The code below will create the same elements as:
+    This script will create the same elements as:
     
 GUI.New("mnu_mode",	"Menubox",		1, 64,	32,  72, 20, "Mode:", "Auto,Punch,Step")
 GUI.New("chk_opts",	"Checklist",	1, 192,	32,  192, 96, "Options", "Only in time selection,Only on selected track,Glue items when finished", "v", 4)
