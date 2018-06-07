@@ -302,6 +302,14 @@ GUI.Main_Update_Elms = function ()
 		
 	end	
 
+    
+    -- Mouse was moved? Clear the tooltip
+    if GUI.tooltip and (GUI.mouse.x - GUI.mouse.lx > 0 or GUI.mouse.y - GUI.mouse.ly > 0) then
+    
+        GUI.mouseover_elm = nil
+        GUI.cleartooltip()
+
+    end
 
 	for i = 0, GUI.z_max do
 		if  GUI.elms_list[i] and #GUI.elms_list[i] > 0 
@@ -665,7 +673,7 @@ GUI.Update = function (elm)
 	local skip = elm:onupdate() or false
     
     if GUI.resized then elm:onresize() end
-	
+    
 	if GUI.elm_updated then
 		if elm.focus then
 			elm.focus = false
@@ -921,10 +929,27 @@ GUI.Update = function (elm)
 	-- If the mouse is hovering over the element
 	if inside and not GUI.mouse.down and not GUI.mouse.r_down then
 		elm:onmouseover()
-		elm.mouseover = true
+        
+        -- Initial mouseover an element
+        if GUI.mouseover_elm ~= elm then
+            GUI.mouseover_elm = elm
+            GUI.mouseover_time = reaper.time_precise()
+            
+        -- Mouse was moved; reset the timer
+        elseif x_delta > 0 or y_delta > 0 then
+        
+            GUI.mouseover_time = reaper.time_precise()
+            
+        -- Display a tooltip
+        elseif (reaper.time_precise() - GUI.mouseover_time) >= GUI.tooltip_time then
+
+            GUI.settooltip(elm.tooltip)
+        
+        end
+		--elm.mouseover = true
 	else
-		elm.mouseover = false
-		--elm.hovering = false
+		--elm.mouseover = false
+
 	end
 	
 	
@@ -1325,6 +1350,8 @@ GUI.txt_blink_rate = 16
 GUI.pi = 3.14159
 
 
+-- Delay time when hovering over an element before displaying a tooltip
+GUI.tooltip_time = 1
 
 
 ------------------------------------
@@ -2345,6 +2372,29 @@ GUI.xor = function(a, b)
 end
 
 
+-- Display a tooltip
+GUI.settooltip = function(str)
+    
+    if not str or str == "" then return end
+    
+    --Lua: reaper.TrackCtl_SetToolTip(string fmt, integer xpos, integer ypos, boolean topmost)
+    --displays tooltip at location, or removes if empty string
+    local x, y = gfx.clienttoscreen(0, 0)
+
+    reaper.TrackCtl_SetToolTip(str, x + GUI.mouse.x + 16, y + GUI.mouse.y + 16, true)
+    GUI.tooltip = str
+    
+    
+end
+
+
+-- Clear the tooltip
+GUI.cleartooltip = function()
+    
+    reaper.TrackCtl_SetToolTip("", 0, 0, true)   
+    GUI.tooltip = nil
+    
+end
 
 
 ------------------------------------
