@@ -2158,7 +2158,7 @@ end
 
 
 ------------------------------------
--------- File functions ------------
+-------- File/Storage functions ----
 ------------------------------------
 
 
@@ -2183,6 +2183,41 @@ GUI.open_file = function (path)
 		os.execute('start "" "' .. path .. '"')
 	end
   
+end
+
+
+-- Saves the current script window parameters to an ExtState under the given section name
+-- Returns dock, x, y, w, h
+GUI.save_window_state = function (name)
+    
+    if not name then return end    
+    local state = {gfx.dock(-1, 0, 0, 0, 0)}
+    reaper.SetExtState(name, "window", table.concat(state, ","), true)
+    
+    return table.unpack(state)
+    
+end
+
+
+-- Looks for an ExtState containing saved window parameters and reapplies them
+-- Call with noapply = true to just return the values
+-- Returns dock, x, y, w, h
+GUI.load_window_state = function (name, noapply)
+
+    if not name then return end
+    
+    local str = reaper.GetExtState(name, "window")
+    if not str or str == "" then return end
+
+    local dock, x, y, w, h = string.match(str, "([^,]+),([^,]+),([^,]+),([^,]+),([^,]+)")
+    if not (dock and x and y and w and h) then return end
+    GUI.dock, GUI.x, GUI.y, GUI.w, GUI.h = dock, x, y, w, h
+
+    -- Probably don't want these messing up where the user put the window
+    GUI.anchor, GUI.corner = nil, nil
+
+    return dock, x, y, w, h
+    
 end
 
 
