@@ -620,7 +620,8 @@ GUI.New = function (name, elm, ...)
     -- If we're overwriting a previous elm, make sure it frees its buffers, etc
     if GUI.elms[name] and GUI.elms.type then GUI.elms[name]:delete() end
 	
-	GUI.elms[name] = elm:new(name, params or ...)
+    GUI.elms[name] = params and elm:new(name, params) or elm:new(name, ...)
+	--GUI.elms[name] = elm:new(name, params or ...)
     
 	if GUI.gfx_open then GUI.elms[name]:init() end
     
@@ -1351,7 +1352,7 @@ GUI.pi = 3.14159
 
 
 -- Delay time when hovering over an element before displaying a tooltip
-GUI.tooltip_time = 1
+GUI.tooltip_time = 0.8
 
 
 ------------------------------------
