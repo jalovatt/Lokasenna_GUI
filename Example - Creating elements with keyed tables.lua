@@ -125,7 +125,8 @@ elms.mnu_mode = {
     w = 72,
     h = 20,
     caption = "Mode:",
-    opts = "Auto,Punch,Step"
+    opts = "Auto,Punch,Step",
+    tooltip = "I'm a menubox"
 }
 
 elms.chk_opts = {
@@ -138,7 +139,8 @@ elms.chk_opts = {
     caption = "Options",
     opts = "Only in time selection,Only on selected track,Glue items when finished",
     dir = "v",
-    pad = 4
+    pad = 4,
+    tooltip = "I'm a checklist"
 }
 
 elms.sldr_thresh = {
@@ -151,7 +153,8 @@ elms.sldr_thresh = {
     min = -60,
     max = 0,
     defaults = 48,
-    dir = "h"
+    dir = "h",
+    tooltip = "I'm a slider"
 }
 
 elms.btn_go = {
@@ -162,7 +165,8 @@ elms.btn_go = {
     w = 64,
     h = 24,
     caption = "Go!",
-    func = btn_click
+    func = btn_click,
+    tooltip = "I'm a button"
 }
 
 
