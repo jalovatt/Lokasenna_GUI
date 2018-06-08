@@ -27,7 +27,7 @@ function GUI.Textbox:new(name, z, x, y, w, h, caption, pad)
 	txt.name = name
 	txt.type = "Textbox"
 	
-	txt.z = z
+	txt.z = txt.z or z
 	
 	txt.x = txt.x or x
     txt.y = txt.y or y
