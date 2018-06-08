@@ -38,19 +38,30 @@ end
 GUI.Template = GUI.Element:new()
 function GUI.Template:new(name, z, x, y, w, h, param1, param2) -- Add your own params here
 	
-	local tmp = {}
+    -- This provides support for creating elms with a keyed table
+	local tmp = (not x and type(z) == "table") and z or {}
 	
 	tmp.name = name
 	tmp.type = "Template"
 	
-	tmp.z = z
-	GUI.redraw_z[z] = true	
+	tmp.z = tmp.z or z
+
 	
-	tmp.x, tmp.y, tmp.w, tmp.h = x, y, w, h
+	tmp.x = tmp.x or x
+    tmp.y = tmp.y or y
+    tmp.w = tmp.w or w
+    tmp.h = tmp.h or h
 
     -- Optional parameters should be given default values to avoid errors/crashes:
-    tmp.param1 = param1 or 12
-    tmp.param2 = param2 or false
+    tmp.param1 = tmp.param1 or param1 or 12
+    
+    -- Because Lua makes no distinction between nil, false, and simply omitting a parameter, we have
+    -- to be a little more creative when specifically passing false values:
+    if tmp.param2 == nil then
+        tmp.param2 = param2 or false
+    end
+    
+	GUI.redraw_z[z] = true	    
 	
 	setmetatable(tmp, self)
 	self.__index = self
