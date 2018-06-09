@@ -40,6 +40,7 @@ function GUI.Window:new(name, z, x, y, w, h, caption, z_set, center) -- Add your
     end
     
     wnd.z_set = wnd.z_set or z_set
+    wnd.noadjust = {}
 	
 	GUI.redraw_z[wnd.z] = true
     
