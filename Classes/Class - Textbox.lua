@@ -746,6 +746,12 @@ GUI.Textbox.keys = {
         
     end,
 
+    [GUI.chars.TAB] = function(self)
+        
+        GUI.tab_to_next(self)
+        
+    end,
+
 	-- A -- Select All
 	[1] = function(self)
 		
