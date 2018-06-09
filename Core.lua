@@ -77,7 +77,7 @@ GUI.redraw_z = {}
 GUI.elms_list = {}
 GUI.z_max = 0
 GUI.update_elms_list = function (init)
-	
+
 	local z_table = {}
 	GUI.z_max = 0
 
@@ -311,6 +311,13 @@ GUI.Main_Update_Elms = function ()
 
     end
 
+
+    -- Bypass for some skip logic to allow tabbing between elements (GUI.tab_to_next)
+    if GUI.newfocus then
+        GUI.newfocus.focus = true
+        GUI.newfocus = nil
+    end
+    
 	for i = 0, GUI.z_max do
 		if  GUI.elms_list[i] and #GUI.elms_list[i] > 0 
         and not (GUI.elms_hide[i] or GUI.elms_freeze[i]) then
@@ -376,7 +383,10 @@ GUI.Main_Draw = function ()
 					gfx.dest = i
 					
 					for __, elm in pairs(GUI.elms_list[i]) do
-						if not GUI.elms[elm] then GUI.Msg(elm.." doesn't exist?") end
+						if not GUI.elms[elm] then 
+                            reaper.MB(  "Error: Tried to update a GUI element that doesn't exist:"..
+                                        "\nGUI.elms." .. tostring(elm), "Whoops!", 0)
+                        end                                    
                         
                         -- Reset these just in case an element or some user code forgot to,
                         -- otherwise we get things like the whole buffer being blitted with a=0.2
@@ -619,7 +629,7 @@ GUI.New = function (name, elm, ...)
     
     -- If we're overwriting a previous elm, make sure it frees its buffers, etc
     if GUI.elms[name] and GUI.elms.type then GUI.elms[name]:delete() end
-	
+    
     GUI.elms[name] = params and elm:new(name, params) or elm:new(name, ...)
 	--GUI.elms[name] = elm:new(name, params or ...)
     
@@ -2398,6 +2408,50 @@ GUI.cleartooltip = function()
 end
 
 
+-- Tab forward (or backward, if Shift is down) to the next element with .tab_idx = number.
+-- Removes focus from the given element, and gives it to the new element.
+function GUI.tab_to_next(elm)
+    
+    if not elm.tab_idx then return end
+    
+    local inc = (GUI.mouse.cap & 8 == 8) and -1 or 1
+    
+    -- Get a list of all tab_idx elements, and a list of tab_idxs
+    local indices, elms = {}, {}
+    for _, element in pairs(GUI.elms) do
+        if element.tab_idx then 
+            elms[element.tab_idx] = element
+            indices[#indices+1] = element.tab_idx        
+        end
+    end
+    
+    -- This is the only element with a tab index
+    if #indices == 1 then return end
+    
+    -- Find the next element in the appropriate direction
+    table.sort(indices)
+    
+    local new
+    local cur = GUI.table_find(indices, elm.tab_idx)
+    
+    if cur == 1 and inc == -1 then
+        new = #indices
+    elseif cur == #indices and inc == 1 then
+        new = 1
+    else
+        new = cur + inc    
+    end
+    
+    -- Move the focus
+    elm.focus = false
+    elm:lostfocus()
+    elm:redraw()
+    
+    -- Can't set focus until the next GUI loop or Update will have problems
+    GUI.newfocus = elms[indices[new]]
+    elms[indices[new]]:redraw()
+
+end
 ------------------------------------
 -------- The End -------------------
 ------------------------------------
