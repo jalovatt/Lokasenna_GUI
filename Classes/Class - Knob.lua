@@ -48,7 +48,7 @@ function GUI.Knob:new(name, z, x, y, w, caption, min, max, default, inc, vals)
     Knob.inc = Knob.inc or inc or 1
     
     
-    Knob.steps = math.abs(max - min) / Knob.inc
+    Knob.steps = math.abs(Knob.max - Knob.min) / Knob.inc
     
     function Knob:formatretval(val)
         
@@ -69,7 +69,7 @@ function GUI.Knob:new(name, z, x, y, w, caption, min, max, default, inc, vals)
 	Knob.curval = Knob.curstep / Knob.steps    
 	
     Knob.retval = Knob:formatretval(
-                ((max - min) / Knob.steps) * Knob.curstep + min
+                ((Knob.max - Knob.min) / Knob.steps) * Knob.curstep + Knob.min
                                     )
 
 

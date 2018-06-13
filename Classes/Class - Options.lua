@@ -68,24 +68,26 @@ function Option:new(name, z, x, y, w, h, caption, opts, dir, pad)
 	option.opt_size = option.opt_size or 20
 	
 	-- Parse the string of options into a table
-	option.optarray = {}
-    
-    local opts = option.opts or opts
-    
-    if type(opts) == "table" then
+    if not option.optarray then
+        option.optarray = {}
         
-        for i = 1, #opts do
-            option.optarray[i] = opts[i]
+        local opts = option.opts or opts
+        
+        if type(opts) == "table" then
+            
+            for i = 1, #opts do
+                option.optarray[i] = opts[i]
+            end
+            
+        else
+        
+            local tempidx = 1
+            for word in string.gmatch(opts, '([^,]*)') do
+                option.optarray[tempidx] = word
+                tempidx = tempidx + 1
+            end
+            
         end
-        
-    else
-    
-        local tempidx = 1
-        for word in string.gmatch(opts, '([^,]*)') do
-            option.optarray[tempidx] = word
-            tempidx = tempidx + 1
-        end
-        
     end
 
 	GUI.redraw_z[option.z] = true	

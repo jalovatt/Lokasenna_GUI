@@ -128,7 +128,7 @@ end
 function GUI.Textbox:val(newval)
 	
 	if newval then
-		self.retval = newval
+		self.retval = tostring(newval)
 		self:redraw()		
 	else
 		return self.retval
@@ -245,6 +245,9 @@ function GUI.Textbox:ontype()
 
     end
     self:windowtocaret()
+    
+    -- Make sure no functions crash because they got a type==number
+    self.retval = tostring(self.retval)
     
     -- Reset the caret so the visual change isn't laggy
     self.blink = 0
