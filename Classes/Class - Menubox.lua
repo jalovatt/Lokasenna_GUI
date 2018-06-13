@@ -347,7 +347,7 @@ end
 
 
 function GUI.Menubox:validateoption(val, dir)
-    
+
     dir = dir or 1
     
     while true do
@@ -375,7 +375,7 @@ function GUI.Menubox:validateoption(val, dir)
         end
     
     end
-    
+
     return val    
     
 end

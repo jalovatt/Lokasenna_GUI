@@ -102,6 +102,7 @@ function GUI.Slider:new(name, z, x, y, w, caption, min, max, defaults, inc, dir)
         for i = 1, #self.defaults do
             
             step = self.defaults[i]
+
             self.handles[i] = {}
             self.handles[i].default = (self.dir ~= "v" and step or (self.steps - step))
             self.handles[i].curstep = step

@@ -43,15 +43,17 @@ function GUI.Tabs:new(name, z, x, y, tab_w, tab_h, opts, pad)
 	Tab.pad = Tab.pad or pad or 8
 	
 	-- Parse the string of options into a table
-    local opts = Tab.opts or opts
-    
-	Tab.optarray = {}
-    if type(opts) == "string" then
-        for word in string.gmatch(opts, '([^,]+)') do
-            Tab.optarray[#Tab.optarray + 1] = word
+    if not Tab.optarray then
+        local opts = Tab.opts or opts
+        
+        Tab.optarray = {}
+        if type(opts) == "string" then
+            for word in string.gmatch(opts, '([^,]+)') do
+                Tab.optarray[#Tab.optarray + 1] = word
+            end
+        elseif type(opts) == "table" then
+            Tab.optarray = opts
         end
-    elseif type(opts) == "table" then
-        Tab.optarray = opts
     end
 	
 	Tab.z_sets = {}
