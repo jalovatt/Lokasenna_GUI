@@ -16,7 +16,7 @@ end
 
 
 -- Managing text is MUCH easier with a monospace font.
-GUI.fonts.texteditor = {"Courier", 14}
+GUI.fonts.texteditor = {"Courier", 16}
 
 
 GUI.TextEditor = GUI.Element:new()
