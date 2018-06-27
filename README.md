@@ -19,20 +19,51 @@ Enjoy. :)
 
 Or don't. See if I care.
 
-## Usage
-See [Getting Started][4] in the project wiki.
+## Installation
+### End Users
+Stable releases are available from the ReaTeam repository on [ReaPack][4], or directly from the
+[ReaTeam script repository][6]. 
+
+- Install _Lokasenna's GUI library v2 for Lua_
+- In Reaper's action list, choose _ReaScript: Run reaScript (EEL, lua, or python)..._
+- Navigate to the library's folder. Typically:
+  _[Reaper resource folder]/Scripts/ReaTeam Scripts/Development/Lokasenna_GUI v2/Library_
+- Run _Set Lokasenna_GUI v2 library path.lua_ to make the library available for other scripts
+
+### Developers
+A separate package, _Lokasenna's GUI library v2 for Lua (developer tools)_, provides templates,
+examples, and an HTML copy of all documentation for that release. I hope you'll find enough detail 
+to answer any questions. If something's missing, wrong, outdated, or vague, by all means let me know.
+
+This repository is home to all development work for upcoming releases and their accompanying
+documentation. As such, nothing here should be considered stable or safe for release. Likewise,
+the project wiki is subject to change and revision at the drop of a hat. I'll try to keep it
+more-or-less in sync with any changes/features/etc as I upload them.
+
+## Contributing
+I'd love to not be the only person working on this. Fork the project if you want, send me a 
+message with your changes, submit pull requests, whatever works for you. I apologize in advance
+if I end up making changes that break whatever you were working on - I've been known to restructure 
+and refactor the entire library when I feel the need.
+
+## Licensing
+Do whatever you want with it. If you release a script using my library I'd love to know about it, 
+and would be thrilled to see my name mentioned on your script's thread/website. If you plan to 
+charge money for a script using this library, that's great, but I'd really appreciate a donation 
+for my time and effort.
+
+If you just use or copy my code without mentioning where it came from, I'll be very upset and might 
+become an alcoholic to cope with the embarassment. And then my marriage would fall apart, and my family
+would abandon me. And I wouldn't be able to hold down a job, so I'd be homeless and sick and it
+would be all your fault. You bastard.
 
 ## Discussion
-Questions, comments, feature requests, bug reports, and the latest celebrity gossip should be 
-directed to the project's [official thread][3] on the REAPER forum.
-
-## Further Detail
-The examples, library and class files have as much documentation as I could stuff into them, so
-between them and [the project Wiki][2] I hope you'll find enough detail to answer any questions.
-If something's missing or vague, by all means let me know.
+General questions, comments, feature requests, bug reports, and the latest celebrity gossip are welcome
+either here, via the Issue tracker, or in the project's [official thread][3] on the REAPER forum.
 
 [1]: https://www.reaper.fm/
 [2]: https://github.com/jalovatt/Lokasenna_GUI/wiki
 [3]: https://forum.cockos.com/showthread.php?t=177772
-[4]: https://github.com/jalovatt/Lokasenna_GUI/wiki/1.01-Getting-started
+[4]: https://reapack.com/
 [5]: https://github.com/jalovatt/Lokasenna_GUI/wiki/images/showcase.png
+[6]: https://github.com/ReaTeam/ReaScripts/tree/master/Development/Lokasenna_GUI%20v2
