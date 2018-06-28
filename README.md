@@ -61,9 +61,15 @@ would be all your fault. You bastard.
 General questions, comments, feature requests, bug reports, and the latest celebrity gossip are welcome
 either here, via the Issue tracker, or in the project's [official thread][3] on the REAPER forum.
 
+## Donations
+I don't have the confidence to charge money for this stuff. However, should you feel so inclined, 
+contributions of Dollars, Quatloos, Pieces of Eight, Galactic Credits, or Pus (no Ningis, thanks)
+are always welcome and can be made [via Paypal][7]. Cheers.
+
 [1]: https://www.reaper.fm/
 [2]: https://github.com/jalovatt/Lokasenna_GUI/wiki
 [3]: https://forum.cockos.com/showthread.php?t=177772
 [4]: https://reapack.com/
 [5]: https://github.com/jalovatt/Lokasenna_GUI/wiki/images/showcase.png
 [6]: https://github.com/ReaTeam/ReaScripts/tree/master/Development/Lokasenna_GUI%20v2
+[7]: https://www.paypal.me/Lokasenna
