@@ -24,16 +24,15 @@ Or don't. See if I care.
 Stable releases are available from the ReaTeam repository on [ReaPack][4], or directly from the
 [ReaTeam script repository][6]. 
 
-- Install _Lokasenna's GUI library v2 for Lua_
+- Install _Lokasenna's GUI Library v2 for Lua_
 - In Reaper's action list, choose _ReaScript: Run reaScript (EEL, lua, or python)..._
 - Navigate to the library's folder. Typically:
   _[Reaper resource folder]/Scripts/ReaTeam Scripts/Development/Lokasenna_GUI v2/Library_
 - Run _Set Lokasenna_GUI v2 library path.lua_ to make the library available for other scripts
 
 ### Developers
-A separate package, _Lokasenna's GUI library v2 for Lua (developer tools)_, provides templates,
-examples, and an HTML copy of all documentation for that release. I hope you'll find enough detail 
-to answer any questions. If something's missing, wrong, outdated, or vague, by all means let me know.
+A separate package, _Lokasenna's GUI Library v2 for Lua (Developer Tools)_, provides templates,
+examples, HTML copy of the project wiki, and an experimental GUI builder. I hope you'll find enough detail to answer any questions. If something's missing, wrong, outdated, or vague, by all means let me know.
 
 This repository is home to all development work for upcoming releases and their accompanying
 documentation. As such, nothing here should be considered safe for release until it shows up on ReaPack. Likewise, the project wiki is subject to change and revision at the drop of a hat. I'll try to keep it more-or-less in sync with any changes/features/etc as I upload them.
