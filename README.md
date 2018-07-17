@@ -1,11 +1,6 @@
 # Lokasenna_GUI
 Lua GUI library for [REAPER][1] scripts
 
-## **DISCLAIMER**
-This repo is currently in the middle of an overhaul for v3. Don't expect anything here to work properly - please use v2, available on ReaPack (see Installation, below).
-
-Yes, I should have kept all of this local or in a development branch until it was ready. I'm new to using Git, so I'm learning all of this as I go.
-
 ## Obligatory Preamble
 As powerful as REAPER's scripting capabilities are, it offers nothing in the way of
 providing a graphical interface for the end-user to make choices, tinker with settings, etc.
@@ -41,9 +36,7 @@ examples, and an HTML copy of all documentation for that release. I hope you'll 
 to answer any questions. If something's missing, wrong, outdated, or vague, by all means let me know.
 
 This repository is home to all development work for upcoming releases and their accompanying
-documentation. As such, nothing here should be considered stable or safe for release. Likewise,
-the project wiki is subject to change and revision at the drop of a hat. I'll try to keep it
-more-or-less in sync with any changes/features/etc as I upload them.
+documentation. As such, nothing here should be considered safe for release until it shows up on ReaPack. Likewise, the project wiki is subject to change and revision at the drop of a hat. I'll try to keep it more-or-less in sync with any changes/features/etc as I upload them.
 
 ## Contributing
 I'd love to not be the only person working on this. Fork the project if you want, send me a 
