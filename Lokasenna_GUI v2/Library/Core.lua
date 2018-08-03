@@ -112,7 +112,11 @@ local function GUI_table ()
         
         if missing_lib then return function () end end
         
-        local ret, err = loadfile(( file:sub(2, 2) == ":" and "" or GUI.lib_path ) .. file)
+        local file_path = ( (file:sub(2, 2) == ":" or file:sub(1, 1) == "/") and "" 
+                                                                             or  GUI.lib_path ) 
+                            .. file
+
+        local ret, err = loadfile(file_path)
         if not ret then
             local ret = reaper.ShowMessageBox(  "Couldn't load " .. file .. 
                                     "\n\n" ..
@@ -254,7 +258,8 @@ local function GUI_table ()
             GUI.mouse_down_elm = nil
             GUI.rmouse_down_elm = nil
             GUI.mmouse_down_elm = nil
-                
+            
+
             -- Convert color presets from 0..255 to 0..1
             for i, col in pairs(GUI.colors) do
                 col[1], col[2], col[3], col[4] =    col[1] / 255, col[2] / 255, 
@@ -1375,18 +1380,54 @@ local function GUI_table ()
         aware of which format you're getting in return.
             
     ]]--
+
+    GUI.OS_fonts = {
+
+        Windows = {
+            sans = "Calibri",
+            mono = "Lucida Console"
+        },
+
+        OSX = {
+            sans = "Helvetica Neue",
+            mono = "Andale Mono"
+        },
+
+        Linux = {
+            sans = "Arial",
+            mono = "DejaVu Sans Mono"
+        }
+
+    }
+
+    GUI.get_OS_fonts = function()
+
+        local os = reaper.GetOS()
+        if os:match("Win") then
+            return GUI.OS_fonts.Windows
+        elseif os:match("OSX") then
+            return GUI.OS_fonts.OSX
+        else
+            return GUI.OS_fonts.Linux
+        end
+
+    end
+
+    local fonts = GUI.get_OS_fonts()        
     GUI.fonts = {
         
                     -- Font, size, bold/italics/underline
                     -- 				^ One string: "b", "iu", etc.
-                    {"Calibri", 32},	-- 1. Title
-                    {"Calibri", 20},	-- 2. Header
-                    {"Calibri", 16},	-- 3. Label
-                    {"Calibri", 16},	-- 4. Value
-        version = 	{"Calibri", 12, "i"},
+                    {fonts.sans, 32},	-- 1. Title
+                    {fonts.sans, 20},	-- 2. Header
+                    {fonts.sans, 16},	-- 3. Label
+                    {fonts.sans, 16},	-- 4. Value
+        monospace = {fonts.mono, 14},
+        version = 	{fonts.sans, 12, "i"},
         
     }
-    
+
+
     
     GUI.colors = {
         
@@ -2286,27 +2327,24 @@ local function GUI_table ()
     ------------------------------------
     
     
-    --[[	Use when working with file paths if you need to add your own /s
-        (Borrowed from X-Raym)
-            
-            Apr. 22/18 - Further reading leads me to believe that simply using
-            '/' as a separator should work just fine on Windows, Mac, and Linux.
-    ]]--
+    -- DEPRECATED: All operating systems seem to be fine with "/"
+    -- Use when working with file paths if you need to add your own /s
+    --    (Borrowed from X-Raym)
     GUI.file_sep = string.match(reaper.GetOS(), "Win") and "\\" or "/"
     
     
     -- To open files in their default app, or URLs in a browser
-    -- Copied from Heda; cheers!
-    GUI.open_file = function (path)
+    -- Using os.execute because reaper.ExecProcess behaves weird
+    -- occasionally stops working entirely on my system.
+    GUI.open_file = function(path)
     
         local OS = reaper.GetOS()
-        
-        if OS == "OSX32" or OS == "OSX64" then
-            os.execute('open "" "' .. path .. '"')
-        else
-            os.execute('start "" "' .. path .. '"')
-        end
-      
+
+        local cmd = ( string.match(OS, "Win") and "start" or "open" ) ..
+                    ' "" "' .. path .. '"'
+
+        os.execute(cmd)
+
     end
     
     
