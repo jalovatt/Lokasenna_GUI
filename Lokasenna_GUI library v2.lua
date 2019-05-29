@@ -1,8 +1,8 @@
 --[[
 Description: Lokasenna's GUI library v2 for Lua
-Version: 2.16.4
+Version: 2.16.6
 Changelog:
-    Fix: Selection with Shift+Arrows in TextBox was broken
+    Fix: Crash when GUI.version has been set to nil
 Author: Lokasenna
 Provides:
     [main]   Lokasenna_GUI v2/Library/Set Lokasenna_GUI v2 library path.lua
