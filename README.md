@@ -32,10 +32,13 @@ Stable releases are available from the ReaTeam repository on [ReaPack][4], or di
 
 ### Developers
 A separate package, _Lokasenna's GUI Library v2 for Lua (Developer Tools)_, provides templates,
-examples, HTML copy of the project wiki, and an experimental GUI builder. I hope you'll find enough detail to answer any questions. If something's missing, wrong, outdated, or vague, by all means let me know.
+examples, and an experimental GUI builder. I hope you'll find enough detail to answer any questions. If something's missing, wrong, outdated, or vague, by all means let me know.
 
 This repository is home to all development work for upcoming releases and their accompanying
 documentation. As such, nothing here should be considered safe for release until it shows up on ReaPack. Likewise, the project wiki is subject to change and revision at the drop of a hat. I'll try to keep it more-or-less in sync with any changes/features/etc as I upload them.
+
+## Documentation
+See the [project wiki](https://github.com/jalovatt/Lokasenna_GUI/wiki).
 
 ## Contributing
 I'd love to not be the only person working on this. Fork the project if you want, send me a 
