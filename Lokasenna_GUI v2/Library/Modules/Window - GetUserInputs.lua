@@ -27,7 +27,7 @@
             
         end
 
-        GUI.GetUserInputs("title", {1,2,3}, {"a","b","c"}, return_values)
+        GUI.GetUserInputs("title", {"a","b","c"}, {1,2,3}, return_values)
 
 ]]--
 
