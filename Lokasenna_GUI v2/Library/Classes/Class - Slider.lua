@@ -381,7 +381,7 @@ end
 
 
 function GUI.Slider:drawfill(x, y, h, min, max, inc)
-
+  local _
     -- Get the color
   if (#self.handles > 1)
     or self.handles[1].curstep ~= self.handles[1].default then
